@@ -3323,3 +3323,58 @@ a.userProfileCard-link {
 .ushipFooter a:hover {
     color: #0177aa
 }
+
+
+main#mainContent.main {
+    -webkit-box-align: stretch;
+    -webkit-box-direction: normal;
+    -webkit-box-flex: 1;
+    -webkit-box-ordinal-group: 4;
+    -webkit-box-orient: vertical;
+    align-items: stretch;
+    color: #414042;
+    display: flex;
+    flex: 1 0;
+    flex-direction: column;
+    font-family: arial, helvetica, clean, sans-serif;
+    font-size: 12px;
+    line-height: 17px;
+    margin: 0 auto;
+    min-height: 0;
+    order: 3;
+    padding: 0;
+    position: relative;
+    text-align: right;
+    max-width: 900px;
+}
+
+div#sitemap.clearfix {
+    background-color: transparent;
+    border-width: 0;
+    color: #414042;
+    font-family: arial, helvetica, clean, sans-serif;
+    font-size: 100%;
+    line-height: 17px;
+    margin: 0 auto;
+    outline: 0;
+    padding: 0 0 0 5px;
+    text-align: left;
+
+}
+
+div#sitemap.clearfix:after {
+    content: "";
+}
+
+div.breadcrumbs {
+    background-color: transparent;
+    border-width: 0;
+    color: #414042;
+    font-family: arial, helvetica, clean, sans-serif;
+    font-size: 100%;
+    line-height: 17px;
+    margin: 0;
+    outline: 0;
+    padding: 5px 0;
+    text-align: left;
+}
