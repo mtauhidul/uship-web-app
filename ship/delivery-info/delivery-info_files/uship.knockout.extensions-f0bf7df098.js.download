@@ -1,0 +1,773 @@
+'use strict';
+
+(function (root) {
+    var uship = root.uship,
+        jQuery = root.jQuery,
+        ko = root.ko;
+
+
+    var assert = uship.utils.assert;
+
+    // Decorates Knockout's native ko.observable.extend() call
+    // by caching the applied extenders in an observable
+    function applyAndCacheExtenders(requestedExtenders) {
+        var target = this;
+        var extensions = {};
+
+        if (requestedExtenders) {
+            if (ko.isObservable(this.extensions)) {
+                extensions = this.extensions();
+            } else {
+                this.extensions = ko.observable(extensions);
+            }
+
+            uship.utils.forEach(requestedExtenders, function (key, value) {
+                var extenderHandler = ko.extenders[key];
+
+                extensions[key] = value;
+
+                if (typeof extenderHandler == 'function') {
+                    target = extenderHandler(target, value) || target;
+                }
+            });
+            this.extensions(extensions);
+        }
+
+        return target;
+    }
+
+    // Allow an observable to update automatically from a published topic
+    function subscribeTo(from, topic) {
+        from.subscribe(this, null, topic);
+        return this;
+    }
+
+    // Observable publishes to a message bus channel when its value is updated
+    function publishToMessageBus(channel, topicToPublish, whenObservableTopic) {
+        if (!uship.messageBus) throw new Error('Include messageBus.js file to publish from observables');
+
+        var channelOrDefault = uship.messageBus(channel);
+
+        this.subscribe(function (newVal) {
+            channelOrDefault.publish(topicToPublish, newVal);
+        }, null, whenObservableTopic);
+
+        return this;
+    }
+
+    // Observable receives a value from a message bus channel on publish
+    // @param dataKey is the property of the published message's data element to syncronize to the observer
+    function subscribeToMessageBus(channel, topicOrTopicList, dataKey, scope) {
+        /*jshint validthis:true */
+
+        if (uship.utils.isObject(topicOrTopicList)) {
+            for (var topicName in topicOrTopicList) {
+                if (topicOrTopicList.hasOwnProperty(topicName)) {
+                    var topic = topicOrTopicList[topicName];
+                    subscribeObservableToTopic.call(this, channel, topicName, topic.dataKey, topic.scope);
+                }
+            }
+        } else {
+            subscribeObservableToTopic.call(this, channel, topicOrTopicList, dataKey, scope);
+        }
+
+        return this;
+    }
+
+    function subscribeObservableToTopic(channel, topicToSubscribe, dataKey, scope) {
+        /*jshint validthis:true */
+        if (!uship.messageBus) throw new Error('Include messageBus.js file to subscribe observables to messages');
+
+        var channelOrDefault = uship.messageBus(channel),
+            observable = this;
+
+        channelOrDefault.subscribe(topicToSubscribe, function (data) {
+            observable(dataKey ? data[dataKey] : data);
+        }, scope);
+    }
+
+    function navigateSubObservables(properties, target) {
+        if (typeof properties === 'string') properties = properties.split('.');
+
+        for (var i = 0; i < properties.length - 1; i++) {
+            target = target[properties[i]];
+        }
+
+        return target;
+    }
+
+    //Referenced observables shadow a property on an underlying viewModel
+    function referencedObservable(property, target, deferred) {
+        if (!property || !target) throw new Error('You must pass in a property to be referenced and the model that contains the property');
+
+        var properties = void 0;
+
+        if (typeof property === 'string' && property.indexOf('.')) {
+            properties = property.split('.');
+            property = properties[properties.length - 1];
+        }
+
+        var unwrappedTarget = ko.unwrap(target);
+
+        unwrappedTarget = navigateSubObservables(properties, unwrappedTarget);
+
+        if (!unwrappedTarget[property]) throw new Error('The passed-in model has no property ' + property + ' to reference');
+        if (!ko.isObservable(unwrappedTarget[property])) throw new Error(property + ' is not an observable');
+
+        var extensions = ko.isObservable(unwrappedTarget[property].extensions) ? unwrappedTarget[property].extensions() : {};
+
+        deferred = deferred || true;
+
+        var reference = ko.computed({
+            read: function read() {
+                var self = ko.unwrap(this);
+
+                var nestedTarget = navigateSubObservables(properties, self);
+
+                if (nestedTarget && ko.isObservable(nestedTarget[property])) {
+                    return nestedTarget[property]();
+                } else {
+                    return undefined;
+                }
+            },
+            write: function write(value) {
+                var self = ko.unwrap(this);
+
+                var nestedTarget = navigateSubObservables(properties, self);
+
+                if (nestedTarget && ko.isObservable(nestedTarget[property])) {
+                    return nestedTarget[property](value);
+                }
+            },
+
+            owner: target,
+            deferEvaluation: deferred
+        });
+        reference.extend(extensions);
+
+        return reference;
+    }
+
+    function toFormatted(target, pattern) {
+        if (!(pattern instanceof RegExp)) throw new Error('Pattern parameter must be a regular expression');
+
+        target.userInput = ko.observable();
+        target.formatted = ko.computed({
+            read: function read() {
+                return target.userInput();
+            },
+            write: function write(value) {
+                if (typeof value === 'undefined' || value === null) return;
+                target.userInput(value);
+
+                var numericMcNumber = value.replace(pattern, '');
+                target(numericMcNumber);
+            },
+
+            owner: target,
+            deferEvaluation: true
+        });
+
+        target.formatted(target());
+        return target;
+    }
+
+    /**
+     * Limit Extender
+     *
+     * Usage: ko.observable().extend({ limit: { min: 0, max: 100 } });
+     * Enforces that an observable stay within the
+     */
+    function limitExtender(target, params) {
+
+        target.subscribe(function (newValue) {
+
+            var parsedValue = parseInt(newValue, 10);
+
+            if (isNaN(parsedValue)) {
+                target('');
+            } else if (parsedValue < params.min) {
+                target(params.min || '');
+            } else {
+                var boundedValue = params.max ? Math.min(params.max, parsedValue) : parsedValue;
+                if (boundedValue !== parsedValue) target(boundedValue);
+            }
+        });
+
+        return target;
+    }
+
+    ko.extenders.limit = limitExtender;
+
+    /**
+    * Units Extender
+    *
+    * Usage: ko.observable().extend({ units: 'ft' });
+    * Adds a formatted property to an observable with a unit of measure.
+    */
+    function unitsExtender(target, units) {
+        target.formatted = ko.computed(function () {
+            var value = parseFloat(ko.unwrap(target));
+
+            return value ? value + ' ' + ko.unwrap(units) : undefined;
+        });
+        return target;
+    }
+
+    /**
+     * Placeholder Binding Handler
+     *
+     * Allows you to add a placeholder binding which brings backwards compatability for using placeholder
+     * text inside inputs. Required for IE8 & IE9
+     */
+    var placeholderShim = {
+        update: function update(element, valueAccessor) {
+            var value = valueAccessor();
+            var placeholder = ko.unwrap(value);
+            var $element = jQuery(element);
+
+            element.setAttribute('placeholder', placeholder);
+
+            setTimeout(function () {
+                if ($element.val() === '') {
+                    $element.val(placeholder);
+                    $element.addClass('placeholder');
+                }
+            }, 1);
+
+            $element.focus(function () {
+                $element.removeClass('placeholder');
+                if ($element.val() === placeholder) {
+                    $element.val('');
+                }
+            }).blur(function () {
+                if ($element.val() === '') {
+                    $element.val(placeholder);
+                    $element.addClass('placeholder');
+                }
+            });
+        }
+    };
+
+    var placeholderSimple = {
+        update: function update(element, valueAccessor) {
+            var value = valueAccessor();
+            var placeholder = ko.unwrap(value);
+
+            element.setAttribute('placeholder', placeholder);
+        }
+    };
+
+    // Set the placeholder attr if support, if not use the shim
+    var hasPlaceholder = 'placeholder' in document.createElement('input');
+    var placeholderBindingHandler = hasPlaceholder ? placeholderSimple : placeholderShim;
+
+    /**
+     * Numeric Input Binding Handler
+     *
+     * Usage: <input data-bind="number: myNumber" />
+     * Display the formatted value of an observable when the input is not selected.
+     * When selected, the input clears and shows the previous value as a placeholder and allows native numeric input
+     */
+
+    var numericBindingHandlerDefault = {
+        init: function init(element, valueAccessor, allBindingsAccessor) {
+            var bindings = valueAccessor(),
+
+            // not sure if this produces a side effect, so leaving for now
+            // eslint-disable-next-line no-unused-vars
+            allBindings = allBindingsAccessor(),
+                value = bindings.value || bindings,
+                formatted = value.formatted || value,
+                isFocused = ko.observable(false);
+
+            var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+
+            var inputType = ko.computed(function () {
+                // firefox has a bug that prevents users from entering a value
+                // when switching input type between text and number.
+                if (isFirefox) return 'text';
+
+                return isFocused() ? 'number' : 'text';
+            });
+
+            var inputValue = ko.computed({
+                read: function read() {
+                    return isFocused() ? value() : formatted();
+                },
+                write: function write(newValue) {
+                    if (!newValue) return value(newValue);
+
+                    var parsed = parseInt(newValue);
+
+                    if (!isNaN(parsed)) {
+                        return value(parsed);
+                    } else {
+                        return undefined;
+                    }
+
+                    //if (typeof minValue != 'undefined') parsed = Math.max(minValue, parsed);
+                    //if (typeof maxValue != 'undefined') parsed = Math.min(maxValue, parsed);
+
+                    //return value(parsed)
+                }
+            }).extend({ rateLimit: { method: 'notifyWhenChangesStop', timeout: 1 } });
+
+            ko.applyBindingsToNode(element, {
+                textInput: inputValue,
+                hasfocus: isFocused,
+                attr: { type: inputType }
+            });
+        }
+    };
+
+    var localizationBindingHandler = {
+        update: function update(element, valueAccessor) {
+            function translator() {
+                var val = valueAccessor();
+                return uship.loc(ko.isObservable(val) ? val() : val);
+            }
+            ko.bindingHandlers.html.update(element, translator);
+        }
+    };
+
+    var conditionalTextBindingHandler = {
+        update: function update(element, valueAccessor) {
+            var val = valueAccessor(),
+                assertionFail = new Error('The conditionalText binding handler must resolve to an object with the properties "condition" and "cases", where cases is an object of string key/value pairs');
+
+            assert(val && uship.utils.isObject(val), assertionFail);
+            assert(val.cases && uship.utils.isObject(val.cases), assertionFail);
+
+            var condition = ko.unwrap(val.condition),
+                resolvedCondition = val.cases[condition] || val.cases.default || '';
+
+            function translator() {
+                return val.isLiteral ? resolvedCondition : uship.loc(resolvedCondition);
+            }
+
+            ko.bindingHandlers.html.update(element, translator);
+        }
+    };
+
+    // TODO: This binding handler does not reevaluate due to all bindings evaluating separately in KO >3
+    // Needs to be fixed before using
+    var fadeTemplateBindingHandler = {
+        init: function init(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+            ko.bindingHandlers.template.init(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext);
+        },
+        update: function update(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+            jQuery(element).fadeOut(100);
+
+            setTimeout(function () {
+                ko.bindingHandlers.template.update(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext);
+                jQuery(element).fadeIn(100);
+            }, 100);
+        }
+    };
+
+    var slideClasses = {
+        base: 'transition-slide--base',
+        toggled: 'transition-slide--toggled',
+        active: 'transition-slide--active',
+        inactive: 'transition-slide--inactive',
+        afterToggled: 'transition-slide--after-toggled--large',
+        transitioning: 'transition-slide--transitioning'
+    };
+
+    var elementSizeClasses = {
+        tiny: 'transition-slide--after-toggled--tiny',
+        small: 'transition-slide--after-toggled--small',
+        medium: 'transition-slide--after-toggled--medium',
+        large: 'transition-slide--after-toggled--large',
+        xlarge: 'transition-slide--after-toggled--xlarge'
+    };
+
+    var slideTemplateBindingHandler = {
+        init: function init(element, valueAccessor, allBindings, viewModel, bindingContext) {
+            return ko.bindingHandlers.template.init(element, valueAccessor, allBindings, viewModel, bindingContext);
+        },
+        update: function update(element, valueAccessor, allBindings, viewModel, bindingContext) {
+
+            var value = ko.unwrap(valueAccessor()),
+                sizeOverride = allBindings.get('slideSize') || 'large',
+                defaultClasses = uship.utils.extend({}, slideClasses, { afterToggled: elementSizeClasses[sizeOverride] }),
+                classes = getTransitionClasses(defaultClasses, allBindings);
+
+            jQuery(element).removeClass(classes.toggled).removeClass(classes.afterToggled).removeClass(classes.active);
+
+            ko.bindingHandlers.template.update(element, valueAccessor, allBindings, viewModel, bindingContext);
+
+            root.setTimeout(function () {
+                applyTransitionClasses('slide', element, value, classes, allBindings.get('maxDuration'));
+            }, 0);
+        }
+    };
+
+    var slideVisibleBindingHandler = {
+        update: function update(element, valueAccessor, allBindings) {
+            var value = ko.unwrap(valueAccessor()),
+                sizeOverride = allBindings.get('slideSize') || 'large',
+                defaultClasses = uship.utils.extend({}, slideClasses, { afterToggled: elementSizeClasses[sizeOverride] }),
+                classes = getTransitionClasses(defaultClasses, allBindings);
+
+            applyTransitionClasses('slide', element, value, classes, allBindings.get('maxDuration'));
+        }
+    };
+
+    var genericTransitionBindingHandler = {
+        update: function update(element, valueAccessor, allBindings) {
+            var value = ko.unwrap(valueAccessor()),
+                classes = getTransitionClasses(null, allBindings);
+
+            applyTransitionClasses('generic', element, value, classes, allBindings.get('maxDuration'));
+        }
+    };
+
+    /**
+     * Information about CSS3 transition support
+     */
+    var transitionInfo = function () {
+        var el = document.createElement('fakeelement');
+
+        var info = {
+            supportsTransitions: el.style.transition !== undefined,
+            transitionend: undefined
+        };
+
+        var transitions = {
+            'WebkitTransition': 'webkitTransitionEnd',
+            'MozTransition': 'transitionend',
+            'OTransition': 'oTransitionEnd',
+            'transition': 'transitionend'
+        };
+
+        for (var t in transitions) {
+            if (el.style[t] !== undefined) {
+                info.transitionend = transitions[t];
+            }
+        }
+
+        return info;
+    }();
+
+    function getTransitionClasses(defaults, allBindings) {
+        defaults = defaults || {
+            base: 'transition--base',
+            active: 'transition--active',
+            inactive: 'transition--inactive',
+            toggled: 'transition--toggled',
+            afterToggled: 'transition--after-toggled',
+            transitioning: 'transition--transitioning'
+        };
+
+        return uship.utils.extend(defaults, allBindings.get('transitionClasses') || {});
+    }
+
+    function applyTransitionClasses(transitionKey, element, value, classes, maxDuration) {
+        if (!applyTransitionClasses.id) applyTransitionClasses.id = 0;
+        if (!applyTransitionClasses.ongoing) applyTransitionClasses.ongoing = {};
+
+        var toggle = !!value,
+            el = jQuery(element),
+            elDataKey = 'transition-' + transitionKey;
+        var transitionId = void 0;
+
+        if (el.data(elDataKey)) {
+            transitionId = el.data(elDataKey);
+        } else {
+            transitionId = ++applyTransitionClasses.id;
+            el.data(elDataKey, transitionId);
+        }
+
+        if (applyTransitionClasses.ongoing.hasOwnProperty(transitionId)) {
+            var ongoing = applyTransitionClasses.ongoing[transitionId];
+            ongoing.resolve();
+        }
+
+        // First-time operations
+        if (!el.hasClass(classes.base)) {
+            el.addClass(classes.base);
+            el.toggleClass(classes.active, toggle);
+            el.toggleClass(classes.inactive, !toggle);
+        }
+
+        applyTransitionClasses.ongoing[transitionId] = new TransitionState(el, transitionId, classes, toggle, maxDuration);
+
+        el.toggleClass(classes.toggled, toggle);
+
+        // afterToggled class is added in the next event loop. Use it to begin transitions
+        root.setTimeout(function () {
+            el.toggleClass(classes.afterToggled, toggle);
+        }, 0);
+    }
+
+    uship.messageBus.subscribe({
+        channel: 'UI',
+        topic: 'transitionEnd',
+        handler: function handler(msg) {
+            delete applyTransitionClasses.ongoing[msg.transitionId];
+        }
+    });
+
+    function TransitionState(el, id, classes, toggle, maxDuration) {
+        this.el = el;
+        this.id = id;
+        this.toggle = toggle;
+        this.classes = classes;
+        this.transitionState = jQuery.Deferred().done(this.onEnd.bind(this));
+        this.boundResolve = this.resolve.bind(this);
+        this.maxDuration = maxDuration || 1200;
+
+        el.removeClass(classes.active);
+        el.removeClass(classes.inactive);
+        el.addClass(classes.transitioning);
+
+        if (!transitionInfo.supportsTransitions || !transitionInfo.transitionend) {
+            this.resolve();
+            return this;
+        }
+
+        el.on(transitionInfo.transitionend, this.boundResolve);
+        this.transitionTimeout = root.setTimeout(this.boundResolve, this.maxDuration);
+
+        return this;
+    }
+
+    TransitionState.prototype.resolve = function () {
+        this.transitionState.resolve();
+    };
+
+    TransitionState.prototype.onEnd = function () {
+        this.el.removeClass(this.classes.transitioning);
+        this.el.toggleClass(this.classes.active, this.toggle);
+        this.el.toggleClass(this.classes.inactive, !this.toggle);
+
+        this.el.off(transitionInfo.transitionend, this.boundResolve);
+        root.clearTimeout(this.transitionTimeout);
+
+        uship.messageBus.publish({
+            channel: 'UI',
+            topic: 'transitionEnd',
+            data: { transitionId: this.id }
+        });
+    };
+
+    // TODO: Take a look at this later
+    // var animateTemplateBindingHandler = {
+    //     init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+    //         ko.bindingHandlers.template.init(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext);
+    //     },
+    //     update: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+    //         var value = valueAccessor();
+    //         var before = ko.unwrap(value.before) || 'fadeOut';
+    //         var after = ko.unwrap(value.after) || 'fadeIn';
+    //         var duration = ko.unwrap(value.duration) || 100;
+
+    //         jQuery(element)[before](duration);
+
+    //         setTimeout(function () {
+    //             ko.bindingHandlers.template.update(element, value.template, allBindingsAccessor, viewModel, bindingContext);
+    //             jQuery(element)[after](duration);
+    //         }, duration);
+    //     }
+    // };
+
+    /**
+     * External templating provider
+     *
+     * Modifies the native template binding to accept a url option, which if present, will attempt
+     * to load the template via AJAX request from the specified url.
+     */
+
+    // Suppress JSHint warnings for [] notation -- consistent with Knockout's code style
+    var externalTemplatePublisher = new ko.subscribable();
+
+    //Create the template engine override
+    function ExternalTemplateEngine() {
+        ko.nativeTemplateEngine.call(this);
+        this.externalTemplateCache = {};
+    }
+
+    var externalTemplateSettings = {
+        baseUrl: ''
+    };
+
+    ExternalTemplateEngine.prototype = Object.create(ko.nativeTemplateEngine.prototype);
+
+    ExternalTemplateEngine.prototype.makeTemplateSource = function (template, templateDocument, options) {
+        //Remote template that hasn't already been pre-fetched
+        if (options && options.url && !document.getElementById(template)) {
+            return this.fetch(template, options);
+        }
+
+        //Otherwise call the native method
+        return ko.templateEngine.prototype.makeTemplateSource.call(this, template, templateDocument, options);
+    };
+
+    ExternalTemplateEngine.prototype.fetch = function (template, options) {
+        return this.externalTemplateCache[options.url] || (this.externalTemplateCache[options.url] = new ko.templateSources.remoteTemplate(template, options));
+    };
+
+    ExternalTemplateEngine.prototype.renderTemplate = function (template, bindingContext, options, templateDocument) {
+        var templateSource = this.makeTemplateSource(template, templateDocument, options);
+        return this.renderTemplateSource(templateSource, bindingContext, options);
+    };
+
+    var externalTemplatePlaceholders = {
+        loading: '<div class="ko-template-placeholder">' + uship.loc('MainLoading') + '</div>',
+        error: '<div class="ko-template-error">' + uship.loc('defaultTemplateErrorMessage') + '</div>'
+    };
+
+    //Create an additional templateSource
+    function remoteTemplate(templateName, options) {
+        this.templateName = templateName;
+        this.options = options;
+        if (!this.options.placeholders) this.options.placeholders = {};
+
+        this.template = ko.observable(this.options.placeholders.loading || externalTemplatePlaceholders.loading || undefined);
+        this.template.data = {};
+        this.isLoaded = false;
+    }
+
+    remoteTemplate.prototype.text = function () /* value */{
+        this.load();
+
+        if (arguments.length === 0) {
+            return this.template();
+        }
+
+        // For unknown reasons an extremely fast response from the server can cause
+        // some kind of a race condition when updating the observable. Setting a
+        // minimal timeout seems to fix this
+        var value = arguments[0];
+        setTimeout(function () {
+            this.template(value);
+        }.bind(this), 1);
+    };
+
+    remoteTemplate.prototype.data = function (key /*, value */) {
+        if (arguments.length === 1) {
+            return this.template.data[key];
+        } else {
+            this.template.data[key] = arguments[1];
+        }
+    };
+
+    remoteTemplate.prototype.load = function (url, isFallback) {
+        if (this.isLoaded) return;
+
+        var self = this;
+        url = url || self.options.url;
+
+        jQuery.ajax({
+            url: url,
+            method: 'GET',
+            dataType: 'html',
+            timeout: isFallback ? 20000 : 2000,
+            data: isFallback ? { url: self.options.url } : {}
+        }).then(function (data) {
+            self.done(data);
+        }, function (xhr, status, err) {
+            return self.fallback(isFallback, url, err);
+        });
+    };
+
+    remoteTemplate.prototype.fallback = function (isFallback, url, err) {
+        var fallbackUrl = this.options.templateFallbackUrl || externalTemplateSettings.baseUrl;
+        if (isFallback || !fallbackUrl) {
+            this.fail(url, err);
+            return;
+        }
+        this.load(fallbackUrl, true);
+    };
+
+    remoteTemplate.prototype.done = function (data) {
+        this.isLoaded = true;
+        this.text(data);
+        externalTemplatePublisher.notifySubscribers(this.templateName, 'templateload');
+    };
+
+    remoteTemplate.prototype.fail = function (url, err) {
+        var logMsg = uship.utils.format('Remote template load failed with {0} for url {1}', err, url);
+        root.logging && root.logging.softErr(logMsg, 'uship.knockout.extensions@ExternalTemplateEngine');
+
+        this.isLoaded = true;
+        this.text(this.options.placeholders.error || externalTemplatePlaceholders.error);
+        externalTemplatePublisher.notifySubscribers(this.templateName, 'templateloadfail');
+    };
+
+    ExternalTemplateEngine.instance = new ExternalTemplateEngine();
+
+    //Helper function wraps an external template provider instance's fetch method
+    function fetchInstanceTemplate(template, options) {
+        if (!ExternalTemplateEngine.instance) return;
+        return ExternalTemplateEngine.instance.fetch(template, options);
+    }
+
+    /**
+     * String Templating Provider
+     * Overrides Knockouts native provider by adding string templating support
+     */
+    function StringTemplate(text) {
+        var _data = {};
+        var _text = text;
+        this.data = function (key, value) {
+            if (!value) return _data[key];
+            _data[key] = value;
+        };
+        this.text = function (newValue) {
+            if (!newValue) return _text;
+            _text = newValue;
+        };
+    }
+
+    function stringTemplateEngine() {
+        var _templates = {};
+        var _nativeEngine = new ko.nativeTemplateEngine();
+
+        _nativeEngine.makeTemplateSource = function (templateName) {
+            return _templates[templateName];
+        };
+
+        _nativeEngine.addTemplate = function (name, body) {
+            _templates[name] = new StringTemplate(body);
+        };
+
+        return _nativeEngine;
+    }
+
+    uship.utils.extend(ko.extenders, {
+        toFormatted: toFormatted,
+        units: unitsExtender
+    });
+
+    //Override/extend native Knockout
+    ko.observableArray.fn.isObservableArray = true;
+    ko.referencedObservable = referencedObservable;
+    ko.subscribable.fn.subscribeTo = subscribeTo;
+    ko.subscribable.fn.publishToMessageBus = publishToMessageBus;
+    ko.subscribable.fn.subscribeToMessageBus = subscribeToMessageBus;
+    ko.subscribable.fn.extend = applyAndCacheExtenders;
+    ko.bindingHandlers.placeholder = placeholderBindingHandler;
+    ko.bindingHandlers.number = numericBindingHandlerDefault;
+    ko.bindingHandlers.loc = localizationBindingHandler;
+    ko.bindingHandlers.conditionalText = conditionalTextBindingHandler;
+    ko.bindingHandlers.fadeTemplate = fadeTemplateBindingHandler;
+    ko.bindingHandlers.slideTemplate = slideTemplateBindingHandler;
+    ko.bindingHandlers.slideVisible = slideVisibleBindingHandler;
+    ko.bindingHandlers.transition = genericTransitionBindingHandler;
+    ko.templateSources.remoteTemplate = remoteTemplate;
+    ko.setTemplateEngine(ExternalTemplateEngine.instance);
+    ko.stringTemplateEngine = stringTemplateEngine;
+
+    ko.externalTemplate = {
+        instance: ExternalTemplateEngine.instance,
+        settings: externalTemplateSettings,
+        publisher: externalTemplatePublisher,
+        placeholders: externalTemplatePlaceholders,
+        fetch: fetchInstanceTemplate
+    };
+
+    ko.unwrap = ko.unwrap || ko.utils.unwrapObservable;
+})(window);

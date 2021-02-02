@@ -1,0 +1,110 @@
+﻿
+.fb-generic {
+    color:#FFF;
+    font-weight:bold;
+    text-align:center;
+    cursor:pointer;
+    padding-top:2px;
+    background-repeat:no-repeat;
+}
+.fblogin-signup .fb-generic {
+    height:21px;
+    width:180px;
+    background:url('/public/images/promo/facebook/facebook-login-bg2.png') no-repeat;
+}
+.fbconnect .fb-generic {
+    width:90px;
+    height:21px;
+    background:url('/public/images/promo/facebook/facebook_logo.jpg') no-repeat;
+    color:#414042;
+}
+.fbsimple .fb-generic {
+    width:20px;
+    height:21px;
+    position: relative;
+    top:-1px;
+    background:url('/public/images/promo/facebook/facebook_logo.jpg') no-repeat;
+}
+/* some elements for the sign in page */
+.fb-generic-logo {
+  height: 35px;
+  width: 33px;
+  background: #fff url('/public/images/promo/facebook/fb_button_sprite2.png') no-repeat 0 0;
+  display: none;
+  position: absolute;
+  left: 0;
+}
+.fb-generic-rt {
+  height: 35px;
+  width: 6px;
+  background: #fff url('/public/images/promo/facebook/fb_button_sprite2.png') no-repeat 0 -270px;
+  display: none;
+  position: absolute;
+  right: 0;
+}
+
+.fblogin-logo-new .fb-generic-logo,
+.fblogin-logo-new .fb-generic-rt {
+  display: block;
+}
+
+.fblogin-logo-new .fb-generic {
+	position: relative;
+    height:35px;
+    width:243px;
+    padding: 0 6px 0 33px;
+    background: #fff url('/public/images/promo/facebook/fb_button_sprite2.png') repeat-x 0 -135px;
+}
+@media screen and (max-width: 767px) {
+  .responsive-page .fblogin-logo-new .fb-generic {
+    min-width: 181px;
+    width: auto;
+  }
+}
+.fblogin-logo-new .fbText-new-logo {
+  line-height: 35px;
+  margin: 0;
+}
+
+/* ie overwrites */
+.ie9 .fblogin-logo-new .fb-generic,
+.ie9 .fb-generic-logo,
+.ie9 .fb-generic-rt,
+.ie8 .fblogin-logo-new .fb-generic,
+.ie8 .fb-generic-logo,
+.ie8 .fb-generic-rt {
+  height: 33px;
+}
+.ie9 .fblogin-logo-new .fbText-new-logo,
+.ie8 .fblogin-logo-new .fbText-new-logo {
+  line-height: 33px;
+}
+
+/* hover states */
+.fblogin-logo-new .fb-generic:hover {
+  background-position: 0 -175px;
+}
+.fblogin-logo-new .fb-generic:hover .fb-generic-logo {
+  background-position: 0 -40px;
+}
+.fblogin-logo-new .fb-generic:hover .fb-generic-rt {
+  background-position: 0 -310px;
+}
+
+/* active states */
+.fblogin-logo-new .fb-generic:active {
+  background-position: 0 -215px;
+}
+.fblogin-logo-new .fb-generic:active .fb-generic-logo {
+  background-position: 0 -80px;
+}
+.fblogin-logo-new .fb-generic:active .fb-generic-rt {
+  background-position: 0 -350px;
+}
+
+.fbText-new-logo {
+    margin-top: 6px; 
+    font-size: 13px;
+    display: inline-block
+}
+

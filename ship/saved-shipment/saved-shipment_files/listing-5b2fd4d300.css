@@ -1,0 +1,752 @@
+/*
+ * path: /listing.aspx
+ * ns:   listing
+ *
+ * listing page
+ */
+.listing-change-status {
+  font-weight: bold;
+  font-size: 14px;
+  float: right;
+  cursor: pointer; }
+
+.listing-change-status-with-tracking-link {
+  font-weight: bold;
+  font-size: 14px;
+  float: right;
+  cursor: pointer;
+  margin-right: 118px; }
+
+.listing-change-status-help {
+  top: 2px;
+  margin-left: 7px;
+  float: right; }
+
+.listing-change-status-help strong {
+  font-weight: bold; }
+
+.listing-change-status-dialog {
+  display: none;
+  padding: 15px; }
+
+.listing-change-status-dialog strong {
+  font-weight: bold; }
+
+.listing-change-status-update-msg {
+  display: none;
+  background-color: #eee;
+  border-radius: 3px;
+  margin: 30px 0 10px 0;
+  padding: 7px; }
+
+.listing-change-select-new-status {
+  float: right;
+  width: 175px; }
+
+.listing-change-status option:disabled {
+  color: #ccc; }
+
+/* BookingRequest Details box */
+.listing-bookingrequest-outer {
+  margin-top: 20px;
+  border: 1px solid #c0eacf;
+  padding: 5px;
+  background-color: #f2f6fa; }
+
+.listing-bookingrequest-inner {
+  border: 1px solid #c0eacf;
+  padding: 10px 0 10px 20px;
+  background-color: #fff; }
+
+.listing-bookingrequest-bd {
+  background: #fff url("/public/images/elements/faux/bgs/bookingrequest_details_fauxbg.png") repeat-y -20px bottom; }
+
+.listing-bookingrequest-col1 {
+  width: 554px; }
+
+.listing-bookingrequest-col2 {
+  width: 372px; }
+
+.listing-bookingrequest-title {
+  margin: 10px 0 5px 0;
+  color: #3E6B8F;
+  line-height: 23px; }
+
+.listing-bookingrequest-title-declined {
+  padding-left: 30px;
+  background: transparent url("/public/images/icons/delete_16x16.png") no-repeat left 3px; }
+
+.listing-bookingrequest-title-accepted {
+  padding-left: 30px;
+  background: transparent url("/public/images/icons/congrats_16x16.png") no-repeat left 3px; }
+
+.listing-bookingrequest-info {
+  padding-left: 15px; }
+
+.listing-pendingdirectassign-info {
+  font-size: 0.875rem;
+  padding-top: 0.625rem; }
+
+.listing-pendingdirectassign-termsTriggerLink {
+  cursor: pointer; }
+
+.listing-bookingrequest-status-msg {
+  padding: 5px 15px 25px 0; }
+
+.listing-bookingrequest-need-help {
+  padding: 5px 15px 25px 15px;
+  font-weight: bold; }
+
+.listing-boookingrequest-details {
+  color: #333;
+  text-align: center;
+  padding-top: 20px; }
+
+.listing-bookingrequest-amt {
+  font-weight: bold;
+  font-size: 52px;
+  line-height: 56px; }
+
+.listing-bookingrequest-amt-explain {
+  font-size: 11px; }
+
+.listing-bookingrequest-expires {
+  font-size: 20px; }
+
+.listing-bookingrequest-decl-reasons {
+  -webkit-box-shadow: rgba(0, 0, 0, 0.5) 3px 4px 3px;
+  -moz-box-shadow: rgba(0, 0, 0, 0.5) 3px 4px 3px;
+  background-color: #fff;
+  border: 1px solid #808285;
+  padding: 5px 0;
+  position: absolute;
+  left: 115px;
+  top: 21px;
+  z-index: 1000; }
+
+.ie7 .listing-bookingrequest-decl-reasons {
+  zoom: 1;
+  left: 112px; }
+
+.webkit .listing-bookingrequest-decl-reasons {
+  left: 112px; }
+
+.listing-bookingrequest-decl-reason {
+  padding: 2px 10px;
+  border-top: 1px solid #fff;
+  border-bottom: 1px solid #fff;
+  cursor: pointer; }
+
+.listing-bookingrequest-decl-reason:hover {
+  background-color: #eff6ff;
+  border-color: #b2d3fc; }
+
+.listing-bookingrequest-decl-reason-lnk {
+  color: #000; }
+
+.listing-bookingrequest-decl-reason-lnk:hover {
+  text-decoration: none; }
+
+.listing-back-to-results,
+.listing-in-category {
+  font-size: 11px; }
+
+.listing-in-category {
+  text-align: right; }
+
+.listing-in-category strong {
+  font-weight: bold; }
+
+.listing-actions {
+  text-align: right; }
+
+.listing-actions-action {
+  margin-left: 5px; }
+
+.listing-actions-place-bid {
+  border-right: 1px solid #d2d2d2;
+  padding-right: 5px; }
+
+.ie6 .listing-actions-place-bid
+, .ie7 .listing-actions-place-bid {
+  vertical-align: middle; }
+
+.listing-actions-watch,
+.listing-actions-email,
+.listing-actions-print {
+  font-size: 11px; }
+
+.listing-actions-share-this {
+  border-right: 1px solid #d2d2d2; }
+
+.listing-actions-flag {
+  padding-left: 5px;
+  font-size: 11px; }
+
+.listing-actions-flag a {
+  margin-left: 0; }
+
+.listing-cta {
+  background: #a3c5d8 url("/images/elements/ccta/arrow_bg.e9378b0849.png") no-repeat center top;
+  text-align: center; }
+
+.listing-cta-inner {
+  padding: 15px; }
+
+.listing-cta-step {
+  background-color: #fff;
+  padding: 5px;
+  margin: 0 5px;
+  height: 75px; }
+
+.listing-cta-step-hd {
+  color: #5b8fb5;
+  margin-bottom: 5px; }
+
+.listing-cta-ft {
+  margin-top: 15px;
+  font-weight: bold; }
+
+.listing-manage {
+  padding: 0 15px 15px 15px !important; }
+
+.ie6 .listing-manage-hd,
+.ie7 .listing-manage-hd {
+  margin-top: 5px; }
+
+.listing-manage-action {
+  margin-top: 10px; }
+
+.listing-manage-action-disabled {
+  color: #999; }
+
+.listing-basic-info th,
+.listing-basic-info td {
+  padding-bottom: 3px;
+  vertical-align: top;
+  text-align: left; }
+
+.listing-basic-info th {
+  padding-right: 10px;
+  white-space: nowrap;
+  font-weight: bold; }
+
+.listing-basic-info-other-shipments {
+  display: block;
+  font-size: 11px; }
+
+.listing-basic-info strong {
+  font-weight: bold; }
+
+.ie6 .listing-pics-bd {
+  overflow: hidden; }
+
+.listing-pics-pic {
+  max-width: 100%; }
+
+.ie6 .listing-pics-pic {
+  width: 100%; }
+
+.listing-pics-controls {
+  margin-top: 5px;
+  text-align: center; }
+
+.listing-pics-no-controls .listing-pics-controls {
+  display: none; }
+
+.listing-pics-count {
+  margin: 0 5px; }
+
+.listing-pics-prev,
+.listing-pics-next {
+  position: relative;
+  top: -1px; }
+
+.listing-map {
+  overflow: hidden;
+  height: 400px;
+  background: #F0F0F0 url("../../../images/elements/listing/map_loading.en.5a77cc5925.png") no-repeat center center; }
+
+.locale-de-DE .listing-map {
+  background-image: url("../../../images/elements/listing/map_loading.de.b8c789f595.png"); }
+
+.locale-es-ES .listing-map {
+  background-image: url("../../../images/elements/listing/map_loading.es.56091f7f32.png"); }
+
+.listing-map-none {
+  background-image: url("../../../images/elements/listing/no_map.bbdb9890ba.gif"); }
+
+.listing-route-info {
+  padding: 10px 0 10px 5px;
+  border-bottom: 1px dashed #808285; }
+
+.listing-route-info-hd {
+  margin-bottom: 5px; }
+
+.listing-route-location .listing-route-info-bd {
+  min-height: 51px;
+  padding-left: 40px;
+  background: url("../../../images/icons/pin-pickup.888ac81acf.png") no-repeat 2px center; }
+
+.listing-route-location-destination .listing-route-info-bd {
+  background-image: url("../../../images/icons/pin-deliver.e0daeb6faa.png"); }
+
+.listing-route-location-place {
+  color: #00f;
+  cursor: pointer; }
+
+.listing-route-location-place:hover {
+  text-decoration: underline; }
+
+.listing-route-map-types-inputs {
+  display: block;
+  margin-bottom: 5px; }
+
+.ie6 .listing-route-details,
+.ie7 .listing-route-details {
+  zoom: 1; }
+
+.ie6 .listing-qa-h-text,
+.ie7 .listing-qa-h-text {
+  float: left; }
+
+.listing-qa-btn {
+  margin-left: 10px; }
+
+.ie6 .listing-qa-btn {
+  position: relative;
+  top: 3px; }
+
+.listing-qa-my-banter {
+  background-color: #F9F9E1; }
+
+.listing-qa-banter {
+  padding: 10px 0;
+  border-bottom: 1px dashed #808285; }
+
+.listing-qa-banter-last {
+  border-bottom: 2px solid #e3e4e5;
+  margin-bottom: 0; }
+
+.listing-qa-banter-info {
+  float: left;
+  width: 84px;
+  margin-left: 10px; }
+
+.listing-qa-banter-type {
+  font-weight: bold; }
+
+.listing-qa-banter-response-alt .listing-qa-banter-type {
+  color: #3d698e; }
+
+.listing-qa-banter-question,
+.listing-qa-banter-response {
+  margin-left: 94px;
+  margin-top: 10px;
+  padding-top: 10px; }
+
+.listing-qa-banter-question {
+  padding-top: 0;
+  margin-top: 0; }
+
+.listing-qa-banter-response {
+  border-top: 1px dashed #808285; }
+
+.listing-qa-banter-date {
+  color: #6d6f71;
+  font-size: 11px; }
+
+.listing-qa-response-date {
+  margin-left: 5px; }
+
+.listing-qa-banter-flag {
+  margin-left: 5px; }
+
+.listing-qa-banter-action {
+  margin-left: 94px;
+  margin-top: 10px; }
+
+.listing-bids-api-cta {
+  float: right; }
+
+.listing-bids-ship-it-now-h {
+  color: #1b75bc;
+  font-style: italic;
+  margin-bottom: 10px; }
+
+.listing-bids {
+  clear: both;
+  width: 100%;
+  border-bottom: 2px solid #e3e4e5;
+  margin-top: 10px; }
+
+.listing-bids th,
+.listing-bids td {
+  padding: 5px 8px; }
+
+.listing-bids tr {
+  border-bottom: 1px dashed #8d8f92; }
+
+.listing-bids th {
+  background-color: #e7e8e9;
+  font-weight: bold;
+  white-space: nowrap; }
+
+.listing-bids-sin th {
+  background-color: #77b1d8; }
+
+.listing-bids-booking-requests th {
+  background-color: #0B486A;
+  color: #fff; }
+
+.listing-bids-alt td {
+  background-color: #f5f6f6; }
+
+.listing-bids-row-last {
+  border: 0 !important; }
+
+.listing-bids-sin .listing-bids-row-last td,
+.listing-bids-booking-requests .listing-bids-row-last td {
+  /* border-bottom: 15px solid #fff; */ }
+
+.listing-bids-col-actions {
+  width: 140px; }
+
+.listing-bids-col-type {
+  white-space: nowrap; }
+
+.listing-bids-footnotes {
+  font-size: 11px;
+  margin-top: 10px; }
+
+.listing-ready-to-bid {
+  border-top: 7px solid #5b8fb5; }
+
+.listing-ready-to-bid-h-title {
+  color: #3d698e; }
+
+.listing-req-notice {
+  float: right; }
+
+.listing-advbid {
+  border: 7px solid #D0E6EF;
+  margin: 10px 0 0 0; }
+
+.listing-advbid-valet-hd {
+  font-weight: bold; }
+
+.listing-advbid-groupbid-hd {
+  font-weight: bold; }
+
+.listing-bidactions {
+  text-align: center; }
+
+.listing-biddisclaimer {
+  margin: 10px 30px; }
+
+.listing-biddisclaimer-hd {
+  font-weight: bold; }
+
+.listing-confirmbin-actions {
+  width: 685px;
+  margin: 0 auto; }
+
+/* lightbox */
+.listing-overlay {
+  display: none;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  opacity: .7;
+  filter: alpha(opacity=70);
+  z-index: 101;
+  background-color: #000; }
+
+.listing-lightbox {
+  display: none;
+  position: absolute;
+  z-index: 1000;
+  padding: 10px;
+  width: 480px; }
+
+.listing-footerlinks {
+  margin: 10px 0;
+  text-align: center; }
+
+/* Brokered shipment banner */
+.listing-brokered-banner {
+  margin-bottom: 20px;
+  padding: 0 10px;
+  color: #666666; }
+
+.listing-brokered-banner .list {
+  margin-bottom: 3px; }
+
+.listing-brokered-banner-header {
+  margin-bottom: 15px;
+  color: #000000; }
+
+.listing-brokered-banner-new {
+  color: #2C4C63;
+  font-weight: bold; }
+
+.listing-brokered-banner-links-header {
+  font-weight: bold;
+  color: #000000; }
+
+/* Auction timer stuff*/
+.listing-auction-timer-date {
+  text-align: right; }
+
+.listing-auction-timer-date-sooner {
+  text-align: right;
+  font-weight: bold; }
+
+.listing-auction-timer-date-soonest {
+  text-align: right;
+  font-weight: bold;
+  color: #942024; }
+
+.listing-auction-timer-clockicon {
+  padding-left: 2px; }
+
+/* Bid table blurbs */
+.listing-owner-bid-list-blurb {
+  text-align: center;
+  padding-top: 1px;
+  padding-bottom: 10px; }
+
+.listing-owner-bid-list-countdown {
+  color: #942024;
+  font-weight: bold; }
+
+.listing-owner-bid-list-empty-blurb {
+  color: #666666;
+  text-align: center;
+  padding-top: 10px;
+  padding-bottom: 10px; }
+
+.listing-service-type-info,
+.listing-reference-numbers-info {
+  padding: 10px 13px; }
+
+.listing-upgrade {
+  text-transform: uppercase;
+  color: white;
+  font-weight: bold;
+  height: 16px;
+  margin-top: 1px;
+  margin-right: 5px;
+  float: left;
+  padding-left: 3px;
+  padding-right: 3px;
+  font-size: 11px;
+  border: solid;
+  border-width: 1px;
+  border-radius: 2px;
+  text-shadow: 1px 1px 1px #333; }
+
+.listing-upgrade-featured {
+  background-color: #6eb841;
+  border-color: #599a38; }
+
+.listing-upgrade-urgent {
+  background-color: #b5321c;
+  border-color: #97230f; }
+
+.listing-upgrade-brokered {
+  background-color: #CC5717;
+  border-color: #A94309; }
+
+.listing-upgrade-network {
+  background-color: #CC5817;
+  border-color: #A94309; }
+
+.listing-title-and-actions {
+  margin-top: 20px;
+  margin-bottom: 8px; }
+
+.listing-title {
+  float: left;
+  padding-top: 2px;
+  padding-right: 5px; }
+
+.listing-exclusive-container {
+  background-color: #f4f4f4; }
+
+.listing-exclusive-svg {
+  fill: #6D4092;
+  height: 11.6px;
+  width: 14px;
+  left: 0;
+  top: 0; }
+
+.listing-exclusive-label {
+  display: inline;
+  width: 69px;
+  height: 18px;
+  font-family: Lato;
+  font-size: 11px;
+  font-weight: bold;
+  font-style: normal;
+  font-stretch: normal;
+  line-height: 1.64;
+  letter-spacing: 1.1px;
+  position: relative;
+  bottom: 2px; }
+
+.listing-breadcrumb {
+  clear: both;
+  padding-top: 2px; }
+
+.olControlNoSelect {
+  z-index: 800 !important; }
+
+div.olMapViewport {
+  z-index: 100; }
+
+.listing-output-additional-info .description {
+  word-break: break-word;
+  white-space: pre-wrap; }
+
+.listing-shipment-seperator {
+  margin-top: 22px;
+  border-bottom: 2px solid #999999; }
+
+.listing-shipment-info-hr {
+  border-color: #dddddd;
+  border-width: 1px 0px 0px 0px;
+  border-style: solid;
+  margin: 6px 0px; }
+
+.listing-shipment-header {
+  font-size: larger;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  padding-top: 7px;
+  padding-bottom: 15px; }
+
+.listing-shipment-status {
+  float: right;
+  background: #0083bb;
+  color: #ffffff;
+  font-size: smaller;
+  font-weight: 600;
+  padding: 1px 4px 0px 4px;
+  margin-left: 11px; }
+
+.listing-shipment-sub-header {
+  font-size: larger;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: end;
+  -webkit-justify-content: flex-end;
+      -ms-flex-pack: end;
+          justify-content: flex-end;
+  margin-bottom: 15px; }
+
+.listing-shipment-header-actions {
+  padding-right: 11px; }
+
+.listing-shipment-header-actions-link {
+  float: right;
+  color: #02aaf3;
+  font-weight: 600; }
+
+.listing-shipment-header-actions-modal-link {
+  cursor: pointer; }
+
+.listing-shipment-address-header {
+  padding-bottom: 10px; }
+
+.listing-shipment-header-actions-seperator {
+  color: #b8b8b8;
+  padding: 0px 5px;
+  font-weight: 600; }
+
+.listing-shipment-data {
+  margin-bottom: -10px; }
+
+.listing-add-shipment {
+  background: #f4f4f4;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch;
+  width: 100%;
+  border: 0;
+  height: 60px;
+  padding: 0;
+  margin: 15px 0px; }
+
+.listing-add-shipment:hover {
+  border: 1px solid #02aaf3; }
+
+.listing-add-shipment-icon-parent {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center; }
+
+.listing-add-shipment-icon {
+  height: 25px;
+  width: 25px;
+  padding-left: 15px; }
+
+.listing-add-shipment-text {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  padding-left: 15px; }
+
+.listing-shipment-address-block {
+  padding-left: 4px;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+          flex-direction: column; }
+
+/* This container is there to be able to display the tracking link both for carriers and shippers inline with the shipment title */
+.shipmentTitlesContainer {
+  position: relative; }
+
+.trackShipmentButton {
+  z-index: 499;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-block;
+  font-weight: bold;
+  position: absolute;
+  right: 0; }
+
+.trackShipmentButton.carrier {
+  top: 0; }
+
+.trackShipmentButton.shipper {
+  top: 2px; }

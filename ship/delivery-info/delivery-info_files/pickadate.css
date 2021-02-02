@@ -1,0 +1,13 @@
+﻿@media screen only and (min-width: 768px) {
+    .pickadate__holder {
+        min-width: 300px;
+    }
+}
+
+
+.pickadate__holder--noToday .pickadate__button--today,
+.pickadate__holder--noClear .pickadate__button--clear {
+    display: none;
+}
+
+

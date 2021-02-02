@@ -1,0 +1,199 @@
+var MeasureControl = function(container_id, options) {
+    if(!MeasureControl.decimal) {
+        MeasureControl.decimal = uship.prefs.i18n.decimal;
+    }
+    if(!MeasureControl.regx) {
+        MeasureControl.regx = new RegExp('[^0-9\\' + uship.prefs.i18n.decimal + '-]', 'g');
+    }
+    
+    this.elem_container = $(container_id);
+    
+    options = this.options= options || {};
+    options.containers = options.containers || [];
+    options.containers.unshift(this.elem_container);
+    
+    var inputs = this.elem_container.getElementsByTagName('input');
+    this.rb_english = inputs[0];
+    this.rb_metric = inputs[1];
+    
+    var items = this.items = {};
+    this.elem_container.select('.'+MeasureControl.ITEM_CSS).each(function(elem_item) {
+        var txt_input_list = elem_item.select('input');
+        var type = elem_item.readAttribute('rel');
+        if(type === 'length' || type === 'width' || type === 'height') {
+            items[type] = {
+                txt_ft : txt_input_list[0],
+                txt_in : txt_input_list[1],
+                txt_m  : txt_input_list[2]
+            };
+        }
+        else if(type === 'weight') {
+            items[type] = {
+                txt_lbs : txt_input_list[0],
+                txt_kg  : txt_input_list[1]
+            };
+        }
+    });
+    if(options.weight_container) {
+        var weight_container = $(options.weight_container);
+        var txt_input_list = weight_container.select('input');
+        this.items.weight = {
+            txt_lbs : txt_input_list[0],
+            txt_kg  : txt_input_list[1]
+        };
+        options.containers.push(weight_container);
+    }
+
+    this.check_radio_state();
+
+    // bind events
+    Event.observe(this.rb_english, 'click', this.handle_radio_click.bind(this));
+    Event.observe(this.rb_metric, 'click', this.handle_radio_click.bind(this));
+    for (var i = 2, len = inputs.length; i < len; i++) {
+        Event.observe(inputs[i], 'blur', this.handle_input_blur.bind(this));
+    }
+    
+    MeasureControl.instances.push(this);
+};
+
+MeasureControl.prototype = {
+    // public
+    values : function() {
+        if(arguments.length === 0 || (arguments.length === 1 && typeof(arguments[0]) === 'boolean')) { // get values
+            return this.get_values(arguments[0]);
+        }
+        else { // set values
+            var items = arguments[0];
+            for(var type in items) {
+                if(type === 'weight') {
+                    this.set_weight(items[type], arguments[1]);
+                }
+                else {
+                    this.set_dimension(type, items[type], arguments[1]);
+                }
+            }
+            return this;
+        }
+    },
+    use_english_unit_type : function(use_english) {
+        use_english = !!use_english;
+        this.rb_english.checked = use_english;
+        this.rb_metric.checked = !use_english;
+        this.check_radio_state();
+        
+        return this;
+    },
+    
+    // private
+    get_values : function(in_english) {
+        in_english = in_english !== undefined ? !!in_english : !this.rb_metric.checked;
+
+        var values = {};        
+        if(this.rb_metric.checked) { // metric
+            for(var item in this.items) {
+                var type = this.items[item];
+                if(item !== 'weight') {
+                    values[item] = +type.txt_m.value || 0;
+                    
+                    if(!in_english) { // invoker wants results in english
+                        values[item] = values[item] * MeasureControl.CONVERSION_RATE.in_to_m;
+                    }
+                }
+                else {
+                    values[item] = +type.txt_kg.value || 0;
+                    
+                    if(in_english) { // invoker wants results in english
+                        values[item] = values[item] * MeasureControl.CONVERSION_RATE.lb_to_kg;
+                    }
+                }
+            }
+        }
+        else { // english
+            for(var item in this.items) {
+                var type = this.items[item];
+                if(item !== 'weight') {
+                    values[item] = (+type.txt_ft.value || 0)*12 + (+type.txt_in.value || 0);
+                    
+                    if(!in_english) { // invoker wants results in english
+                        values[item] = values[item] / MeasureControl.CONVERSION_RATE.in_to_m;
+                    }
+                }
+                else {
+                    values[item] = +type.txt_lbs.value || 0;
+                    
+                    if(!in_english) { // invoker wants results in english
+                        values[item] = values[item] / MeasureControl.CONVERSION_RATE.lb_to_kg;
+                    }
+                }
+            }
+        }
+         
+        return values;
+    },
+    set_weight : function(weight, in_english) {
+        in_english = in_english !== undefined ? !!in_english : !this.rb_metric.checked;
+        var type = this.items.weight;
+        if(in_english && this.rb_metric.checked) {
+            weight = weight * MeasureControl.CONVERSION_RATE.lb_to_kg;
+        }
+        else if(!in_english && !this.rb_metric.checked) {
+            weight = weight / MeasureControl.CONVERSION_RATE.lb_to_kg;
+        }
+        
+        if(!this.rb_metric.checked) { // english    
+            type.txt_lbs.value = weight;
+        }
+        else { // metric
+            type.txt_kg.value = weight;
+        }
+    },
+    set_dimension : function(which, length, in_english) {
+        in_english = in_english !== undefined ? !!in_english : !this.rb_metric.checked;
+        var type = this.items[which];
+        if(in_english && this.rb_metric.checked) {
+            length = length * MeasureControl.CONVERSION_RATE.in_to_m;
+        }
+        else if(!in_english && !this.rb_metric.checked) {
+            length = length / MeasureControl.CONVERSION_RATE.in_to_m;
+        }
+        
+        if(!this.rb_metric.checked) { // english
+            type.txt_ft.value = Math.floor(length / 12);
+            type.txt_in.value = length % 12;
+        }
+        else { // metric
+            type.txt_m.value = length;
+        }
+    },
+    check_radio_state: function() {
+        if (!this.rb_english.checked && !this.rb_metric.checked) {
+            this.rb_english.checked = true;
+        }
+        
+        var checked = this.rb_metric.checked;
+        this.options.containers.each(function(container) {
+            if (checked) {
+                container.addClassName(MeasureControl.METRIC_CSS);
+            }
+            else {
+                container.removeClassName(MeasureControl.METRIC_CSS);
+            }
+        });
+    },
+    handle_radio_click: function handle_radio_click(e) {
+        this.check_radio_state();
+    },
+    handle_input_blur: function(e) {
+        MeasureControl.strip_elem(Event.element(e));
+    }
+};
+MeasureControl.strip_elem = function(elem) {
+    elem.value = elem.value.replace(MeasureControl.regx, '');
+};
+MeasureControl.METRIC_CSS = 'measurement-info-metric';
+MeasureControl.ITEM_CSS = 'measurement-info-input';
+MeasureControl.CONVERSION_RATE = {
+    in_to_m  : .0254,
+    lb_to_kg : .45359237
+};
+MeasureControl.instances = [];

@@ -1,0 +1,100 @@
+/*
+ * path: /Controls/User/listingControls/custom/addresses.ascx
+ * ns:   addresses
+ *
+ * used in listing process to set time and location
+ * for pickup and delivery
+ */
+.addresses-timeframe-datebox .form-input-text-datepicker-wrap,
+.addresses-timeframe-datebox .form-input-text-datepicker,
+.addresses-timeframe-datebox .form-input-text-date {
+  width: 100%; }
+.addresses-timeframe-latest {
+  position: relative;
+  padding-left: 4%; }
+.addresses-timeframe-and {
+  position: absolute;
+  left: 0;
+  width: 17%;
+  text-align: center; }
+  
+@media only screen and (max-width: 767px) {
+  .responsive-page .addresses-timeframe-datebox,
+  .responsive-page .addresses-timeframe-mode,
+  .responsive-page .addresses-timeframe-and {
+    padding-left: 0;
+    display: block;
+    width: 100%;
+    box-sizing: border-box; }
+  .responsive-page .addresses-timeframe-and {
+    position: relative;
+    left: auto;
+    text-align: left;
+    padding: .5em 0; }
+}
+
+/*  Used to hide/show Google Places   */
+.google-places-off .google-places-logic
+{
+  display: none;
+}
+
+.google-places-on .old-address-logic
+{
+  display: none;
+}
+
+/*span*/
+.origin-information .twitter-typeahead:before {
+color: #357017;
+}
+
+.twitter-typeahead:before {
+content: '\68';
+font-family: 'uship-icons';
+margin: 0 0.5em;
+z-index: 1;
+position: absolute;
+padding: 0.65em 0;
+}
+
+/*first input*/
+
+input[type="search"]{
+border-radius: 3px;
+}
+
+input[type="search"]{
+  background-color: white;
+  font-family: inherit;
+  border: 1px solid rgba(202, 196, 196, 0.75);
+  -webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+  color: rgba(0, 0, 0, 0.75);
+  display: block;
+  font-size: 1em;
+  margin-bottom: 4px;
+  padding: 0.625em;
+  height: 2.6875em;
+  width: 60%;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  -webkit-transition: all 0.15s linear;
+  -moz-transition: all 0.15s linear;
+  transition: all 0.15s linear;
+}
+
+*:after {
+-moz-box-sizing: border-box;
+-webkit-box-sizing: border-box;
+box-sizing: border-box;
+}
+
+.google-places-logic .tt-dropdown-menu {
+ min-width: 60%;
+}
+
+
+
+

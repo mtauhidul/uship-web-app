@@ -1,0 +1,71 @@
+
+<!-- saved from url=(0089)https://tm.uship.com/tags?org_id=2nz2vc7y&session_id=d297c972-8b0a-4047-9c52-97100508da0e -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><script type="text/javascript">
+    (function() {
+      var container = document.querySelector('#_tcx-s60360xq1x');
+      if (!container) {
+        return;
+      }
+
+      function addToContainer(url, text) {
+        const wrapper = document.createElement('div');
+        wrapper.setAttribute('data-tcx-url', url);
+        wrapper.innerText = text;
+        container.appendChild(wrapper);
+      }
+
+      const fetch = window.fetch
+      window.fetch = function() {
+        return Promise.resolve(fetch.apply(window, arguments))
+            .then(async response => {
+              if (response.ok) {
+                try {
+                  const clone = response.clone();
+                  const json = await clone.json();
+                  addToContainer(clone.url, JSON.stringify(json));
+                } catch (err) {}
+              }
+              return response;
+            });
+      };
+
+      var XHR = XMLHttpRequest.prototype;
+      var send = XHR.send;
+      var open = XHR.open;
+      XHR.open = function(method, url) {
+        this.url = url;
+        return open.apply(this, arguments);
+      };
+      XHR.send = function() {
+        this.addEventListener('load', function() {
+          try {
+            const response = this.response;
+            if (response && response.length) {
+              const firstChar = response[0];
+              if (firstChar === '[' || firstChar === '{') {
+                addToContainer(this.url, response);
+              }
+            }
+          } catch (err) {
+            // No-op.
+          }
+        });
+        return send.apply(this, arguments);
+      };
+    })();
+  </script>
+  
+  <title>empty</title>
+ <script id="tdr_vx8p7" type="text/javascript" nonce="4e58d944f72617ba" src="./clear.png"></script><script id="tdr_W7FZp" type="text/javascript" nonce="4e58d944f72617ba" src="./clear(1).png"></script><img id="tdr_ihXlR" alt="empty" style="visibility:hidden" src="./clear(2).png"><script id="tdr_j2UGB" type="text/javascript" nonce="4e58d944f72617ba" src="./clear(3).png"></script><script id="tdr_S0wMa" type="text/javascript" nonce="4e58d944f72617ba" src="./clear(4).png"></script><script id="tdr_5TT7R" type="text/javascript" nonce="4e58d944f72617ba" src="./clear3.png"></script><img id="tdr_HreRu" alt="empty" style="visibility:hidden" src="./clear1(1).png"><script id="tdr_hrakP" type="text/javascript" nonce="4e58d944f72617ba" src="./clear3(1).png"></script><script id="tdr_aYeaE" type="text/javascript" nonce="4e58d944f72617ba" src="./clear(5).png"></script></head>
+<body data-new-gr-c-s-check-loaded="14.993.0" data-gr-ext-installed="">
+ 
+ <div style="background:url(https://tm.uship.com/fp/clear.png?org_id=2nz2vc7y&amp;session_id=d297c972-8b0a-4047-9c52-97100508da0e&amp;nonce=4e58d944f72617ba&amp;w=4e58d944f72617ba&amp;ck=0&amp;m=1)"></div>
+ <img src="./clear(6).png" alt="empty" style="visibility:hidden">
+ 
+ <script nonce="4e58d944f72617ba" src="./check.js.download"></script>
+ 
+ 
+ 
+ 
+
+<iframe id="tdz_ifrm" title="empty" name="" width="0px" height="0px" marginwidth="0" marginheight="0" frameborder="0" style="display:none !important; z-index:-9999 !important; visibility:hidden !important" aria-disabled="true" aria-hidden="true" tabindex="-1" src="./HP.html"></iframe><iframe id="tdr_azY2R" title="empty" aria-disabled="true" aria-hidden="true" width="0" height="0" tabindex="-1" style="color:rgba(0,0,0,0); float:left; position:absolute; top:-200; left:-200; border:0px" src="./ls_fp.html"></iframe><iframe id="tdr_BaiBx" title="empty" aria-disabled="true" aria-hidden="true" width="0" height="0" tabindex="-1" style="color:rgba(0,0,0,0); float:left; position:absolute; top:-200; left:-200; border:0px" src="./sid_fp.html"></iframe><iframe id="tdr_ZJgj1" title="empty" aria-disabled="true" aria-hidden="true" width="0" height="0" tabindex="-1" style="color:rgba(0,0,0,0); float:left; position:absolute; top:-200; left:-200; border:0px" src="./top_fp.html"></iframe></body></html>

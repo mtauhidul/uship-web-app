@@ -1,0 +1,1523 @@
+        
+    
+//For hiding and showing items in a radio button when using RadioButtonList     
+var radioTrueFalse = function(rbList, ShowWhenTrue, ShowWhenFalse) {
+    var rbItems = $A(rbList.getElementsByTagName('input'));
+    var change = function(e) {
+        var item = Event.element(e);
+        if (item.value == 1) {
+            Element.show(ShowWhenTrue);
+            Element.hide(ShowWhenFalse);
+        }
+        else {
+            Element.hide(ShowWhenTrue);
+            Element.show(ShowWhenFalse);
+        }
+    }
+    rbItems.each(function(item) {
+        if (item.value == 1 && item.checked) {
+            Element.show(ShowWhenTrue);
+            Element.hide(ShowWhenFalse);
+        }
+        else if (item.value == 0 && item.checked) {
+            Element.hide(ShowWhenTrue);
+            Element.show(ShowWhenFalse);
+        }
+        Event.observe(item, 'click', change);
+    });
+
+} 
+
+//For hiding and showing Items below a checkbox based on the checkbox being selected
+var CheckBoxSelectedShow = function(chkbox, ShowItemsList) {
+    var change = function(e) {
+        if (chkbox.checked == true) {
+            Element.show(ShowItemsList);
+        }
+        else {
+            Element.hide(ShowItemsList);
+        }
+    }
+    Event.observe(chkbox, 'click', change);
+    if (chkbox.checked == true) {
+        Element.show(ShowItemsList);
+    }
+    else {
+        Element.hide(ShowItemsList);
+    }
+}
+//For hiding and showing other option text in dropdown
+var ShowOtherOptionInDropDown = function(drpdown, ShowItemsdiv, val) {
+    var change = function(e) {
+        if (drpdown.selectedIndex == val) {
+            Element.show(ShowItemsdiv);
+        }
+        else {
+            Element.hide(ShowItemsdiv);
+        }
+    }
+
+    Event.observe(drpdown, 'click', change);
+    if (drpdown.selectedIndex == val) {
+        Element.show(ShowItemsdiv);
+    }
+    else {
+        Element.hide(ShowItemsdiv);
+    }
+}
+
+// Toggles Account Type (Personal/Business) 
+// and clears company name when user toggles back to personal 
+var ToggleCompanyName = function(drpdown, ShowItemsdiv, val) {
+    var change = function(e) {
+        if (drpdown.selectedIndex == val) {
+            Element.show(ShowItemsdiv);
+        }
+        else {
+            Element.hide(ShowItemsdiv);
+            ShowItemsdiv.getElementsByTagName('input')[0].value = '';
+        }
+    }
+
+    Event.observe(drpdown, 'click', change);
+    if (drpdown.selectedIndex == val) {
+        Element.show(ShowItemsdiv);
+    }
+    else {
+        Element.hide(ShowItemsdiv);
+        ShowItemsdiv.getElementsByTagName('input')[0].value = '';
+    }
+}
+
+var radioOptionsResponsive = function(details, rbList, val, invert, isResponsive) {
+	me = {};
+	me.details = details;
+	me.rbList = rbList; 
+	me.val = val; 
+	me.invert = invert; 
+	me.isResponsive = isResponsive;
+	me.rbItems = $A(rbList.getElementsByTagName('input'));
+	me.windowWidth = window.innerWidth || window.document.documentElement.clientWidth || window.document.body.clientWidth || 0;	
+	
+	function init() {
+		me.rbItems.each(function(item) {
+			if(item.value == val && item.checked)	{
+				if(invert) {
+					Element.hide(details);
+				}
+				else {
+					Element.show(details);
+				}
+			}
+			
+			item.observe('click', function () { 
+				me.run(item);
+			});
+			item.parentElement.observe('click', function () {
+				me.checkRadioButton(item);
+			});
+		});
+	}
+	
+	me.run = function(item) {
+		if(item.value == val) {
+			if(invert) {
+				Element.hide(details);
+			}
+			else {
+				Element.show(details);
+			}
+		}
+		else {
+			if(invert) {
+				Element.show(details);
+			}
+			else {
+				Element.hide(details);
+			}
+		}
+	}
+	
+	me.checkRadioButton = function (radioButton) {
+		radioButton.checked = true;
+        me.run(radioButton);
+    }
+	
+	init();
+	return me;
+}
+
+var radioOptions = function(details, rbList, val, invert) {
+    var rbItems = $A(rbList.getElementsByTagName('input'));
+    var change = function(e) {
+        var item = Event.element(e);
+        if (item.value == val) {
+            if (invert) {
+                Element.hide(details);
+            }
+            else {
+                Element.show(details);
+            }
+        }
+        else {
+            if (invert) {
+                Element.show(details);
+            }
+            else {
+                Element.hide(details);
+            }
+        }
+    }
+    rbItems.each(function(item) {
+        if (item.value == val && item.checked) {
+
+            if (invert) {
+                Element.hide(details);
+            }
+            else {
+                Element.show(details);
+            }
+        }
+        Event.observe(item, 'click', change);
+    });
+}
+
+var AuctionOptions_old = function(rbNotAuctionId, rbIsAuctionId, ddAuctionTypeId, ebayValue, conAuctionOptionsId, conEbayOptionsId) {
+    me = {};
+    me.rbNotAuction = $(rbNotAuctionId);
+    me.rbIsAuction = $(rbIsAuctionId);
+    me.ddAuctionType = $(ddAuctionTypeId);
+    me.conAuctionOptions = $(conAuctionOptionsId);
+    me.conEbayOptions = $(conEbayOptionsId);
+    me.ebayValue = ebayValue;
+
+    function init() {
+        // wire events
+        me.rbNotAuction.observe('click', me.run);
+        me.rbIsAuction.observe('click', me.run);
+        me.ddAuctionType.observe('change', handleAuctionTypeChange);
+
+        // run
+        me.run();
+    }
+
+    me.run = function() {
+        if (me.rbIsAuction.checked) {
+            me.conAuctionOptions.show();
+            
+            if (me.ddAuctionType.options[me.ddAuctionType.selectedIndex].value == me.ebayValue) {
+                me.conEbayOptions.show();
+            }
+            else {
+                me.conEbayOptions.hide();
+            }
+        }
+        else {
+            me.conAuctionOptions.hide();
+            me.conEbayOptions.hide();
+        }
+    }
+
+    // event handlers
+    function handleAuctionTypeChange(e) {
+        me.rbIsAuction.checked = true;
+        me.run();
+    }
+
+    init();
+    return me;
+}
+
+
+var AuctionOptions = function (ddAuctionTypeId, rbNotAuctionId, rbIsAuctionId, rbLinkedAuctionId, rbNotLinkedAuctionId, rbEnterManuallyId, ebayValue, conEbayOptionsId, conLinkedEbayId, conNotLinkedEbayId,
+                              hdnAllowImportLot, ddRBAuctionSite, hdnAuctionNumber, ritchieValue, conRitchieOptionsId, conRitchieImport, conAuctionOptionsId, conNetworkInternationalOptions, NetworkInternationalValue, itemURL,
+                              radRbPurchased, radRbNotPurchased, divManualLotsEnter, divAutoLinkAccountImportLot, chkRitchieAccountLink, ritchieEmailAddressUsed, popupShowRitchieInfo,
+                              divImportFromProxibid, importFromProxibidEnabled, ProxibidListingTypeId, divImportFromEtsy, importFromEtsyEnabled, EtsyListingTypeId,
+                              divImportFromAutobid, importFromAutobidEnabled, AutobidListingTypeId) {
+
+    var listToUse = "";
+
+    if ($(ddAuctionTypeId).selectedIndex === -1) {
+        listToUse = ddAuctionTypeNewId;
+    } else {
+        listToUse = ddAuctionTypeId;
+    }
+
+    me = {};
+    me.ddAuctionType = $(listToUse);
+
+    me.rbNotAuction = $(rbNotAuctionId);
+    me.rbIsAuction = $(rbIsAuctionId);
+    //me.chkIsAuction = $(chkIsAuctionId);
+    //me.divNewAuctionDropDown = $(divNewAuctionDropDown);
+
+    me.rbLinkedAuction = $(rbLinkedAuctionId);
+    me.rbNotLinkedAuction = $(rbNotLinkedAuctionId);
+    me.rbEnterManually = $(rbEnterManuallyId);
+    me.ebayValue = ebayValue; //listingTypeID
+    me.conEbayOptions = $(conEbayOptionsId);
+    me.conLinkedEbay = $(conLinkedEbayId);
+    me.conNotLinkedEbay = $(conNotLinkedEbayId);
+
+    me.hdnAllowImportLot = $(hdnAllowImportLot);
+    me.ddRBAuctionSite = $(ddRBAuctionSite);
+    me.hdnAuctionNumber = $(hdnAuctionNumber);
+    me.origSelectedRBAuctionSite = me.ddRBAuctionSite.selectedIndex;
+    me.ritchieValue = ritchieValue; //listingTypeID
+    me.conRitchieOptions = $(conRitchieOptionsId);
+    me.conRitchieImport = $(conRitchieImport);
+
+    me.conNetworkInternationalOptions = $(conNetworkInternationalOptions);
+    me.NetworkInternationalValue = NetworkInternationalValue //listingTypeID
+
+    me.conAuctionOptions = $(conAuctionOptionsId);
+    me.itemURL = $(itemURL);
+
+    me.radioRbPurchased = $(radRbPurchased);
+    me.radioRbNotPurchased = $(radRbNotPurchased);
+    me.manualLotsEnter = $(divManualLotsEnter);
+    me.autoLinkAccountImportLot = $(divAutoLinkAccountImportLot);
+    me.chkRitchieAccountLink = $(chkRitchieAccountLink);
+    me.ritchieEmailAddressUsed = $(ritchieEmailAddressUsed);
+    me.popupShowRitchieInfo = $(popupShowRitchieInfo);
+
+    me.conImportFromProxibid = $(divImportFromProxibid);
+    me.importFromProxibidEnabled = importFromProxibidEnabled;
+    me.ProxibidListingTypeId = ProxibidListingTypeId;
+    
+    me.conImportFromEtsy = $(divImportFromEtsy);
+    me.importFromEtsyEnabled = importFromEtsyEnabled;
+    me.EtsyListingTypeId = EtsyListingTypeId;
+
+    me.conImportFromAutobid = $(divImportFromAutobid);
+    me.importFromAutobidEnabled = importFromAutobidEnabled;
+    me.AutobidListingTypeId = AutobidListingTypeId;
+    
+    function init() {
+        if (me.rbNotAuction != null) {
+            // wire events
+            me.ddAuctionType.observe('change', handleAuctionTypeChange);
+
+            me.rbNotAuction.observe('click', me.run);
+            me.rbNotAuction.parentElement.observe('click', function () {
+                me.checkRadioButton(me.rbNotAuction);
+            });
+            me.rbIsAuction.observe('click', me.run);
+            me.rbIsAuction.parentElement.observe('click', function () {
+                me.checkRadioButton(me.rbIsAuction);
+            });
+            //if (me.chkIsAuction != null) {
+            //    me.chkIsAuction.observe('click', me.run);
+            //}
+
+            if (me.radioRbPurchased) {
+                me.radioRbPurchased.observe('click', me.toggleAutoManualLotImport);
+                me.radioRbNotPurchased.observe('click', me.toggleAutoManualLotImport);
+            }
+            if (me.chkRitchieAccountLink) {
+                me.chkRitchieAccountLink.observe('click', me.showEmailAddressUsedForLinking);
+            }
+            if (me.popupShowRitchieInfo) {
+                me.popupShowRitchieInfo.observe('click', me.showRitchiePopup);
+            }
+            me.rbLinkedAuction.observe('click', me.run_ebay);
+            me.rbNotLinkedAuction.observe('click', me.run_ebay);
+            if (me.rbEnterManually) {
+                me.rbEnterManually.observe('click', me.run_ebay);
+            }
+
+            // run
+            me.run();
+            me.run_ebay();
+            me.toggleAutoManualLotImport();
+            // Ritchie stuff
+            if (me.hdnAllowImportLot.value != '0') {
+                me.ddRBAuctionSite.observe('change', handleRBAuctionSiteChange);
+
+                me.run_rithciebros();
+            }
+        }
+        else {
+            me.conAuctionOptions.show();
+        }
+    }
+
+    me.showRitchiePopup = function () {
+        var popupoptions = {
+            className: 'myshipments-action-confirm',
+            lightbox: true,
+            hideclose: false,
+            offsetY: 200,
+            width: 400
+        };
+        var elem = document.createElement('div');
+        elem.innerHTML = __.RitchieBrosAccountLinkingInformation;
+        var new_features_popup = uship.utils.in_page_popup(__.LinkMyRBAccountTouShip, elem, popupoptions);
+    }
+
+    me.toggleAutoManualLotImport = function () {
+        if (me.radioRbPurchased) {
+            if (me.radioRbPurchased.checked) {
+                me.manualLotsEnter.hide();
+                me.autoLinkAccountImportLot.show();
+            } else {
+                me.manualLotsEnter.show();
+                me.autoLinkAccountImportLot.hide();
+            }
+        }
+        else {
+        }
+    }
+
+    me.showEmailAddressUsedForLinking = function () {
+        if (me.chkRitchieAccountLink.checked) {
+            var emailAddress = document.getElementsByClassName('js-emailEntry-txtEmailAddress')[0];
+            if (emailAddress) {
+                me.ritchieEmailAddressUsed.innerHTML = __.IntervRegEmailAddress + ' : ' + emailAddress.value;
+                me.ritchieEmailAddressUsed.show();
+            }
+        }
+        else {
+            me.ritchieEmailAddressUsed.innerHTML = '';
+            me.ritchieEmailAddressUsed.hide();
+        }
+    }
+
+    me.checkRadioButton = function (radioButton) {
+        radioButton.checked = true;
+        me.run();
+    }
+
+    me.run = function () {
+
+        //if (me.chkIsAuction.checked) {
+        //    me.divNewAuctionDropDown.show();
+        //} else {
+        //    me.divNewAuctionDropDown.hide();
+        //    if (me.divChkImport.visible()) {
+        //        me.rbIsAuction.checked = false;
+        //    }
+        //}
+
+        var selectedValue = me.ddAuctionType.options[me.ddAuctionType.selectedIndex].value;
+
+        me.conEbayOptions.hide();
+        me.conRitchieOptions.hide();
+        me.conNetworkInternationalOptions.hide();
+        me.conAuctionOptions.hide();
+        me.conImportFromProxibid.hide();
+        me.conImportFromEtsy.hide();
+        me.conImportFromAutobid.hide();
+        me.itemURL.hide();
+
+        if (me.rbIsAuction.checked) {
+            if (selectedValue == me.ebayValue) {
+                me.conEbayOptions.show();
+            }
+            else if (selectedValue == me.ritchieValue && me.hdnAllowImportLot.value != '0') {
+                me.conRitchieOptions.show();
+            }
+            else if (selectedValue == me.NetworkInternationalValue) {
+                me.conNetworkInternationalOptions.show();
+            }
+            else if (me.importFromProxibidEnabled == 'True' && selectedValue == me.ProxibidListingTypeId) {
+                me.conImportFromProxibid.show();
+            }
+            else if (me.importFromEtsyEnabled == 'True' && selectedValue == me.EtsyListingTypeId) {
+                me.conImportFromEtsy.show();
+            }
+            else if (me.importFromAutobidEnabled == 'True' && selectedValue == me.AutobidListingTypeId) {
+                me.conImportFromAutobid.show();
+            }
+            else if (selectedValue != 71 && selectedValue != 81 && selectedValue != 82 && selectedValue != 85 && selectedValue != 86 && selectedValue != 88) { // GumTreeListingTypeID == 71, LandwirtListingTypeID == 81, EquipmentOne = 82, Tec24 = 85, Bluecycle = 86
+                me.conAuctionOptions.show();
+                me.itemURL.show();
+            }
+        }
+
+        if ((me.rbNotAuction.checked || selectedValue != me.ritchieValue) && me.hdnAllowImportLot.value != '0') {
+            clear_lots();
+        }
+    }
+
+    me.run_ebay = function () {
+        var selectedValue = me.ddAuctionType.options[me.ddAuctionType.selectedIndex].value;
+
+        if (me.rbIsAuction.checked  && selectedValue == me.ebayValue) {
+            if (me.rbLinkedAuction.checked) {
+                me.conLinkedEbay.show();
+                me.conNotLinkedEbay.hide();
+            }
+            else if (me.rbNotLinkedAuction.checked) {
+                me.conLinkedEbay.hide();
+                me.conNotLinkedEbay.show();
+            }
+            else {
+                me.conLinkedEbay.hide();
+                me.conNotLinkedEbay.hide();
+            }
+        }
+    }
+
+    me.run_rithciebros = function () {
+        var selectedValue = me.ddAuctionType.options[me.ddAuctionType.selectedIndex].value;
+
+        var lbl_imported_lots = document.getElementsByClassName('js-label-importedlots')[0];
+        var hdn_imported_lots = document.getElementsByClassName('js-hdn-importedlots')[0];
+
+        lbl_imported_lots.innerHTML = hdn_imported_lots.value;
+
+        if (me.rbIsAuction.checked && selectedValue == me.ritchieValue) {
+            me.conRitchieImport.show();
+        }
+    }
+
+    // event handlers
+    function handleAuctionTypeChange(e) {
+        me.checkRadioButton(me.rbIsAuction);
+        me.run();
+    }
+
+    function handleRBAuctionSiteChange(e) {
+        var lbl_imported_lots = document.getElementsByClassName('js-label-importedlots')[0];
+        me.hdnAuctionNumber.value = me.ddRBAuctionSite[me.ddRBAuctionSite.selectedIndex].value;
+
+        if (lbl_imported_lots.innerHTML !== '') {
+            if (confirm('Lot numbers are specific to each auction site. Changing your auction site will delete all of your imported lot information. Do you want to proceed?')) {
+                var btn = document.getElementsByClassName('js-btn-rbauctionsite')[0];
+                btn.click();
+            }
+            else {
+                me.ddRBAuctionSite.selectedIndex = me.origSelectedRBAuctionSite;
+            }
+        }
+
+        me.hdnAuctionNumber.value = me.ddRBAuctionSite[me.ddRBAuctionSite.selectedIndex].value;
+        me.origSelectedRBAuctionSite = me.ddRBAuctionSite.selectedIndex;
+    }
+
+    function clear_lots() {
+        // per discussion with Laith, if the user select No on "Do you know the lot numbers?", then clear out all the lot numbers of imported items - Eric Purwaka, 1/28/10
+        var div_imported_lots = document.getElementsByClassName('js-div-importedlots')[0];
+        var lbl_imported_lots = document.getElementsByClassName('js-label-importedlots')[0];
+        var hdn_imported_lots = document.getElementsByClassName('js-hdn-importedlots')[0];
+        var div_item_lots = document.getElementsByClassName('js-lotnumber');
+        var lbl_item_lots = document.getElementsByClassName('js-label-lotnumber');
+        var hdn_item_lots = document.getElementsByClassName('js-hdn-lotnumber');
+        var disabled_controls = document.getElementsByClassName('form-disabled');
+        var overlays = document.getElementsByClassName('listingproc-heavy-equipment-item-overlay');
+
+        me.ddRBAuctionSite.options[0].selected = true;
+        me.hdnAuctionNumber.value = '-1';
+
+        div_imported_lots.style.display = 'none';
+        lbl_imported_lots.innerHTML = '';
+        hdn_imported_lots.value = '';
+
+        for (var i = 0, len = div_item_lots.length; i < len; i++) {
+            div_item_lots[i].style.display = 'none';
+        }
+
+        for (var i = 0, len = lbl_item_lots.length; i < len; i++) {
+            lbl_item_lots[i].innerHTML = '';
+        }
+
+        for (var i = 0, len = hdn_item_lots.length; i < len; i++) {
+            hdn_item_lots[i].value = '';
+        }
+
+        for (var i = 0, len = disabled_controls.length; i < len; i++) {
+            disabled_controls[0].removeClassName('form-disabled');
+        }
+
+        for (var i = 0, len = overlays.length; i < len; i++) {
+            overlays[i].style.display = 'none';
+        }
+    }
+
+    init();
+    return me;
+}
+
+var EBayImporter = function(btnLaunchId, btnRefreshId, containerId, conLoadingId, importUrl) {
+    this.btnLaunch = $(btnLaunchId);
+    this.btnRefresh = $(btnRefreshId);
+    this.container = $(containerId);
+    this.conLoading = $(conLoadingId);
+    this.EBAY_IMPORT_URL = importUrl;
+
+}
+EBayImporter.prototype = {
+    launch: function () {
+        if (this._w && !this._w.closed) {
+            // focus window if already open
+            this._w.focus();
+        }
+        else {
+            // open a new window
+            this._w = window.open(this.EBAY_IMPORT_URL, '', 'toolbar=0,scrollbars=1,location=0,statusbar=1,menubar=0,resizable=1,width=800,height=600');
+            this._w.focus();
+        }
+    },
+    complete: function () {
+        // close window
+        if (this._w) {
+            this._w.close();
+        }
+
+        Position.clone(this.container, this.conLoading);
+        new Effect.Opacity(this.container, { duration: 0, transition: Effect.Transitions.linear, from: 1, to: .2 });
+        this.conLoading.show();
+        this.btnLaunch.disabled = true;
+
+        this.btnRefresh.click();
+    }
+}
+
+var YearInput = function(inputId) {
+    var elem = $(inputId);
+    var TEXT = 'Year';
+    function run() {
+        if (elem.value == '') {
+            elem.value = TEXT;
+        }
+        else if (elem.value == TEXT) {
+            elem.value = '';
+        }
+    }
+    elem.observe('focus', run);
+    elem.observe('blur', run);
+    run();
+}
+
+var TimeframeOptions = function(rbFlexibleId, rbSpecificId, conSpecificId) {
+    this.rbFlexible = $(rbFlexibleId);
+    this.rbSpecific = $(rbSpecificId);
+    this.conSpecific = $(conSpecificId);
+
+    this.rbFlexible.observe('click', this.run.bind(this));
+    this.rbSpecific.observe('click', this.run.bind(this));
+    this.run();
+}
+TimeframeOptions.prototype = {
+    run: function() {
+        if (this.rbSpecific.checked) {
+            this.conSpecific.show();
+        }
+        else {
+            this.conSpecific.hide();
+        }
+    }
+}
+
+/**** pickup / delivery *****/
+var ExpirationOptions = function(containerId, pickupObj, deliveryObj) {
+    this.container = $(containerId);
+    this.pickup = pickupObj;
+    this.delivery = deliveryObj;
+
+    this.run();
+}
+ExpirationOptions.prototype = {
+    run: function() {
+        if (this.isSet(this.pickup) || this.isSet(this.delivery)) {
+            this.container.hide();
+        }
+        else {
+            this.container.show();
+        }
+        setTimeout(this.run.bind(this), 500);
+    },
+    isSet: function(tf) {
+        return (tf.checkbox.checked && tf.latest.value.length > 0)
+    }
+}
+
+// Will be deprecated by LocationNoFreeText and LocationNoFreeText will be renamed.
+var Location = Class.create();
+Location.prototype = {
+    initialize: function (CountryName, CountryChangeLink, CountryDropDown, ZipcodeName, ProvinceGroup,
+    ProvinceDropDown, ProvinceTextBox, ProvinceHiddenInput, StateLabel, FillStates, opZIPtxt, opCitytxt,
+    conZipTextAll, conFreeTextAll, opFreetxt, lbl_FreeTextExample, conZipExample, FreeTextExample,
+    FreeTextStreet, FreeTextList, royal_mail_lookups, zipLookup, streetAddressSection, quick) {
+        if (Location.COUNTRY_LABELS === null) {
+            Location.COUNTRY_LABELS = {
+                'default': {
+                    address_line1: __.MainStreetAddress,
+                    address_line2: __.MainTownRegion
+                },
+                3: {
+                    address_line1: __.MainUKHouseNoOrStreetAddress,
+                    address_line2: __.MainUKPostCode
+                },
+				76: {
+					address_line1: __.MainStreetAddress,
+					address_line2: __.MainJsPostalCode
+				},
+				16: {
+					address_line1: __.MainStreetAddress,
+					address_line2: __.MainJsPostalCode
+				}
+            };
+        }
+
+        this.countryName = $(CountryName);
+        this.countryChangeLink = $(CountryChangeLink);
+        this.countryDropDown = $(CountryDropDown);
+        this.zipcodeName = $(ZipcodeName);
+        this.provinceGroup = $(ProvinceGroup);
+        this.provinceDropDown = $(ProvinceDropDown);
+        this.provinceTextBox = $(ProvinceTextBox);
+        this.provinceHiddenInput = $(ProvinceHiddenInput);
+        this.stateLabel = $(StateLabel);
+        this.opZIPtxt = $(opZIPtxt);
+        this.opCitytxt = $(opCitytxt);
+        this.ZipAll = $(conZipTextAll);
+        this.FreeTextAll = $(conFreeTextAll);
+        this.opFreetxt = $(opFreetxt);
+        this.lbl_FreeTextExample = $(lbl_FreeTextExample);
+        this.ZipExample = $(conZipExample);
+        this.FreeTextExample = FreeTextExample;
+        this.FreeTextStreet = FreeTextStreet;
+        this.FreeTextList = $(FreeTextList);
+        this.royal_mail_lookups = royal_mail_lookups;
+        this.zipLookup = zipLookup;
+        this.streetAddressSection = $(streetAddressSection);
+		this.quick = quick;
+
+        if (FillStates == undefined || FillStates == "" || FillStates == "false") {
+            this.fillStates = false;
+        }
+        else {
+            this.fillStates = true;
+        }
+
+        this.populateCountries();
+    },
+    showCountryList: function () {
+        Element.hide(this.countryName);
+        Element.hide(this.countryChangeLink);
+        Element.show(this.countryDropDown);
+    },
+    hideCountryList: function () {
+        Element.show(this.countryName);
+        Element.show(this.countryChangeLink);
+        Element.hide(this.countryDropDown);
+    },
+    changeCountry: function (stateID) {
+        if (stateID) {
+            this.setSelectedProvince(stateID);
+        }
+        else {
+            this.setSelectedProvince(-1);
+        }
+
+        if (this.provinceTextBox) {
+			this.provinceTextBox.value = '';
+		}
+		
+        this.populateCountries();
+    },
+    changeProvince: function () {
+        this.setSelectedProvince(this.getSelectedProvince());
+    },
+    setCountryName: function (country) {
+        this.countryName.innerHTML = country;
+    },
+    setZipcodeName: function (zipname) {
+        this.zipcodeName.innerHTML = zipname + ':';
+    },
+    setZIPCode: function (zip) {
+        if (this.opZIPtxt) {
+            this.opZIPtxt.value = zip;
+        }
+    },
+    setCity: function (city) {
+        if (this.opCitytxt) {
+            this.opCitytxt.value = city;
+        }
+    },
+    setState: function (state) {
+        if (this.provinceTextBox) {
+            this.provinceTextBox.value = state;
+        }
+    },
+    setStateLabel: function (label) {
+        if(this.stateLabel) {
+			this.stateLabel.innerHTML = label + ':';
+		}
+    },
+    setSelectedProvince: function (provinceID) {
+        if(this.provinceHiddenInput) {
+			this.provinceHiddenInput.value = provinceID;
+		}
+    },
+    setSelectedCountry: function (countryID) {
+        for (i = 0; i < this.countryDropDown.length; i++) {
+            if (this.countryDropDown[i].value == countryID) {
+                this.countryDropDown.selectedIndex = i;
+                break;
+            }
+        }
+    },
+    setStreetFreeText: function (street) {
+        if($(this.FreeTextStreet)) {
+			$(this.FreeTextStreet).value = street;
+		}
+    },
+    setCityStateZIPCodeFreeText: function (city, state, ZIP) {
+        this.opFreetxt.value = city + ' ' + state + ' ' + ZIP;
+    },
+    getSelectedCountry: function () {
+        return this.countryDropDown.options[this.countryDropDown.selectedIndex].value;
+    },
+    getSelectedProvince: function () {
+        return this.provinceDropDown && this.provinceDropDown.options[this.provinceDropDown.selectedIndex].value;
+    },
+    getProvinces: function (countryID) {
+        id3Solutions.UShip.Web.PickupDropoff.GetStates(countryID, this.provinceDropDown && this.provinceDropDown.id, this.provinceHiddenInput.value, this.populateProvinces);
+    },
+    toggleStreetAddress: function (toggle) {
+        if (this.streetAddressSection)
+            if (toggle) Element.show(this.streetAddressSection);
+            else Element.hide(this.streetAddressSection);
+    },
+    populateCountries: function () {
+        var val = this.getSelectedCountry();
+        this.setCountryName(this.countryDropDown.options[this.countryDropDown.selectedIndex].text);
+        this.hideCountryList();
+        if (this.FreeTextAll != undefined) { Element.hide(this.FreeTextAll); }
+        if (this.ZipAll != undefined) { Element.show(this.ZipAll); }
+        if (this.lbl_FreeTextExample != undefined) { Element.hide(this.lbl_FreeTextExample); }
+        if (this.ZipExample != undefined) { Element.hide(this.ZipExample); }
+        this.toggleStreetAddress(true);
+
+        if (val == 1) { //United States
+			if (this.fillStates) {
+                this.provinceDropDown && Element.show(this.provinceDropDown);
+				this.getProvinces(val);
+                this.provinceTextBox && Element.hide(this.provinceTextBox); 
+                this.provinceGroup && Element.show(this.provinceGroup);
+            }
+            else {
+                this.provinceGroup && Element.hide(this.provinceGroup);
+            }
+            this.setZipcodeName(__.MainJsZIP);
+            this.setStateLabel(__.MainJsState);
+            Element.show(this.zipLookup);
+        }
+        else if (val == 2) { //Canada
+            this.provinceDropDown && Element.show(this.provinceDropDown);
+            this.provinceTextBox && Element.hide(this.provinceTextBox);
+            this.getProvinces(val);
+            this.provinceGroup && Element.show(this.provinceGroup);
+            this.setZipcodeName(__.MainJsPostalCode);
+            this.setStateLabel(__.MainJsProvince);
+            Element.show(this.zipLookup);
+        }
+        // else if (val == 3) { //UK
+
+        //     Element.hide(this.provinceGroup);
+
+        //     this.setZipcodeName('Post code');
+        //     this.setStateLabel('County');
+        //     Element.show(this.ZipExample);
+        // }
+        else { //Everyone else
+            if (val in this.FreeTextList) {
+                this.provinceTextBox && Element.hide(this.provinceTextBox);
+                this.provinceDropDown && Element.hide(this.provinceDropDown);
+                this.provinceGroup && Element.hide(this.provinceGroup);
+                Element.hide(this.ZipAll);
+                this.toggleStreetAddress(false);
+
+                this.royal_mail_lookups.each(function (item) {
+                    item.hide();
+                });
+				
+                var country_label = (function (dest, src) {
+                    var obj = {};
+                    for (var k in src) {
+                        obj[k] = dest[k] || src[k];
+                    }
+                    return obj;
+                })(Location.COUNTRY_LABELS[val] || {}, Location.COUNTRY_LABELS['default']);
+				
+                $(this.FreeTextStreet) && uship.utils.text_input_default_text(this.FreeTextStreet, country_label.address_line1);
+                uship.utils.text_input_default_text(this.opFreetxt, country_label.address_line2);
+
+
+                if (val == 3 || val == 76 || val == 129 || val == 16
+                    || val == 31 || val == 12 || val == 44 || val == 46 || val == 207 || val == 178) {
+                    this.royal_mail_lookups.each(function (item) {
+						item.show();
+						
+						switch (val) {
+							case '3': // UK
+							    item.href = 'http://www.royalmail.com/postcode-finder/';
+								break;
+							case '76': // Germany
+								item.href = 'http://www.postdirekt.de/plzserver/';
+								break;
+							case '129': // Mexico
+								item.href = 'http://www.sepomex.gob.mx/ServiciosLinea/Paginas/ccpostales.aspx';
+								break;
+							case '16': // Austria
+								item.href = 'http://at.postleitzahl.org/';
+								break;
+							case '31': // Brazil
+								item.href = 'http://www.correios.com.br/';
+								break;
+							case '12': // Argentina
+								item.href = 'http://www.correoargentino.com.ar/cpa/';
+								break;
+							case '44': // Chile
+								item.href = 'http://www.correos.cl/SitePages/home.aspx';
+								break;
+							case '46': // Colombia
+								item.href = 'http://190.26.208.149/CodigosPostales/Index.html#app=76ee&4817-selectedIndex=1';
+								break;
+							case '207': // Venezuela
+								item.href = 'http://www.ipostel.gob.ve/nlinea/codigo_postal.php';
+                            case'178':  // South Africa
+                                item.href = 'http://www.postoffice.co.za/tools/postalcode.html';
+
+						}
+                    });
+                }
+
+                Element.show(this.FreeTextAll);
+            }
+            else {
+                this.provinceTextBox && Element.show(this.provinceTextBox);
+                this.provinceDropDown && Element.hide(this.provinceDropDown);
+				
+                this.provinceGroup && Element.show(this.provinceGroup);
+                this.setZipcodeName(__.MainJsPostalCode);
+                this.setStateLabel(__.MainJsProvinceRegion);
+                Element.hide(this.zipLookup);
+            }
+        }
+    },
+    populateProvinces: function (response) {
+        var drop = $(response.value.target);
+        drop.innerHTML = '';
+        response.value.values.each(function (val) {
+            var isSelected = (response.value.selected == val.k);
+            drop.options[drop.options.length] = new Option(val.v, val.k, isSelected, isSelected);
+        });
+    }
+};
+Location.COUNTRY_LABELS = null;
+
+var LocationNoFreeText = Class.create();
+LocationNoFreeText.prototype = {
+    initialize: function (countryName,
+                            countryChangeLink,
+                            countryDropDown,
+                            postalCodeName,
+                            provinceGroup,	
+                            provinceDropDown,
+                            provinceTextBox,
+                            provinceHiddenInput,
+                            stateLabel,
+                            fillStates,
+                            opZiptxt,
+                            opCitytxt,
+                            conZipTextAll,
+                            conZipExample,
+                            usCAPostalCodeLookUp,
+                            internationalPostalCodeLookUp,
+                            streetAddressSection,
+                            quick,
+                            isFullAddress) {
+
+        this.countryName = $(countryName);
+        this.countryChangeLink = $(countryChangeLink);
+        this.countryDropDown = $(countryDropDown);
+        this.zipcodeName = $(postalCodeName);
+        this.provinceGroup = $(provinceGroup);
+        this.provinceDropDown = $(provinceDropDown);
+        this.provinceTextBox = $(provinceTextBox);
+        this.provinceHiddenInput = $(provinceHiddenInput);
+        this.stateLabel = $(stateLabel);
+        this.opZIPtxt = $(opZiptxt);
+        this.opCitytxt = $(opCitytxt);
+        this.ZipAll = $(conZipTextAll);
+        this.ZipExample = $(conZipExample);
+        this.usCAPostalCodeLookUp = usCAPostalCodeLookUp;
+        this.internationalPostalCodeLookUp = $(internationalPostalCodeLookUp);
+        this.streetAddressSection = $(streetAddressSection);
+        this.quick = quick;
+        this.isFullAddress = $(isFullAddress);
+
+		
+        if (fillStates == undefined || fillStates == "" || fillStates == "false") {
+            this.fillStates = false;
+        }
+        else {
+            this.fillStates = true;
+        }
+
+        this.populateCountries();
+    },
+    showCountryList: function () {
+        Element.hide(this.countryName);
+        Element.hide(this.countryChangeLink);
+        Element.show(this.countryDropDown);
+    },
+    hideCountryList: function () {
+        Element.show(this.countryName);
+        Element.show(this.countryChangeLink);
+        Element.hide(this.countryDropDown);
+    },
+    changeCountry: function (stateID) {
+        if (stateID) {
+            this.setSelectedProvince(stateID);
+        }
+        else {
+            this.setSelectedProvince(-1);
+        }
+
+        if (this.provinceTextBox) {
+            this.provinceTextBox.value = '';
+        }
+
+        if (this.opCitytxt) {
+            this.opCitytxt.value = '';
+        }
+
+        this.isFullAddress.value = 0;
+        this.populateCountries();
+    },
+    changeProvince: function () {
+        this.setSelectedProvince(this.getSelectedProvince());
+    },
+    setCountryName: function (country) {
+        this.countryName.innerHTML = country;
+    },
+    setZipcodeName: function (zipname) {
+        this.zipcodeName.innerHTML = zipname + ':';
+    },
+    setZIPCode: function (zip) {
+        if (this.opZIPtxt) {
+            this.opZIPtxt.value = zip;
+        }
+    },
+    setCity: function (city) {
+        if (this.opCitytxt) {
+            this.opCitytxt.value = city;
+        }
+    },
+    setState: function (state) {
+        if (this.provinceTextBox) {
+            this.provinceTextBox.value = state;
+        }
+    },
+    setStateLabel: function (label) {
+        if (this.stateLabel) {
+            this.stateLabel.innerHTML = label + ':';
+        }
+    },
+    setSelectedProvince: function (provinceID) {
+        if (this.provinceHiddenInput) {
+            this.provinceHiddenInput.value = provinceID;
+        }
+    },
+    setSelectedCountry: function (countryID) {
+        for (i = 0; i < this.countryDropDown.length; i++) {
+            if (this.countryDropDown[i].value == countryID) {
+                this.countryDropDown.selectedIndex = i;
+                break;
+            }
+        }
+    },
+    setCityStateZIPCodeFreeText: function (city, state, ZIP) {
+        this.opFreetxt.value = city + ' ' + state + ' ' + ZIP;
+    },
+    getSelectedCountry: function () {
+        return this.countryDropDown.options[this.countryDropDown.selectedIndex].value;
+    },
+    getSelectedProvince: function () {
+        return this.provinceDropDown && this.provinceDropDown.options[this.provinceDropDown.selectedIndex].value;
+    },
+    getProvinces: function (countryID) {
+        if (countryID == 1 || countryID == 2) {
+            var _request = uship.ns.ajaxpro.register('listing2a', 'GetStates', ['country', 'target', 'selectedVal']);
+            _request(countryID, this.provinceDropDown.id, this.provinceHiddenInput.value, this.populateProvinces); 
+        }
+    },
+    toggleStreetAddress: function (toggle) {
+        if (this.streetAddressSection)
+            if (toggle) Element.show(this.streetAddressSection);
+            else Element.hide(this.streetAddressSection);
+    },
+    populateCountries: function () {
+        var val = this.getSelectedCountry();
+        this.setCountryName(this.countryDropDown.options[this.countryDropDown.selectedIndex].text);
+        this.hideCountryList();
+        if (this.ZipAll != undefined) {
+            Element.show(this.ZipAll);
+        }
+        if (this.ZipExample != undefined) {
+            Element.hide(this.ZipExample);
+        }
+        this.toggleStreetAddress(true);
+
+        if (val == 1) { //United States
+			if (this.fillStates) {
+                this.provinceDropDown && Element.show(this.provinceDropDown);
+				this.getProvinces(val);
+                this.provinceTextBox && Element.hide(this.provinceTextBox); 
+                this.provinceGroup && Element.show(this.provinceGroup);
+            }
+            else {
+				
+                this.provinceGroup && Element.hide(this.provinceGroup);
+            }
+            this.setZipcodeName(__.MainJsZIP);
+            this.setStateLabel(__.MainJsState);
+            Element.show(this.usCAPostalCodeLookUp);
+            Element.hide(this.internationalPostalCodeLookUp);
+        }
+        else if (val == 2) { //Canada
+            this.provinceGroup && Element.hide(this.provinceGroup);
+            this.setZipcodeName(__.MainJsPostalCode);
+            this.setStateLabel(__.MainJsProvince);
+            Element.show(this.usCAPostalCodeLookUp);
+            Element.hide(this.internationalPostalCodeLookUp);
+        }
+        else if (val == 3
+            || val == 16
+            || val == 70
+            || val == 76
+            || val == 139
+            || val == 179
+            || val == 178) { // AT DE, ES, FR, NL, UK, ZA
+            this.provinceGroup && Element.hide(this.provinceGroup);
+            this.setZipcodeName(__.MainJsPostalCode);
+            this.setStateLabel(__.MainJsProvinceRegion);
+            Element.hide(this.usCAPostalCodeLookUp);
+            Element.show(this.internationalPostalCodeLookUp);
+            switch (val) {
+                case '3': // UK
+                    this.internationalPostalCodeLookUp.href = 'http://www.royalmail.com/postcode-finder/';
+                    break;
+                case '16': // Austria
+                    this.internationalPostalCodeLookUp.href = 'http://at.postleitzahl.org/';
+                    break
+                case '70': // France
+                    this.internationalPostalCodeLookUp.href = 'http://www.laposte.fr/Entreprise/Outils-Indispensables/Outils/Trouvez-un-code-postal';
+                    break;
+                case '76': // Germany
+                    this.internationalPostalCodeLookUp.href = 'http://www.postdirekt.de/plzserver/';
+                    break;
+                case '139': // Netherlands
+                    this.internationalPostalCodeLookUp.href = 'http://www.postnl.nl/voorthuis/klantenservice/postcodezoeker/?bnr=dp-cm-bnr200911-hpcm-ql1-postcodezoeker';
+                    break;
+                case '179': // Spain
+                    this.internationalPostalCodeLookUp.href = 'http://www.correos.es/comun/CodigosPostales/1010_s-CodPostal.asp';
+                    this.isFullAddress.value = "1";
+                    break;
+                case '178': // South Africa
+                    this.internationalPostalCodeLookUp.href = 'http://www.postoffice.co.za/tools/postalcode.html';
+                    this.isFullAddress.value = "1";
+                    break;
+            };
+        }
+        else if (val == 94
+              || val == 12
+              || val == 31
+              || val == 44
+              || val == 46
+              || val == 129
+              || val == 207) { // AR, BR,CL, CO, IN, MX, VE
+            this.provinceTextBox && Element.hide(this.provinceTextBox);
+            this.provinceDropDown && Element.hide(this.provinceDropDown);
+            this.stateLabel && Element.hide(this.stateLabel);
+            this.provinceGroup && Element.show(this.provinceGroup);
+            this.setZipcodeName(__.MainJsPostalCode);
+            this.setStateLabel(__.MainJsProvinceRegion);
+            Element.hide(this.usCAPostalCodeLookUp);
+            Element.show(this.internationalPostalCodeLookUp);
+            switch (val) {
+                case '94':
+                    this.internationalPostalCodeLookUp.href = 'http://www.indiapost.gov.in/pin/';
+                    break;
+                case '12':
+                    this.internationalPostalCodeLookUp.href = 'http://www.correoargentino.com.ar/cpa/';
+                    break;
+                case '31':
+                    this.internationalPostalCodeLookUp.href = 'http://www.correios.com.br/';
+                    break;
+                case '44':
+                    this.internationalPostalCodeLookUp.href = 'http://www.correos.cl/SitePages/home.aspx';
+                    break;
+                case '46':
+                    this.internationalPostalCodeLookUp.href = 'http://190.26.208.149/CodigosPostales/Index.html#app=76ee&4817-selectedIndex=1';
+                    break;
+                case '129':
+                    this.internationalPostalCodeLookUp.href = 'http://www.sepomex.gob.mx/ServiciosLinea/Paginas/ccpostales.aspx';
+                    break;
+                case '207':
+                    this.internationalPostalCodeLookUp.href = 'http://www.ipostel.gob.ve/nlinea/codigo_postal.php';
+                    break;
+            };
+            this.isFullAddress.value = "1";
+        }
+        else { //Everyone else
+            this.provinceTextBox && Element.show(this.provinceTextBox);
+            this.stateLabel && Element.show(this.stateLabel);
+            this.provinceDropDown && Element.hide(this.provinceDropDown);
+			
+            this.provinceGroup && Element.show(this.provinceGroup);
+            this.setZipcodeName(__.MainJsPostalCode);
+            this.setStateLabel(__.MainJsProvinceRegion);
+            Element.hide(this.usCAPostalCodeLookUp);
+            Element.hide(this.internationalPostalCodeLookUp);
+        }
+    },
+    populateProvinces: function (response) {		
+        var drop = $(response.value.target);
+        drop.innerHTML = '';
+        response.value.values.each(function (val) {
+            var isSelected = (response.value.selected == val.k);
+            drop.options[drop.options.length] = new Option(val.v, val.k, isSelected, isSelected);
+        });
+    }
+};
+LocationNoFreeText.COUNTRY_LABELS = null;
+
+var AddressOptions = function(rbPreviousId, rbNewId, ddPreviousId, conNewId, addressTypeID, addressID, overlayId, disableType) {
+    this.rbPrevious = $(rbPreviousId);
+    this.rbNew = $(rbNewId);
+    this.ddPrevious = $(ddPreviousId);
+    this.conNew = $(conNewId);
+    this.addressType = $(addressTypeID);
+    this.address = $(addressID);
+    this.overlay = $(overlayId);
+    this.disableType = $(disableType).value;
+
+    // wire event handlers
+    Event.observe(this.rbPrevious, 'click', this.handleRadioClick.bind(this));
+    Event.observe(this.rbNew, 'click', this.handleRadioClick.bind(this));
+    Event.observe(this.ddPrevious, 'click', this.handleDropdownClick.bind(this));
+    Event.observe(this.ddPrevious, 'change', this.handleDropdownChange.bind(this));
+    Event.observe(this.conNew, 'click', this.handleAreaClick.bind(this));
+    Event.observe(this.conNew, 'keypress', this.handleAreaKeyPress.bind(this));
+    this.run();
+}
+AddressOptions.prototype = {
+    run: function() {
+        if (this.rbPrevious.checked) {
+            this.ddPrevious.removeClassName('form-disabled');
+            this.conNew.addClassName('form-disabled');
+        }
+        else if (this.rbNew.checked) {
+            this.ddPrevious.addClassName('form-disabled');
+            this.conNew.removeClassName('form-disabled');
+        }
+        else {
+            this.ddPrevious.removeClassName('form-disabled');
+            this.conNew.removeClassName('form-disabled');
+        }
+    },
+    handleRadioClick: function(e) {
+        this.run();
+    },
+    handleDropdownClick: function(e) {
+        this.rbPrevious.checked = true;
+        this.run();
+    },
+    handleDropdownChange: function(e) {
+        this.rbPrevious.checked = true;
+        this.run();
+    },
+    handleAreaClick: function(e) {
+        this.rbNew.checked = true;
+        this.run();
+    },
+    handleAreaKeyPress: function(e) {
+        this.ddPrevious.checked = true;
+        this.run();
+    },
+    selectNewAddress: function() {
+        this.rbNew.checked = true;
+    },
+    pseudo_disabled: function(val) {
+        if (this.overlay) {
+            var visibility;
+
+            if (val) {
+                document.body.appendChild(this.overlay);
+
+                var address_type_size;
+                var address_size = this.address.getDimensions();
+                var height = 0;
+                var offset;
+
+                if (this.disableType != '0') {
+                    var selects = this.addressType.getElementsByTagName('select');
+
+                    for (var i = 0, len = selects.length; i < len; i++) {
+                        $(selects[i]).addClassName('form-disabled');
+                    }
+
+                    address_type_size = this.addressType.getDimensions();
+                    offset = this.addressType.cumulativeOffset();
+                     
+                    height = address_type_size.height;
+                }
+                else {
+                    offset = this.address.cumulativeOffset();
+                }
+
+                this.ddPrevious.addClassName('form-disabled');
+                this.conNew.addClassName('form-disabled');
+
+                height = height + address_size.height + 10;
+
+                var style = this.overlay.style;
+                style.height = height + 'px';
+                style.width = address_size.width + 'px';
+                style.left = offset.left + 'px';
+                style.top = offset.top + 'px';
+                style.display = 'block';
+
+                visibility = 'hidden';
+            }
+            else {
+                if (this.disableType != '0') {
+                    var selects = this.addressType.getElementsByTagName('select');
+
+                    for (var i = 0, len = selects.length; i < len; i++) {
+                        $(selects[i]).removeClassName('form-disabled');
+                    }
+                }
+
+                this.ddPrevious.removeClassName('form-disabled');
+                this.conNew.removeClassName('form-disabled');
+
+				this.overlay.style.display = 'none';
+                this.overlay.style.height = '0px';
+                this.overlay.style.width = '0px';
+
+                visibility = 'visible';
+
+                this.run();
+            }
+
+            if (uship.browser.msie && parseFloat(uship.browser.version) <= 6) {
+                this.ddPrevious.style.visibility = visibility;
+
+                var inputs = this.conNew.select('select');
+
+                for (var i = 0; i < inputs.length; i++) {
+                    inputs[i].style.visibility = visibility;
+                }
+            }
+        }
+    }
+}
+
+/***** pricing options *****/
+var PricingSelect = function(options) {
+    this.options = options;
+    var noneSelected = false;
+    for (var i = 0, len = this.options.length; i < len; i++) {
+        this.options[i].radio.observe('click', this.handleRadioClick.bind(this));
+        if (this.options[i].textbox) {
+            this.options[i].textbox.observe('click', this.handleTextboxClick.bind(this));
+        }
+        if (!noneSelected) {
+            noneSelected = !this.options[i].radio.checked;
+        }
+    }
+    this.run(undefined, noneSelected);
+}
+PricingSelect.prototype = {
+    run: function(click, noneSelected) {
+        for (var i = 0, len = this.options.length; i < len; i++) {
+            if (!this.options[i].radio.checked && this.options[i].textbox && !noneSelected) {
+                this.options[i].textbox.addClassName('form-disabled');
+            }
+            else if (this.options[i].textbox) {
+                this.options[i].textbox.removeClassName('form-disabled');
+                if (click) {
+                    this.options[i].textbox.focus();
+                }
+            }
+        }
+    },
+    handleRadioClick: function(e) {
+        this.run(true);
+    },
+    handleTextboxClick: function(e) {
+        var elem = Event.element(e);
+        for (var i = 0, len = this.options.length; i < len; i++) {
+            var textbox = this.options[i].textbox;
+            if (textbox && textbox == elem) {
+                this.options[i].radio.checked = true;
+                break;
+            }
+        }
+        this.run();
+    }
+}
+var PricingOption = function(radioId, textboxId) {
+    return {
+        radio: $(radioId),
+        textbox: $(textboxId)
+    }
+}
+var SelectOnType = function(chkNotifyId, txtMobileId) {
+    this.chkNotify = $(chkNotifyId);
+    this.txtMobile = $(txtMobileId);
+    this.length = this.txtMobile.value.length
+    Event.observe(this.txtMobile, 'keyup', this.handleKeyPress.bind(this));
+}
+SelectOnType.prototype = {
+    handleKeyPress: function(e) {
+        var len = this.txtMobile.value.length;
+        if (this.txtMobile.value.length > 0 && len > this.length && !this.chkNotify.checked) {
+            this.chkNotify.click();
+        }
+        this.length = len;
+    }
+}
+
+var MoneyHelper = function(txtAmountId) {
+    this.txtAmount = $(txtAmountId);
+    Event.observe(this.txtAmount, 'blur', this.handleBlur.bind(this));
+}
+MoneyHelper.prototype = {
+    handleBlur: function(e) {
+        if (this.txtAmount.value.length > 0) {
+            this.txtAmount.value = this.txtAmount.value.replace('$', '');
+        }
+    }
+}
+
+function AlertForm(checkbox, inputs) {
+    this.checkbox = $(checkbox);
+    this.length = 0;
+
+    this.check_css();
+    Event.observe(this.checkbox, 'click', this.handle_checkbox_click.bind(this));
+
+    for (var i = 0, len = inputs.length; i < len; i++) {
+        var elem = $(inputs[i]);
+        var tag = elem.tagName.toUpperCase();
+        if (tag == 'SELECT') {
+            Event.observe(elem, 'change', this.handle_change_state.bind(this));
+        }
+        else if (tag == 'INPUT') {
+            var type = elem.type.toUpperCase();
+            if (type == 'TEXT') {
+                this.length = elem.value.length;
+                Event.observe(elem, 'keyup', this.handle_text_type.bind(this));
+            }
+            else if (type == 'RADIO') {
+                Event.observe(elem, 'click', this.handle_change_state.bind(this));
+            }
+        }
+    }
+}
+AlertForm.prototype = {
+    check_css: function() {
+        if (this.checkbox.checked) {
+            Element.removeClassName(this.checkbox.parentNode, 'form-disabled');
+        }
+        else {
+            Element.addClassName(this.checkbox.parentNode, 'form-disabled');
+        }
+    },
+    handle_checkbox_click: function(e) {
+        this.check_css();
+    },
+    handle_change_state: function(e) {
+        this.checkbox.checked = true;
+        this.check_css();
+    },
+    handle_text_type: function(e) {
+        var elem = Event.element(e);
+        if (this.length < elem.value.length) {
+            this.checkbox.checked = true;
+            this.check_css();
+        }
+        this.length = elem.value.length;
+    }
+};
+
+/*** complete listing ***/
+var HomeAddressOptions = function(rbPickupId, rbDeliveryId, rbNewId, conNewId) {
+    this.rbPickup = $(rbPickupId);
+    this.rbDelivery = $(rbDeliveryId);
+    this.rbNew = $(rbNewId);
+    this.conNew = $(conNewId);
+
+    // wire event handlers
+    Event.observe(this.rbPickup, 'click', this.handleRadioClick.bind(this));
+    Event.observe(this.rbDelivery, 'click', this.handleRadioClick.bind(this));
+    Event.observe(this.rbNew, 'click', this.handleRadioClick.bind(this));
+    Event.observe(window, 'load', this.run.bind(this));
+
+    this.run();
+}
+HomeAddressOptions.prototype = {
+    run: function() {
+        if (this.rbNew.checked) {
+            this.conNew.show();
+        }
+        else {
+            this.conNew.hide();
+        }
+    },
+    handleRadioClick: function(e) {
+        Event.element(e).checked = true;
+        this.run();
+    }
+}
+
+/*** other ***/
+var uShipDefaultButton;
+var SetFocus = function(formId) {
+    // set default input to click when enter is hit
+    var inputs = $$('td.form-nav input'); //btw, I hate using this $$ method because it's slow, but I am going for the sake of time
+    if (inputs && inputs.length > 0) {
+        uShipDefaultButton = inputs[inputs.length - 1];
+    }
+
+    // wire event handler
+    if (uShipDefaultButton != undefined) {
+        Event.observe($('form1'), 'keypress', function(e) {
+            if (e.keyCode == Event.KEY_RETURN) {
+                Event.stop(e);
+                uShipDefaultButton.click();
+            }
+        });
+    }
+}
+
+function callback_inclisting() {
+    return true;
+}
+
+function SaveTitle(txtTitle) {
+    var _request = uship.ns.ajaxpro.register('listing2a', 'SaveTitle', ['listingTitle']);
+    _request(txtTitle.value, callback_inclisting);
+}
+
+function SaveAutoTitle(dropdown) {
+    var _request = uship.ns.ajaxpro.register('listing2a', 'SaveTitle', ['listingTitle']);
+    var model = dropdown.options[dropdown.selectedIndex].text;
+    var year_make = $('phControlToLoad_pnlHost__ctl0_txtTitle').value;
+    
+    _request((year_make + " " + model), callback_inclisting);
+}
+
+function SaveEmail(txtEmail) {
+    var _request = uship.ns.ajaxpro.register('listing2a', 'SaveEmail', ['email']);
+    _request(txtEmail.value, callback_inclisting);
+}
+

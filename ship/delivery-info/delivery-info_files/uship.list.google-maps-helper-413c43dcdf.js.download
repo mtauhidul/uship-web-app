@@ -1,0 +1,124 @@
+'use strict';
+
+(function (_ref) {
+    var uship = _ref.uship,
+        jQuery = _ref.jQuery;
+
+    var latLngByCountry = {
+        'US': { 'latitude': 37.09024, 'longitude': -95.71289 },
+        'NL': { 'latitude': 52.13263, 'longitude': 5.291265 },
+        'ES': { 'latitude': 40.46366, 'longitude': -3.749220 },
+        'DE': { 'latitude': 51.16569, 'longitude': 10.45152 },
+        'FR': { 'latitude': 46.22763, 'longitude': 2.213749 },
+        'CA': { 'latitude': 56.13036, 'longitude': -106.3467 },
+        'AU': { 'latitude': -25.27439, 'longitude': 133.7751 },
+        'AR': { 'latitude': -38.41610, 'longitude': -63.61667 },
+        'CL': { 'latitude': -35.675147, 'longitude': -71.5429689 },
+        'CO': { 'latitude': 4.57087, 'longitude': -74.29733 },
+        'MX': { 'latitude': 23.6345, 'longitude': -102.55278 },
+        'PE': { 'latitude': -9.18997, 'longitude': -75.01515 },
+        'VE': { 'latitude': 6.42375, 'longitude': -66.58973 },
+        'BR': { 'latitude': -14.235004, 'longitude': -51.925279 },
+        'ZA': { 'latitude': -30.55948, 'longitude': 22.937506 },
+        'GB': { 'latitude': 55.37805, 'longitude': -3.43597 },
+        'AT': { 'latitude': 47.516231, 'longitude': 14.550072 },
+        'IN': { 'latitude': 20.59368, 'longitude': 78.96288 },
+        'EU': { 'latitude': 54.52596, 'longitude': 15.25512 }
+    };
+
+    function formatAddressString(streetAddress, majorMunicipality, StateProvinceLabel, postalCode, CountryLabel) {
+        var value = '';
+        if (streetAddress && !(streetAddress.replace(/ /g, '') === '')) value += streetAddress + ', ';
+        if (majorMunicipality && !(majorMunicipality.replace(/ /g, '') === '')) value += majorMunicipality + ', ';
+        if (StateProvinceLabel && !(StateProvinceLabel.replace(/ /g, '') === '')) {
+            value += StateProvinceLabel;
+            if (postalCode && !(postalCode.replace(/ /g, '') === '')) {
+                value += ' ' + postalCode + ', ';
+            } else {
+                value += ', ';
+            }
+        }
+        if (CountryLabel && !(CountryLabel.replace(/ /g, '') === '')) value += CountryLabel;
+        if (value.charAt(value.length - 2) === ',') value = value.substring(0, value.length - 2);
+        return value;
+
+        /*****
+        //may be just do this, since you know exactly what args you get in this method
+        //Also, I fail to understand why you aren't using postal code if state isnt available
+          return [].slice.apply(arguments).filter(function (addressItem) {
+            return addressItem && !!addressItem.replace(/ /g,'');
+        }).join(', ');
+        *****/
+    }
+
+    function getFormattedAddress(address) {
+        var streetAddress = address.StreetAddress;
+        var majorMunicipality = address.MajorMunicipality;
+        var StateProvinceLabel = address.StateProvinceLabel;
+        var postalCode = address.PostalCode;
+        var CountryLabel = address.CountryLabel;
+        return formatAddressString(streetAddress, majorMunicipality, StateProvinceLabel, postalCode, CountryLabel);
+    }
+
+    function getRitchieBrosFormattedAddress(address) {
+        //var streetAddress = address.Street;
+        var ret = [];
+        address.City && ret.push(address.City);
+        address.State && ret.push(address.State);
+        address.ZIPCode && ret.push(address.ZIPCode);
+        address.CountryLabel && ret.push(address.CountryLabel);
+        return ret.join(', ');
+        //return formatAddressString('', address.City, address.State, address.ZIPCode, address.CountryLabel);
+    }
+
+    function createFormattedAddressFromCurrentLocation(placeResult) {
+        var streetAddress = placeResult.streetNumber + ' ' + placeResult.route;
+        var majorMunicipality = placeResult.city;
+        var StateProvinceLabel = placeResult.state;
+        var CountryLabel = placeResult.country;
+        return formatAddressString(streetAddress, majorMunicipality, StateProvinceLabel, undefined, CountryLabel);
+    }
+
+    self.MakeVisualSelectionPrediction = function (userText) {
+        var matchFound = false;
+        userText = userText.toLowerCase().replace(/,/g, '');
+        var originalTextLength = userText.length;
+        for (var j = 1; j < originalTextLength && !matchFound; j++) {
+            var gpSuggestions = jQuery('.tt-suggestion');
+            for (var i = 0; i < gpSuggestions.length && !matchFound; i++) {
+                var suggestion = gpSuggestions[i];
+                var suggestionText = suggestion.children[0].innerHTML;
+                var lowerCaseSuggestionWithNoCommas = suggestionText.toLowerCase().replace(/,/g, '');
+                if (lowerCaseSuggestionWithNoCommas.indexOf(userText.toLowerCase()) != -1) {
+                    //suggestion.style.backgroundColor = '#e4e4e4';
+                    jQuery(suggestion).addClass('tt-highlighted');
+                    matchFound = true;
+                    return suggestion;
+                }
+            }
+            userText = userText.substring(0, userText.length - j);
+        }
+    };
+
+    function RemovePredictionHighlighting(suggestion) {
+        if (suggestion) {
+            jQuery(suggestion).removeClass('tt-highlighted');
+        }
+    }
+
+    function waitForGooglePlacesToAutoCompleteInvalidInput() {
+        setTimeout(function () {
+            //wait for typeahead autoselection to propogate
+        }, 10000);
+    }
+
+    uship.namespace('list').extend({
+        latLngByCountry: latLngByCountry,
+        getFormattedAddress: getFormattedAddress,
+        getRitchieBrosFormattedAddress: getRitchieBrosFormattedAddress,
+        waitForGooglePlacesToAutoCompleteInvalidInput: waitForGooglePlacesToAutoCompleteInvalidInput,
+        MakeVisualSelectionPrediction: self.MakeVisualSelectionPrediction,
+        RemovePredictionHighlighting: RemovePredictionHighlighting,
+        createFormattedAddressFromCurrentLocation: createFormattedAddressFromCurrentLocation
+    });
+})(window);

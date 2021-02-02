@@ -1,0 +1,198 @@
+uship.ns('calendar', function (ns) {
+    var DATE_INPUT_CSS = 'form-input-text-date-yui';
+    var ACTIVE_CSS = 'form-input-text-date-active';
+    var NO_DATE_SELECTED_CSS = 'no-date-selected';
+    var CALENDAR_ICON_SELECTOR = '.form-input-text-icon';
+    var SELECT_DATE_DISPLAY_SELECTOR = '.calendar-selected-date';
+    var calendar;
+    var over_cal = false;
+    var Date_US_Format;
+    var elem_container;
+    var txt_target;
+
+
+    ns.init = function () {
+        if (!calendar) {
+            elem_container = $('yui-calendar');
+            // ensures calendar container is direct child of the body,
+            // it helps make sure its z-index is recognized
+            document.body.appendChild(elem_container);
+
+            calendar = new YAHOO.widget.Calendar("cal3", "cal3Container");
+
+            calendar.cfg.setProperty("MONTHS_SHORT", uship.prefs.i18n.month_names_short);
+            calendar.cfg.setProperty("MONTHS_LONG", uship.prefs.i18n.month_names);
+            calendar.cfg.setProperty("WEEKDAYS_SHORT", uship.prefs.i18n.day_names_short);
+            calendar.cfg.setProperty("WEEKDAYS_LONG", uship.prefs.i18n.day_names);
+    
+            calendar.selectEvent.subscribe(getDate, calendar, true);
+            calendar.renderEvent.subscribe(setupListeners, calendar, true);
+            $$('.' + DATE_INPUT_CSS).each(function (txt_date) {
+                add(txt_date);
+            });
+        }
+    }
+
+    var add = ns.add = function (txt_date) {
+        var parent = txt_date.parentElement;
+        var focusTarget = txt_date;
+        var calendarIcon = parent.querySelector(CALENDAR_ICON_SELECTOR);
+        var selected_date_display =  parent.querySelector(SELECT_DATE_DISPLAY_SELECTOR);
+        var DATE_SYNCING_INTERVAL_IN_MILLISECONDS = 500
+        function clickHandler (){ 
+            focusTarget.focus();
+        }
+
+        function focusHandler (){ 
+            showCal.apply(txt_date);
+        }
+
+        function blurHandler (){ 
+            hideCal.apply(txt_date);
+        }
+        
+        var previousSelectedDate = txt_date.value;
+        function syncSelectedDate(){
+            var currentSelectedDate = txt_date.value;
+            if(currentSelectedDate === previousSelectedDate){
+                return;
+            }
+            previousSelectedDate = currentSelectedDate;
+            if(txt_date.value){
+                selected_date_display.innerHTML =  txt_date.value;
+                selected_date_display.removeClassName(NO_DATE_SELECTED_CSS);
+            }
+            else{
+                selected_date_display.innerHTML = jQuery(selected_date_display).attr("data-select-date-instruction");
+                selected_date_display.addClassName(NO_DATE_SELECTED_CSS);
+            }
+        }
+       
+        if(selected_date_display){
+            focusTarget = selected_date_display;
+            setInterval(syncSelectedDate, DATE_SYNCING_INTERVAL_IN_MILLISECONDS)
+        }
+
+        focusTarget
+            .observe('focus', focusHandler)
+            .observe('blur', blurHandler);
+        
+        calendarIcon.observe('click', clickHandler);
+    };
+    
+    function setupListeners() {
+        uship.dom.events.attach(elem_container, 'hover', overCal, outCal);
+        uship.dom.events.attach(elem_container, 'blur', hideCal);
+    }
+    function getDate() {
+        var calDate = this.getSelectedDates()[0];
+        var format = uship.prefs !== undefined ? uship.prefs.i18n.dateformat : 'mm/dd/yyyy';
+        var momentDate = moment(new Date(calDate));
+        var newDate = momentDate.format(format.toUpperCase());
+
+        if (txt_target) {
+            txt_target.value = newDate;
+        }
+        else {
+            throw new Error('Ooops! We do not have a target set');
+        }
+        over_cal = false;
+
+        uship.events.fire('calendarset', [txt_target.id, calDate]);
+
+        hideCal();
+    }
+    function showCal() {
+        
+        if (txt_target) {
+                txt_target.removeClassName(ACTIVE_CSS);
+            }
+        txt_target = $(this).addClassName(ACTIVE_CSS);
+        
+        var date = txt_target.value;
+
+        if ($(txt_target.id + '_MinDateValue').value == 0) {
+            // US Date format is always mm/dd/yyy - Eric Purwaka, 2/1/10
+            $(txt_target.id + '_MinDateValue').value = (new Date().getMonth() + 1) + '/' + new Date().getDate() + '/' + new Date().getFullYear();
+        };
+
+        if (date) {
+
+            if (Date_US_Format == undefined) {
+                Date_US_Format = $(txt_target.id + '_MinDateValue').value;
+            }
+            if (!calendar.cfg.getProperty('pagedate'))
+            {
+                var pgDate = new Date(Date_US_Format);
+                pgDate.setDate(1);
+                calendar.cfg.setProperty('pagedate', pgDate, true);
+            }
+           
+            calendar.cfg.setProperty('selected', Date_US_Format);
+            calendar.cfg.setProperty('mindate', new Date($(txt_target.id + '_MinDateValue').value));
+        
+            if($(txt_target.id + '_IsBidFormOfferPrice')){
+                //set up max dates for offerPrice calendars on the bidform
+                if ($(txt_target.id + '_MaxDateValue') && $(txt_target.id + '_MaxDateValue').value){
+                    calendar.cfg.setProperty('maxdate', new Date($(txt_target.id + '_MaxDateValue').value));
+                } else if ($(txt_target.id.replace('2', '1') + '_MaxDateValue') && $(txt_target.id.replace('2', '1') + '_MaxDateValue').value){
+                    //if there is a max set for the first calendar, but not the second, the max for the first calendar should still apply 
+                    calendar.cfg.setProperty('maxdate', new Date($(txt_target.id.replace('2', '1') + '_MaxDateValue').value));
+                }
+
+                var selectedDate = new Date(date);
+                if (!isNaN(selectedDate)){
+                    calendar.cfg.setProperty('pagedate', selectedDate, true);
+                    calendar.cfg.setProperty('selected', date);
+                }
+            }
+            else if ($(txt_target.id + '_MaxDateValue') ){
+                //add the latest allowed date
+                calendar.cfg.setProperty('maxdate', new Date($(txt_target.id + '_MaxDateValue').value));
+                var selectedDate = new Date(date);
+                if (!isNaN(selectedDate)){
+                    calendar.cfg.setProperty('pagedate', selectedDate, true);
+                    calendar.cfg.setProperty('selected', date);
+                }
+            }
+            
+            calendar.render();
+        }
+        else {
+            var pgDate = new Date($(txt_target.id + '_MinDateValue').value);
+            pgDate.setDate(1);
+            calendar.cfg.setProperty('pagedate', pgDate, true);
+            calendar.cfg.setProperty('mindate', new Date($(txt_target.id + '_MinDateValue').value));
+            calendar.render();
+        }
+
+        var xy = txt_target.cumulativeOffset();
+        var height = txt_target.getHeight();
+        elem_container
+            .setStyle({
+                top: (xy.top + height) + 'px',
+                left: xy.left + 'px'
+            })
+            .show();
+    }
+    function hideCal() {
+        if (!over_cal && txt_target) {
+            txt_target.removeClassName(ACTIVE_CSS);
+            txt_target = null;
+            elem_container.hide();
+        }
+    }
+    function overCal() {
+        over_cal = true;
+    }
+    function outCal() {
+        over_cal = false;
+    }
+    
+});
+
+uship.dom.events.attach(document, 'ready', function() {
+    if(window.YAHOO) { uship.ns.calendar.init(); }
+});
+
+

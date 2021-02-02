@@ -1,0 +1,312 @@
+.shipmentBanner {
+  position: relative;
+  width: 100%;
+  background-color: white;
+  line-height: 1.4 !important;
+  border-bottom: 1px solid #ddd; }
+  .shipmentBanner:before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    margin-left: -12px;
+    top: 100%;
+    width: 0;
+    height: 0;
+    border-left: 12px solid transparent;
+    border-right: 12px solid transparent;
+    border-top: 12px solid #ddd; }
+  .shipmentBanner:after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    margin-left: -10px;
+    top: 100%;
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 10px solid #fff; }
+  .shipmentBanner > .row {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: stretch;
+    -webkit-align-items: stretch;
+        -ms-flex-align: stretch;
+            align-items: stretch; }
+    @media only screen and (max-width: 767px) {
+      .shipmentBanner > .row {
+        -webkit-box-orient: vertical;
+        -webkit-box-direction: normal;
+        -webkit-flex-direction: column;
+            -ms-flex-direction: column;
+                flex-direction: column; } }
+  .shipmentBanner .shipmentBanner-saveContainer-spacing {
+    padding-bottom: 20px;
+    width: 100%; }
+  .shipmentBanner .button.secondary {
+    max-width: 160px;
+    margin-bottom: 0; }
+    @media only screen and (max-width: 767px) {
+      .shipmentBanner .button.secondary {
+        max-width: none; } }
+  .shipmentBanner .shipmentBanner-pricingLabel {
+    margin-bottom: 5px;
+    margin-top: 20px; }
+  .shipmentBanner .shipmentBanner-pricing {
+    font-weight: 500;
+    margin-top: 20px;
+    margin-bottom: 5px;
+    padding-left: 0;
+    padding-right: 0;
+    top: -5px; }
+    @media only screen and (max-width: 425px) {
+      .shipmentBanner .shipmentBanner-pricing {
+        top: 25px; } }
+    @media only screen and (min-width: 426px) and (max-width: 550px) {
+      .shipmentBanner .shipmentBanner-pricing {
+        top: 28px; } }
+    @media only screen and (min-width: 551px) and (max-width: 640px) {
+      .shipmentBanner .shipmentBanner-pricing {
+        top: 33px; } }
+    @media only screen and (min-width: 641px) and (max-width: 767px) {
+      .shipmentBanner .shipmentBanner-pricing {
+        top: 40px; } }
+    @media only screen and (min-width: 768px) and (max-width: 845px) {
+      .shipmentBanner .shipmentBanner-pricing {
+        margin-top: 10px; } }
+    @media only screen and (max-width: 767px) {
+      .shipmentBanner .shipmentBanner-pricing {
+        margin-top: 0; } }
+    .shipmentBanner .shipmentBanner-pricing > .columns {
+      padding-left: 0;
+      padding-right: 0; }
+    .shipmentBanner .shipmentBanner-pricing h6 {
+      font-weight: 500;
+      margin-bottom: 0;
+      font-size: 1.1em;
+      line-height: 1; }
+    .shipmentBanner .shipmentBanner-pricing .shipmentBanner-lowPrice,
+    .shipmentBanner .shipmentBanner-pricing .shipmentBanner-highPrice {
+      font-size: 1.8em;
+      font-weight: bolder;
+      padding-bottom: 5px;
+      margin-bottom: 10px; }
+      @media only screen and (max-width: 767px) {
+        .shipmentBanner .shipmentBanner-pricing .shipmentBanner-lowPrice,
+        .shipmentBanner .shipmentBanner-pricing .shipmentBanner-highPrice {
+          line-height: 1.2;
+          padding-bottom: 0;
+          margin-bottom: 0; } }
+
+.shipmentBanner.noEstimate .shipmentBanner-chart {
+  background: white;
+  background-image: none; }
+  @media only screen and (min-width: 768px) {
+    .shipmentBanner.noEstimate .shipmentBanner-chart {
+      padding-bottom: 20px !important; } }
+
+.shipmentBanner.noEstimate .highPrice-container {
+  display: none; }
+
+.shipmentBanner.noEstimate .lowPrice-container {
+  display: none; }
+
+.shipmentBanner.noEstimate .chart-averagePoint {
+  display: none; }
+
+.shipmentBanner.noEstimate .estimateBox {
+  display: none; }
+
+.shipmentBanner.noEstimate .shipmentBanner-save-heading {
+  text-align: center;
+  font-weight: bolder;
+  padding-bottom: 10px; }
+
+.shipmentBanner.noEstimate .shipmentBanner-notEnoughData {
+  font-weight: bolder; }
+
+.shipmentBanner.noEstimate .shipmentBanner-pricingLabel {
+  margin-bottom: 0;
+  line-height: 1.3;
+  width: 100%; }
+
+.shipmentBanner.noEstimate .shipmentBanner-pricing {
+  text-align: left;
+  line-height: 1.6;
+  padding-top: 15px;
+  top: 0;
+  margin-top: 0; }
+
+.shipmentBanner.noEstimate .shipmentBanner-saveContainer {
+  padding-top: 15px;
+  padding-bottom: 15px; }
+
+.shipmentBanner-saveContainer .shipmentBanner-save-heading {
+  text-align: center;
+  padding-bottom: 10px; }
+  @media only screen and (max-width: 767px) {
+    .shipmentBanner-saveContainer .shipmentBanner-save-heading {
+      text-align: left;
+      padding-left: 0;
+      padding-right: 0; } }
+
+.shipmentBanner-save-question {
+  font-weight: bolder; }
+
+.shipmentBanner-save {
+  text-align: center; }
+
+.shipmentBanner-save input[type="submit"] {
+  white-space: normal; }
+
+@media only screen and (min-width: 768px) and (max-width: 853px) {
+  .shipmentBanner-chart {
+    background-position: 0 65px; } }
+
+.shipmentBanner-chart .chart-averagePoint {
+  position: absolute;
+  border-radius: 50%;
+  border: 3px solid #136159;
+  height: 20px;
+  top: 40px;
+  left: 36%;
+  width: 20px;
+  background-color: white; }
+  @media only screen and (max-width: 400px) {
+    .shipmentBanner-chart .chart-averagePoint {
+      margin-top: -10px; } }
+  @media only screen and (min-width: 401px) and (max-width: 510px) {
+    .shipmentBanner-chart .chart-averagePoint {
+      margin-top: -12px; } }
+  @media only screen and (min-width: 511px) and (max-width: 640px) {
+    .shipmentBanner-chart .chart-averagePoint {
+      margin-top: -18px; } }
+  @media only screen and (min-width: 630px) and (max-width: 767px) {
+    .shipmentBanner-chart .chart-averagePoint {
+      margin-top: -25px; } }
+  @media only screen and (max-width: 767px) {
+    .shipmentBanner-chart .chart-averagePoint {
+      left: 50%;
+      margin-left: -10.5px; } }
+  @media only screen and (min-width: 768px) and (max-width: 853px) {
+    .shipmentBanner-chart .chart-averagePoint {
+      top: 40px; } }
+
+.shipmentBanner-chart .estimateBox {
+  position: absolute;
+  height: 70px;
+  top: 30px;
+  left: 36%;
+  margin-left: 23px;
+  background-color: #1d6861;
+  background-color: rgba(29, 104, 97, 0.9);
+  padding: 10px 15px;
+  line-height: 1.2; }
+  @media only screen and (max-width: 400px) {
+    .shipmentBanner-chart .estimateBox {
+      margin-top: -28px; } }
+  @media only screen and (min-width: 401px) and (max-width: 510px) {
+    .shipmentBanner-chart .estimateBox {
+      margin-top: -30px; } }
+  @media only screen and (min-width: 511px) and (max-width: 640px) {
+    .shipmentBanner-chart .estimateBox {
+      margin-top: -18px; } }
+  @media only screen and (min-width: 630px) and (max-width: 767px) {
+    .shipmentBanner-chart .estimateBox {
+      margin-top: -24px; } }
+  @media only screen and (max-width: 767px) {
+    .shipmentBanner-chart .estimateBox {
+      left: 50%;
+      margin-left: 13.5px; } }
+  @media only screen and (min-width: 768px) and (max-width: 853px) {
+    .shipmentBanner-chart .estimateBox {
+      top: 30px; } }
+
+.estimateBox:before {
+  content: '';
+  position: absolute;
+  left: 0px;
+  top: 19px;
+  margin-left: -15px;
+  width: 0;
+  height: 0;
+  border-bottom: 15px solid transparent;
+  border-right: 15px solid #136159;
+  opacity: .9; }
+  @media only screen and (max-width: 510px) {
+    .estimateBox:before {
+      border-top: 15px solid transparent;
+      border-right: 15px solid #136159;
+      border-bottom: 0;
+      top: 24px; } }
+
+.foundation-web .shipmentBanner-saveContainer {
+  -webkit-align-self: center !important;
+      -ms-flex-item-align: center !important;
+              -ms-grid-row-align: center !important;
+          align-self: center !important;
+  padding-top: .5em;
+  padding-bottom: .5em; }
+
+.estimateBox-header {
+  font-size: 1.1em;
+  color: white; }
+
+.estimateBox-price p {
+  color: white;
+  font-weight: bolder;
+  font-size: 2em;
+  line-height: 1.2; }
+
+.ie8 .shipmentBanner .shipmentBanner-saveContainer,
+.ie9 .shipmentBanner .shipmentBanner-saveContainer {
+  padding-top: 25px; }
+
+@media only screen and (max-width: 767px) {
+  .shipmentBanner {
+    text-align: center; }
+  .shipmentBanner .shipmentBanner-pricingLabel {
+    width: 90px;
+    text-align: left;
+    margin-bottom: 20px;
+    margin-top: 17px;
+    max-height: 36px;
+    overflow: visible;
+    word-wrap: break-word; }
+  .shipmentBanner-saveContainer .shipmentBanner-save {
+    padding-left: 0;
+    padding-right: 0; }
+  .lowPrice-container,
+  .shipmentBanner-lowPrice {
+    text-align: left; }
+  .highPrice-container,
+  .shipmentBanner-highPrice {
+    text-align: right; }
+  .shipmentBanner-save-instructions {
+    text-align: left; }
+  .shipmentBanner-save-question {
+    text-align: left; }
+  .shipmentBanner .shipmentBanner-saveContainer {
+    padding-top: 35px; } }
+
+@media only screen and (max-width: 425px) {
+  .shipmentBanner .shipmentBanner-pricing {
+    padding-top: 5%; }
+  .shipmentBanner-chart {
+    padding-top: 10px !important; } }
+
+@media only screen and (min-width: 426px) and (max-width: 767px) {
+  .shipmentBanner .shipmentBanner-saveContainer {
+    padding-top: 50px; }
+  .shipmentBanner .shipmentBanner-pricing {
+    padding-top: 10%; } }
+
+@media only screen and (min-width: 768px) {
+  .shipmentBanner-chart {
+    padding-bottom: 10px !important; } }
+
+@media only screen and (max-width: 551px) {
+  .shipmentBanner .shipmentBanner-saveContainer {
+    padding-top: 35px; } }

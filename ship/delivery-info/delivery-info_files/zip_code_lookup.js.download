@@ -1,0 +1,175 @@
+// shows a quasi in page popup with zip code lookup info.  asks for city and state and then optional
+// fills texbox with zip code.
+// this should be use inside of an "onclick" attribute of an anchor
+// EXAMPLE:
+// <a href="#" onclick="uship.utils.zip_code_lookup(this, txtZipCode); return false;">?</a>
+uship.utils.zip_code_lookup = (function () {
+    var ERROR_CLASS_NAME = 'notification-error',
+                            NOTICE_CLASS_NAME = 'success';
+                            
+
+    var _dom = uship.dom,
+        _ns = uship.ns,
+        _utils = uship.utils;
+
+    var btn_submit,
+        dd_state,
+        elem_container,
+        elem_error,
+        elem_notice,
+        lnk_close,
+        style_container,
+        txt_city,
+        txt_zipcode,
+        _request;
+
+    // helpers methods
+    function open(x, y, fill_screen) {
+        reset();
+        
+        //adding some logic into this bitch, so i can make it so it does the fill screen under 768, even if true
+        var w = window.innerWidth || document.width;
+        var smallScreen =  w < 768;
+        
+        _utils.hide_select_inputs(true, elem_container);
+		
+		if(!fill_screen) {
+			style_container.left = x + 'px';
+	        style_container.top = y + 'px';
+	        style_container.display = 'block';
+	
+	        var fuzzy = 20;
+	        var width = elem_container.getWidth();
+	        var delta_x = document.viewport.getWidth() - (x + width + fuzzy);
+	        if (delta_x < 0) {
+	            style_container.left = (x + delta_x) + 'px';
+	        }
+		}
+		else {
+			var window_width = window.innerWidth || document.width;
+			var elem_width = window_width - 44;
+			
+			style_container.width = elem_width + 'px';
+			style_container.display = 'block';	
+		};
+
+        txt_city.focus();
+    }
+    function close() {
+        style_container.display = 'none';
+
+        _utils.hide_select_inputs(false, elem_container);
+    }
+    function reset() {
+        txt_city.value = '';
+        dd_state.selectedIndex = 0;
+        elem_error.style.display = 'none';
+        elem_notice.style.display = 'none';
+    }
+
+    function show_notice(message, is_error) {
+        elem_error.hide();
+        elem_notice.hide();
+
+        if (is_error) {
+            var target = elem_error;
+        }
+        else {
+            var target = elem_notice;
+        }
+
+        target.down()
+            .update(message)
+            .up()
+            .show();
+    }
+
+    // event handlers
+    function handle_button_click(e) {
+        _request(txt_city.value, dd_state.options[dd_state.selectedIndex].value, dd_state.selectedIndex, $(dd_state.options[dd_state.selectedIndex]).readAttribute('cid'), handle_lookup_callback);
+    }
+    function handle_close_click(e) {
+        e.stop();
+        close();
+    }
+    function handle_lookup_callback(resp) {
+        var value = resp.value;
+        if (!value.error) {
+            elem_notice.hide()
+
+            if (txt_zipcode !== undefined) {
+                txt_zipcode.value = value.payload;
+                txt_zipcode.focus();
+                txt_zipcode.removeClassName("defaulttext"); // handles the pre-text color change
+                close();
+            }
+            else {
+                show_notice([value.payload, __(' is a valid ZIP code for '), txt_city.value, ' ,', dd_state.options[dd_state.selectedIndex].value].join(''))
+            }
+        }
+        else {
+            show_notice(value.error_text, true);
+        }
+    }
+
+    function invoke(element, txt_target, options, x, y) {
+        if (elem_container === undefined || elem_container === null) {
+            // handles the case if Prototype is non included
+            if (window.Ajax === undefined) {
+                _utils.popup_page('/zip_lookup.aspx', { width: 350, height: 210 });
+                return;
+            }
+            var _self = arguments.callee;
+            _request = _ns.ajaxpro.register('Controls.User.ZipCodeLookup', 'Lookup', ['City', 'State', 'StateId', 'Country']);
+
+            _utils.load_control('ZipCodeLookup', function (html) {
+                // create element
+                elem_container = (new Element('div')).update(html).down();
+                style_container = elem_container.style;
+
+                // get form elements
+                var collection = elem_container.select('input,select');
+                txt_city = collection[0];
+                btn_submit = collection[2];
+                dd_state = collection[1];
+                elem_error = elem_container.select('.' + ERROR_CLASS_NAME)[0];
+                elem_notice = elem_container.select('.' + NOTICE_CLASS_NAME)[0];
+                lnk_close = elem_container.select('a')[0];
+
+                elem_error.hide();
+                elem_notice.hide();
+
+                // bind event listeners
+                btn_submit.observe('click', handle_button_click);
+                lnk_close.observe('click', handle_close_click);
+                _utils.default_submit(btn_submit, elem_container);
+
+                // append to DOM
+                $('overlays').appendChild(elem_container);
+
+                // reload constructor
+                _self(element, txt_target, options, x, y);
+            });
+            return false;
+        }
+
+        txt_zipcode = undefined;
+        if (txt_target !== undefined) {
+            txt_zipcode = $(txt_target);
+        }
+
+        open(x + options.x, y + options.y, options.fill_screen);
+    }
+
+    return function (element, txt_target, options) {
+        element = $(element);
+        options = options || {};
+        options.x = options.x || 5;
+        options.y = options.y || 5;
+        options.fill_screen = options.fill_screen || false;
+        _dom.events.attach(element, 'click', function (e) {
+            e.preventDefault();
+            invoke(element, txt_target, options, e.pointerX(e), e.pointerY(e));
+        });
+    };
+})();

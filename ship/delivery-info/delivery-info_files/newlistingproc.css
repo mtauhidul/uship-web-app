@@ -1,0 +1,212 @@
+/*
+ * path: /listing2.aspx
+ * ns:   listingproc
+ * 
+ * for A/B Test: Standard Listing Style Changes
+ * new styles to override certain listingproc.css styles
+ */ 
+
+/* show elements added specifically for A/B style test */
+.listingproc-newstylesonly {
+    display: block;
+}
+     
+/* general */
+.listingproc-content {
+    border: 1px solid #e5e5e5;
+    position: relative;
+    -moz-border-radius: 10px;
+    -webkit-borderradius: 10px;
+    border-radius: 10px;
+}
+.listingproc-h {
+    display: none;
+}
+.bab-box, .listingproc-choose-commodity-name {
+    border:none;
+}
+.form-section {
+    border-bottom: 1px solid #e5e5e5;
+    margin-bottom: 0;
+    padding: 0;
+}
+.listingproc-group {
+    background: none;
+    margin: 0;
+}
+.h-underlined {
+    border: none;
+}
+
+/* header */
+.process-hd {
+    border-bottom: none;
+    margin-bottom: 10px;
+    position: relative;
+}
+.listingproc-req-notice {
+    position: absolute;
+    text-transform: lowercase;
+    top: 35px;
+    bottom: 20px;
+}
+.req-notice {
+    display: none;
+}
+
+/* nav buttons */
+.listingproc-navbuttons {
+    padding: 0;
+}
+.listingproc-navbuttons-old {
+    display: none;
+}
+.listingproc-navbuttons-new {
+    padding: 20px;
+}
+.listingproc-navbuttons .button-medium {
+    margin-right: 5px;
+}
+
+/* register view */
+.listingproc-userinfo {
+    border: none;
+}
+
+/* check-email view */
+.listingproc-complete {
+    display: none;
+}
+.listingproc-checkemail {
+    border: none;
+}
+.listingproc-checkemail-header {
+    background: none;
+    display: block;
+    font-size: 22px;
+    font-weight: bold;
+    padding: 20px 0;
+}
+.listingproc-checkemail-wrapper {
+    border: 1px solid #e5e5e5;
+    padding: 15px;
+    -moz-border-radius: 10px;
+    -webkit-borderradius: 10px;
+    border-radius: 10px;
+}
+.listingproc-checkemail-instructions {
+    background: transparent url('/public/images/icons/email_36x36.png') no-repeat 0px 10px;
+    line-height: 25px;
+    padding: 5px 0 15px 45px;
+}
+.listingproc-checkemail-tiplist {
+    font-weight: normal;
+    line-height: 25px;
+}
+
+/* toggle login */
+.emailentry-toggle-login {
+    position: absolute;
+    right: 15px;
+    top: 30px;
+    z-index: 2;
+}
+.emailentry-toggle-login-new {
+    position: absolute;
+    right: 15px;
+    top: -30px;
+    z-index: 2;
+}
+.emailentry-toggle-login-noimport {
+    position: relative;
+    right: 15px;
+    top: 15px;
+    z-index: 2;
+}
+
+ .emailEntry-toggle-login-question {
+  margin-right: 10px;
+ }
+.emailentry-toggle-login-link {
+    display: none;
+}
+
+.form-item-description-blue  
+{
+    color:#1A63A3;
+    font-weight:bold;
+}
+.listingproc-addinfo {
+  padding: 11px 0px 9px 21px;
+  background: transparent url('/public/images/icons/icon-description-16x16.png') no-repeat 0px 10px;
+}
+.listingproc-addadditionaldetails {
+  padding: 6px 0px 9px 36px;
+  background: transparent url('/public/images/icons/icon-description-16x16.png') no-repeat 15px 5px;
+}
+.listingproc-addpictures 
+{
+    padding: 11px 0px 4px 36px;
+    background: transparent url('/public/images/icons/icon-picture-16x16.png') no-repeat 15px 10px;
+}
+.listingproc-servicetypes
+{
+    padding: 11px 0px 4px 36px;
+    background: transparent url('/public/images/icons/icon-servicetype-16x16.png') no-repeat 15px 10px;
+}
+.listingproc-link 
+{
+    cursor:pointer;
+}
+/* auction import */
+.listingproc-ebayinfo {
+  border-color: #c9dec5;
+  margin: 0 35px 0 0px;
+}
+.listingproc-form-new {
+  padding: 0 0px;
+}
+.listingproc-ebayinfo-box {
+    padding: 5px;
+}
+.listing-ebayinfo-link-box {
+    padding-left: 0px;
+}
+
+.listingproc-ebayinfo-background-wrapper { 
+  padding-left: 0px;
+  /*background: transparent url('/public/images/promo/partners/ebay/ebay_compatible.gif') no-repeat right;*/
+}
+/* Cobranded import styles */
+.listingproc-cobrand-import {
+	border-color: #3888B9;
+	padding-top: 0px;
+}
+
+	padding-top: 0px;
+}
+.listingproc-cobrand-box {
+    padding: 0px;
+}
+.listingproc-cobrand-import-prefill {
+    padding-right: 235px;
+}
+.listingproc-proxibid-import-background-wrapper {
+    background: transparent url('/public/images/elements/logo/proxibid_logo_100x26.png') no-repeat right 15px;	
+}
+.listingproc-networkinternational-import-background-wrapper {
+	padding-left: 0px;
+    background: transparent url('/public/images/elements/logo/NetworkInternational.png') no-repeat right;	
+}
+.listingproc-ni-box {
+    padding: 0px;
+}
+.networkinternational-import-form .form-item {
+	padding-left: 0px;
+}
+.listingproc-gutter {
+    margin: 15px 0 0;
+}
+.ritchiebros-import-form-new.form-item {
+    padding-left: 0px;
+}

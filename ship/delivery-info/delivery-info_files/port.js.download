@@ -1,0 +1,617 @@
+function get_select_value(select) {
+    return parseInt(select.options[select.selectedIndex].value, 10);
+}
+function add_select_value(select, text, value) {
+    select.options[select.options.length] = new Option(text, value, false, false);
+}
+function replace_select_options_group(select, arr) {
+    if (arr !== null && arr !== undefined && arr.length !== undefined && arr.length > 0) {
+        var group;
+        var op = new Option(arr[0].v, arr[0].k, false, false);
+
+        select.options[select.options.length] = op;
+
+        for (var i = 1, len = arr.length; i < len; i++) {
+            if (arr[i].k < 0) {
+                group = document.createElement('OPTGROUP');
+                group.label = arr[i].v;
+                select.appendChild(group);
+            }
+            else {
+                op = new Option(arr[i].v, arr[i].k, false, false);
+                select.options[select.options.length] = op;
+            }
+        }
+    }
+}
+
+function replace_select_options(select, arr) {
+    if (arr !== undefined && arr.length !== undefined && arr.length > 0) {
+        for (var i = 0, len = arr.length; i < len; i++) {
+            var op = select.options;
+            op[op.length] = new Option(arr[i].v, arr[i].k, false, false);
+        }
+    }
+}
+
+function set_selected_value(ddl, value) {
+    for (i = 0; i < ddl.length; i++) {
+        if (ddl[i].value == value) {
+            ddl.selectedIndex = i;
+            break;
+        }
+    }
+}
+
+var prefillGooglePlacesInputWithPortAddress = function(address, GpInput, GPQuery){
+    if (GpInput){
+        var addressText = address.value.PortName + ', ' +  address.value.ZIPCode;
+        GPQuery(addressText);
+    }
+};
+
+var prefillGooglePlacesInputWithRBSiteAddress = function(address, GpInput, GPQuery){
+    if (GpInput){
+        
+        var addressText = uship.list.getRitchieBrosFormattedAddress(address);
+        GPQuery(addressText);
+    }
+};
+
+
+var request = (function() {
+    var cache = {};
+
+    var ajax = {
+        GetPortStates : uship.ns.ajaxpro.register('addresses', 'GetPortStates', []),
+        GetPortsByStateID : uship.ns.ajaxpro.register('addresses', 'GetPortsByStateID', ['stateID']),
+        GetAddressInfoByPortID : uship.ns.ajaxpro.register('addresses', 'GetAddressInfoByPortID', ['portID']),
+        GetAuctionSalesSite : uship.ns.ajaxpro.register('addresses', 'GetAuctionSalesSite', ['rbUserType']),
+        GetAddressInfoByRBSalesSiteID : uship.ns.ajaxpro.register('addresses', 'GetAddressInfoByRBSalesSiteID', ['rbsalessiteID'])
+    };
+
+    return {
+        states: function(type, callback) {
+            var KEY = 'type' + type;
+            var resp = cache[KEY];
+
+            if (resp) {
+                callback(resp);
+            }
+            else {
+                ajax.GetPortStates(function(resp) {
+                    cache[KEY] = resp;
+                    callback(resp);
+                });
+            }
+        },
+        rbsalessite: function(type, rbUserType, callback) {
+            var KEY = 'type' + type;
+            var resp = cache[KEY];
+			
+            if (resp) {
+                callback(resp);
+            }
+            else {
+                ajax.GetAuctionSalesSite(rbUserType,function(resp) {
+                    cache[KEY] = resp;
+                    callback(resp);
+                });
+            }
+        },
+        ports: function(state, callback) {
+            var KEY = 'state' + state;
+            var resp = cache[KEY];
+
+            if (resp) {
+                callback(resp);
+            }
+            else {
+                ajax.GetPortsByStateID(state, function(resp) {
+                    cache[KEY] = resp;
+                    callback(resp);
+                });
+            }
+        },
+        address: function(port, callback) {
+            var KEY = 'port' + port;
+            var resp = cache[KEY];
+
+            if (resp) {
+                callback(resp);
+            }
+            else {
+                ajax.GetAddressInfoByPortID(port, function(resp) {
+                    cache[KEY] = resp;
+                    callback(resp);
+                });
+            }
+        },
+        address_rbsalessite: function(rbsalessite, callback) {
+            var KEY = 'rbsalessite' + rbsalessite;
+            var resp = cache[KEY];
+
+            if (resp) {
+                callback(resp);
+            }
+            else {
+                ajax.GetAddressInfoByRBSalesSiteID(rbsalessite, function(resp) {
+                    cache[KEY] = resp;
+                    callback(resp);
+                });
+            }
+        }
+    };
+})();
+
+function AddressType(ddlTypes, 
+                     portTypeId, ddlStates, ddlPorts, hdnState, hdnPort,
+                     rbSalesSiteTypeId, divRBSalesSite, ddlRBSalesSite, hdnRBSalesSite,
+                     loc, addrSelect, addrSelectNew, ddlMode, divDate11, divDate22,
+                     uxStreetAddress1, uxStreetAddress2, rbUserType, isBroker, divDate33, GPInput, GPQuery, isInEditMode) {
+                   
+    this.ddlTypes = ddlTypes;
+
+    // Port stuff
+    this.portTypeId = portTypeId;
+    this.ddlStates = ddlStates;
+    this.ddlPorts = ddlPorts;
+    this.hdnState = hdnState;
+    this.hdnPort = hdnPort;
+	
+    // RB sales site stuff
+    this.rbSalesSiteTypeId = rbSalesSiteTypeId;
+    this.divRBSalesSite = divRBSalesSite;
+    this.ddlRBSalesSite = ddlRBSalesSite;
+    this.hdnRBSalesSite = hdnRBSalesSite;
+    this.rbUserType = rbUserType;
+    this.loc = loc;
+    this.addrSelect = addrSelect;
+    this.addrSelectNew = addrSelectNew;
+    this.isBroker = isBroker;
+    this.GPInput = GPInput;
+    this.GPQuery = GPQuery;
+    this.isInEditMode  = isInEditMode; 
+    this.ddlMode = ddlMode;
+    if(ddlMode){
+        this.divDate11 = divDate11;
+        this.divDate22 = divDate22;
+        this.divDate33 = divDate33;
+
+        this.uxStreetAddress1 = uxStreetAddress1;
+        this.uxStreetAddress2 = uxStreetAddress2;
+
+        //New timeframe mode
+        Event.observe(ddlMode, 'change', this.handle_pickup_delivery_mode_change.bind(this));
+        Event.observe(ddlMode, 'selectionchange', this.handle_pickup_delivery_mode_change.bind(this));
+        this.handle_pickup_delivery_mode_change();
+    }
+    Event.observe(ddlTypes, 'change', this.handle_type_change.bind(this));
+    Event.observe(ddlStates, 'change', this.handle_states_change.bind(this));
+    Event.observe(ddlPorts, 'change', this.handle_ports_change.bind(this));
+
+    if (this.divRBSalesSite) {
+        Event.observe(ddlRBSalesSite, 'change', this.handle_rbsalessite_change.bind(this));
+    }
+
+    this.init_selection();
+}
+
+var disableGooglePlacesInput = function(GpInput){
+    if(GpInput) {
+        if (GpInput[0]) GpInput = GpInput[0];
+        GpInput.disabled = 'true';
+        GpInput.style.background = "rgb(223, 222, 222)";
+    }
+};
+
+var enableGooglePlacesInput =function(GpInput, GpQuery, isInEditMode){
+    if(GpInput && !isInEditMode) {
+        if (GpInput[0]) GpInput = GpInput[0];
+        GpInput.removeAttribute("disabled");
+        GpInput.style.background = "transparent";
+    }
+}
+
+AddressType.prototype = {
+    handle_pickup_delivery_mode_change: function (e) {
+        if (this.divDate33 != null) {
+            if (this.ddlMode) {
+                if (this.ddlMode.selectedIndex == 2 || this.ddlMode.selectedIndex == 3) {
+                    this.divDate11.style.display = 'block';
+                    this.divDate22.style.display = 'none';
+                    this.divDate33.style.display = 'none';
+                }
+                if (this.ddlMode.selectedIndex == 0) {
+                    this.divDate11.style.display = 'none';
+                    this.divDate22.style.display = 'none';
+                    this.divDate33.style.display = 'block';
+                }
+
+                if (this.ddlMode.selectedIndex == 1) {
+                    this.divDate11.style.display = 'block';
+                    this.divDate22.style.display = 'block';
+                    this.divDate33.style.display = 'none';
+                }
+            }
+        }
+        else {
+            if (this.ddlMode) {
+                if (this.ddlMode.selectedIndex == 0 || this.ddlMode.selectedIndex == 2 || this.ddlMode.selectedIndex == 3) {
+                    this.divDate11.style.display = 'block';
+                    this.divDate22.style.display = 'none';
+                }
+
+                if (this.ddlMode.selectedIndex == 1) {
+                    this.divDate11.style.display = 'block';
+                    this.divDate22.style.display = 'block';
+                }
+            }
+        }
+    },
+    handle_type_change: function (e) {
+        this.hdnState.value = -1;
+        this.hdnPort.value = -1;
+
+        if (this.hdnRBSalesSite) {
+            this.hdnRBSalesSite.value = -1;
+        }
+
+        this.types_change_helper(get_select_value(this.ddlTypes),undefined,this.rbUserType);
+
+        uship.events.fire('locations_container_resize');
+
+        if (this.addrSelect) {
+            this.addrSelect.pseudo_disabled(false);
+        }
+        else if (this.addrSelectNew) {
+            this.addrSelectNew.pseudo_disabled(false);
+        }
+        enableGooglePlacesInput(this.GPInput, this.GPQuery, this.isInEditMode);
+    },
+    handle_states_change: function (e) {
+        this.hdnState.value = -1;
+        this.hdnPort.value = -1;
+
+        this.states_change_helper(get_select_value(this.ddlStates));
+
+        if (this.addrSelect) {
+            this.addrSelect.pseudo_disabled(false);
+        }
+        else if (this.addrSelectNew) {
+            this.addrSelectNew.pseudo_disabled(false);
+        }
+        enableGooglePlacesInput(this.GPInput, this.GPQuery, this.isInEditMode);
+        uship.events.fire('locations_container_resize');
+    },
+    handle_ports_change: function (e) {
+        this.hdnPort.value = -1;
+		var port = get_select_value(this.ddlPorts);
+        this.ports_change_helper(port);
+		if (port <= 0){
+			if (this.addrSelect) {
+	            this.addrSelect.pseudo_disabled(false);
+	        }
+	        else if (this.addrSelectNew) {
+	            this.addrSelectNew.pseudo_disabled(false);
+	        }
+            enableGooglePlacesInput(this.GPInput, this.GPQuery, this.isInEditMode);
+	        uship.events.fire('locations_container_resize');
+    	} else {
+            disableGooglePlacesInput(this.GPInput);
+        }
+    },
+    handle_rbsalessite_change: function (e) {
+        this.hdnRBSalesSite.value = -1;
+
+        if (this.addrSelect) {
+            this.addrSelect.pseudo_disabled(false);
+        }
+        else if (this.addrSelectNew) {
+            this.addrSelectNew.pseudo_disabled(false);
+        }
+
+        this.rbsalessite_change_helper(get_select_value(this.ddlRBSalesSite));
+
+        uship.events.fire('locations_container_resize');
+    },
+    types_change_helper: function (type, state, rbUserType) {
+        this.ddlStates.innerHTML = '';
+        this.ddlPorts.innerHTML = '';
+
+        this.ddlStates.hide();
+        this.ddlStates.disabled = true;
+
+        this.ddlPorts.hide();
+        this.ddlPorts.disabled = true;
+
+        if (this.divRBSalesSite) {
+            this.divRBSalesSite.hide();
+            this.ddlRBSalesSite.innerHTML = '';
+        }
+
+        if (this.loc) this.loc.toggleStreetAddress(true);
+
+        if (type) {
+            if (this.portTypeId !== '' && type === parseInt(this.portTypeId) && !this.isBroker) {
+                add_select_value(this.ddlStates, __('loading...'), -1);
+                this.ddlStates.show();
+
+                request.states(type, function (resp) {
+                    this.ddlStates.innerHTML = '';
+                    this.ddlStates.disabled = false;
+                    replace_select_options_group(this.ddlStates, resp.value);
+
+                    if (state) {
+                        set_selected_value(this.ddlStates, state);
+                    }
+
+                    uship.events.fire('locations_container_resize');
+                } .bind(this));
+            }
+            else if (this.rbSalesSiteTypeId !== '' && type === parseInt(this.rbSalesSiteTypeId) && !this.isBroker) {
+                add_select_value(this.ddlRBSalesSite, __('loading...'), -1);
+                this.divRBSalesSite.show();
+
+                request.rbsalessite(type,rbUserType, function (resp) {
+                    this.ddlRBSalesSite.innerHTML = '';
+                    replace_select_options(this.ddlRBSalesSite, resp.value);
+
+                    if (state) {
+                        set_selected_value(this.ddlRBSalesSite, state);
+                    }
+
+                    uship.events.fire('locations_container_resize');
+                } .bind(this));
+            }
+        }
+    },
+    states_change_helper: function (state, port) {
+        this.ddlPorts.innerHTML = '';
+        this.ddlPorts.hide();
+        this.ddlPorts.disabled = true;
+
+        if (this.loc) this.loc.toggleStreetAddress(true);
+
+        if (state && state > 0) {
+            this.hdnState.value = state;
+
+            add_select_value(this.ddlPorts, __('loading...'), -1);
+            this.ddlPorts.show();
+
+            request.ports(state, function (resp) {
+                this.ddlPorts.innerHTML = '';
+                this.ddlPorts.disabled = false;
+                replace_select_options(this.ddlPorts, resp.value);
+
+                if (port) {
+                    set_selected_value(this.ddlPorts, port);
+                }
+
+                uship.events.fire('locations_container_resize');
+            } .bind(this));
+        }
+        else if (!isNaN(state) && state === 0) {
+            // "Other" selected
+            this.hdnState.value = 0;
+        }
+    },
+    ports_change_helper: function (port, isInit) {
+        if (port && port > 0) {
+            this.hdnPort.value = port;
+
+            request.address(port, function (resp) {
+                var countryID = resp.value.CountryID;
+
+                if (countryID == 1 || countryID == 2) {
+                    if (!!!isInit) {
+                        this.loc.setSelectedCountry(countryID);
+                        this.loc.changeCountry(resp.value.StateID);
+                        this.loc.setZIPCode(resp.value.ZIPCode);
+                        this.loc.setCity(resp.value.PortName);
+
+                        if (this.addrSelect) {
+                            this.addrSelect.selectNewAddress();
+                            this.addrSelect.handleRadioClick();
+                        }
+                    }
+                }
+
+                if (this.uxStreetAddress1) this.uxStreetAddress1.value = "";
+                if (this.uxStreetAddress2) this.uxStreetAddress2.value = "";
+                if (this.loc) this.loc.toggleStreetAddress(false);
+                
+                if (this.addrSelect) {
+                    this.addrSelect.pseudo_disabled(true);
+                }
+                else if (this.addrSelectNew) {
+                    this.addrSelectNew.pseudo_disabled(true);
+                }
+
+                prefillGooglePlacesInputWithPortAddress(resp, this.GPInput, this.GPQuery);
+                uship.events.fire('locations_container_resize');
+            } .bind(this));
+        }
+        else if (!isNaN(port) && port === 0) {
+            // "Other" selected
+            this.hdnPort.value = 0;
+            if (this.loc) this.loc.toggleStreetAddress(true);
+        }
+        else {
+            if (this.loc) this.loc.toggleStreetAddress(true);
+        }
+    },
+    rbsalessite_change_helper: function (rbsalessite, isInit) {
+        if (rbsalessite && rbsalessite > 0) {
+
+            this.hdnRBSalesSite.value = rbsalessite;
+
+            request.address_rbsalessite(rbsalessite, function (resp) {
+                if (!!!isInit && resp.value.AddressLoaded === true) {
+                    var countryID = resp.value.CountryID;
+
+                    this.loc.setSelectedCountry(countryID);
+                    this.loc.changeCountry(resp.value.StateID);
+
+                    var zip = resp.value.ZIPCode;
+
+                    if (zip == '' || zip == '0') {
+                        zip = '00000';
+                    }
+
+                    this.loc.setZIPCode(zip);
+                    this.loc.setCity(resp.value.City);
+                    this.loc.setState(resp.value.State);
+
+                    if (this.addrSelect) {
+                        this.addrSelect.selectNewAddress();
+                        this.addrSelect.handleRadioClick();
+                    }
+                }
+
+                if (this.uxStreetAddress1) this.uxStreetAddress1.value = "";
+                if (this.uxStreetAddress2) this.uxStreetAddress2.value = "";
+                if (this.loc) this.loc.toggleStreetAddress(false);
+
+                // if (resp.value.AddressLoaded === true) {
+                //     if (this.addrSelect) {
+                //         this.addrSelect.pseudo_disabled(true);
+                //     }
+                //     else if (this.addrSelectNew) {
+                //         this.addrSelectNew.pseudo_disabled(true);
+                //     }
+                // }
+                if (resp.value.AddressLoaded){
+                    prefillGooglePlacesInputWithRBSiteAddress(resp.value, this.GPInput, this.GPQuery);
+                    //disableGooglePlacesInput(this.GPInput);
+                    enableGooglePlacesInput(this.GPInput, this.GPQuery, this.isInEditMode);
+                } else {
+                    enableGooglePlacesInput(this.GPInput, this.GPQuery, this.isInEditMode);
+                }
+                uship.events.fire('locations_container_resize');
+            } .bind(this));
+        }
+        else if (!isNaN(rbsalessite) && rbsalessite === 0) {
+            // "Other" selected
+            this.hdnRBSalesSite.value = 0;
+            if (this.loc) this.loc.toggleStreetAddress(true);
+        }
+        else {
+            if (this.loc) this.loc.toggleStreetAddress(true);
+        }
+    },
+    init_selection: function () {
+        var state;
+        var port;
+        var rbsalessite;
+        var type = get_select_value(this.ddlTypes);
+		var rbUserType;
+
+        if (this.portTypeId !== '' && type === parseInt(this.portTypeId) && !this.isBroker) {
+            state = this.hdnState.value;
+            this.types_change_helper(type, state,undefined);
+
+            if (state && state > 0) {
+                port = this.hdnPort.value;
+                this.states_change_helper(state, port);
+
+                if (port && port > 0) {
+                    this.ports_change_helper(port, true);
+                }
+            }
+        }
+        else if (this.rbSalesSiteTypeId !== '' && type === parseInt(this.rbSalesSiteTypeId) && !this.isBroker) {
+            rbsalessite = this.hdnRBSalesSite.value;
+            this.types_change_helper(type, rbsalessite, this.rbUserType);
+
+            if (rbsalessite && rbsalessite > 0) {
+                this.rbsalessite_change_helper(rbsalessite, true);
+            }
+        }
+    }
+};
+
+var AddressOptionsNew = function(rbNewId, conNewId, addressTypeID, addressID, overlayId, disableType) {
+    this.rbNew = $(rbNewId);
+    this.conNew = $(conNewId);
+    this.addressType = $(addressTypeID);
+    this.address = $(addressID);
+    this.overlay = $(overlayId);
+    this.disableType = '0';
+
+    var temp = $(disableType);
+
+    if (temp) {
+        this.disableType = temp.value;
+    }
+}
+AddressOptionsNew.prototype = {
+    pseudo_disabled: function(val) {
+        if (this.overlay) {
+            var visibility;
+
+            if (val) {
+            	document.body.appendChild(this.overlay);
+
+                var address_type_size;
+                var address_size = this.address.getDimensions();
+                var height = 0;
+                var offset;
+                
+                if (this.disableType != '0') {
+                    var selects = this.addressType.getElementsByTagName('select');
+
+                    for (var i = 0, len = selects.length; i < len; i++) {
+                        $(selects[i]).addClassName('form-disabled');
+                    }
+
+                    address_type_size = this.addressType.getDimensions();
+                    offset = this.addressType.cumulativeOffset();
+
+                    height = address_type_size.height;
+                }
+                else {
+                    offset = this.address.cumulativeOffset();
+                }
+
+                this.conNew.addClassName('form-disabled');
+
+                height = height + address_size.height + 10;
+
+                var style = this.overlay.style;
+                style.height = height + 'px';
+                style.width = address_size.width + 'px';
+                style.left = offset.left + 'px';
+                style.top = offset.top + 'px';
+                style.display = 'block';
+                
+                visibility = 'hidden';
+            }
+            else {
+                if (this.disableType != '0') {
+                    var selects = this.addressType.getElementsByTagName('select');
+
+                    for (var i = 0, len = selects.length; i < len; i++) {
+                        $(selects[i]).removeClassName('form-disabled');
+                    }
+                }
+                
+                this.conNew.removeClassName('form-disabled');
+
+                this.overlay.style.display = 'none';
+                this.overlay.style.height = '0px';
+                this.overlay.style.width = '0px';
+
+                visibility = 'visible';
+            }
+
+            if (uship.browser.msie && parseFloat(uship.browser.version) <= 6) {
+                inputs = this.conNew.select('select');
+
+                for (var i = 0; i < inputs.length; i++) {
+                    inputs[i].style.visibility = visibility;
+                }
+            }
+        }
+    }
+}

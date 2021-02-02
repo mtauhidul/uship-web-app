@@ -1,0 +1,56 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!-- saved from url=(0432)https://10207287.fls.doubleclick.net/activityi;dc_pre=CLCXnvrky-4CFYeRGAodWN4JpA;src=10207287;type=counter;cat=uship0;ord=4667995736697;tran=611943929;gtm=2wg1k0;auiddc=950187960.1610565777;u1=https%3A%2F%2Fwww.uship.com%2Fshipment%2FClass-A-Motorhome-for-transport%2F611943929%2F%3Fsvd%3D1;u2=undefined;u3=undefined;u4=Shipper;~oref=https%3A%2F%2Fwww.uship.com%2Fshipment%2FClass-A-Motorhome-for-transport%2F611943929%2F%3Fsvd%3D1? -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><script type="text/javascript">
+    (function() {
+      var container = document.querySelector('#_tcx-1u2zm31kzbc');
+      if (!container) {
+        return;
+      }
+
+      function addToContainer(url, text) {
+        const wrapper = document.createElement('div');
+        wrapper.setAttribute('data-tcx-url', url);
+        wrapper.innerText = text;
+        container.appendChild(wrapper);
+      }
+
+      const fetch = window.fetch
+      window.fetch = function() {
+        return Promise.resolve(fetch.apply(window, arguments))
+            .then(async response => {
+              if (response.ok) {
+                try {
+                  const clone = response.clone();
+                  const json = await clone.json();
+                  addToContainer(clone.url, JSON.stringify(json));
+                } catch (err) {}
+              }
+              return response;
+            });
+      };
+
+      var XHR = XMLHttpRequest.prototype;
+      var send = XHR.send;
+      var open = XHR.open;
+      XHR.open = function(method, url) {
+        this.url = url;
+        return open.apply(this, arguments);
+      };
+      XHR.send = function() {
+        this.addEventListener('load', function() {
+          try {
+            const response = this.response;
+            if (response && response.length) {
+              const firstChar = response[0];
+              if (firstChar === '[' || firstChar === '{') {
+                addToContainer(this.url, response);
+              }
+            }
+          } catch (err) {
+            // No-op.
+          }
+        });
+        return send.apply(this, arguments);
+      };
+    })();
+  </script><title></title></head><body style="background-color: transparent" data-new-gr-c-s-check-loaded="14.993.0" data-gr-ext-installed=""><img src="./dc_pre=CLCXnvrky-4CFYeRGAodWN4JpA"><div class="_tc_offscreeneded" id="_tcx-1u2zm31kzbc"></div></body></html>

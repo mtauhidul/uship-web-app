@@ -1,0 +1,317 @@
+﻿function show_popup(lnk_invoker, elem_popup, is_bid_valet) {
+    if(window.customize_popup_zindex == undefined) {
+        window.customize_popup_zindex = 15500;
+    }
+    
+    if(window.HideNumberToComplete != undefined) {
+        HideNumberToComplete();
+    }
+    
+    if(is_bid_valet) {
+        var popup = $(elem_popup);
+        window.customize_popup_zindex = window.customize_popup_zindex + 5;
+        popup.style.zIndex = window.customize_popup_zindex;
+    }
+    
+    uship.utils.position_element(elem_popup, lnk_invoker);
+    new Effect.Appear(elem_popup, {duration: .2})
+}
+
+function close_popup(popupDivID) {
+    new Effect.Fade(popupDivID, {duration: .2});
+    
+    if(window.ShowNumberToComplete != undefined){
+        ShowNumberToComplete();
+    }
+}
+
+function cancel_addgroup(groupDiv, txtID, drpdwnID, lblErrorID) {
+    close_popup(groupDiv);
+    
+    // reset values  
+    var name = $(txtID);
+    name.value = "";
+    
+    var number = $(drpdwnID);
+    number.options.selectedIndex = 0
+    
+    var error = $(lblErrorID);
+    error.innerHTML = "";
+    error.style.display = 'none';
+}
+
+function cancel_editvalet(popupDiv, lowBidTxtID, lowBid, underBidChkID, underBidChk, timedBidChkID, timedBidChk, timeTxtID, timeTxt, priceReductionTxtID, priceReductionTxt, lblErrorID, divErrorID) {
+    close_popup(popupDiv);
+    
+    var txt = $(lowBidTxtID);
+    txt.value = lowBid;
+    
+    txt = $(timeTxtID);
+    txt.value = timeTxt;
+    
+    txt = $(priceReductionTxtID);
+    txt.value = priceReductionTxt;
+    
+    var chk = $(underBidChkID);
+    
+    if(underBidChk == "True")
+    {
+        chk.checked = true;
+    }
+    else
+    {
+        chk.checked = false;
+    }
+    
+    chk = $(timedBidChkID);
+    
+    if(timedBidChk == "True")
+    {
+        chk.checked = true;
+    }
+    else
+    {
+        chk.checked = false;
+    }
+    
+    // reset error
+    var error = $(lblErrorID);
+    error.innerHTML = "";
+    
+    var errorDiv = $(divErrorID);
+    errorDiv.style.visible = 'false';
+    errorDiv.style.display = 'none';
+}
+
+function validateGroupName(txtID, drpdwnID, lblErrorID) {   
+    var name = $(txtID);
+    var labelError = $(lblErrorID);
+    
+    var trimedName = name.value;
+    trimedName = trimedName.replace(/^\s*/, "").replace(/\s*$/, "");
+    
+    if(trimedName == "")
+    {
+        labelError.innerHTML = __.jsBidValetEnterGroupName;
+        labelError.style.display = 'block';
+        return false;
+    }
+    
+    var number = $(drpdwnID);
+    
+    if(number.options.selectedIndex == 0)
+    {
+        labelError.innerHTML = __.jsBidValetNumberOfMatches;
+        labelError.style.display = 'block';
+        return false;
+    }
+    
+    return true;
+}
+
+function validateBidValet(lowBidTxtID, underBidChkID, timedBidChkID, timeTxtID, priceReductionTxtID, lblErrorID, divErrorID, totalBid, minPriceReduction, minBid) {   
+    var labelError = $(lblErrorID);
+    var errorDiv = $(divErrorID);
+    var underBid = $(underBidChkID);
+    var timedBid = $(timedBidChkID);
+    
+    if(!(underBid.checked || timedBid.checked))
+    {
+        labelError.innerHTML = __.jsBidValetCheckbox;
+        labelError.style.display = 'block';
+        errorDiv.style.visible = 'true';
+        errorDiv.style.display = 'block';
+        return false;
+    }
+    
+    var lowBidStr = $(lowBidTxtID);
+    var trimmedLowBid = lowBidStr.value;
+    
+    trimmedLowBid = trimmedLowBid.replace(/^\s*/, "").replace(/\s*$/, "").replace(",", "");
+    
+    var lowBid = parseFloat(parseFloat(trimmedLowBid).toFixed(2));
+    var bid = parseFloat(parseFloat(totalBid).toFixed(2));
+    var priceDecrement = parseFloat(parseFloat(minPriceReduction).toFixed(2));
+    
+    if(trimmedLowBid == "")
+    {
+        labelError.innerHTML = String.format(__.jsBidValetLowestBid, uship.prefs.i18n.currency + minBid);
+        labelError.style.display = 'block';
+        errorDiv.style.display = 'block';
+        errorDiv.style.visible = 'true';
+        return false;
+    }
+    else if(isNaN(trimmedLowBid))
+    {
+        labelError.innerHTML = String.format(__.jsBidValetLowestBidGreater, uship.prefs.i18n.currency + minBid) + __.jsPleaseReenter;
+        labelError.style.display = 'block';
+        errorDiv.style.visible = 'true';
+        errorDiv.style.display = 'block';
+        return false;
+    }
+    else if (lowBid < minBid)
+    {
+        labelError.innerHTML = String.format(__.jsBidValetLowestBidLower, uship.prefs.i18n.currency + minBid) + __.jsPleaseReenter;
+        labelError.style.display = 'block';
+        errorDiv.style.visible = 'true';
+        errorDiv.style.display = 'block';
+        return false;
+    }
+    else if(underBid.checked && (lowBid > parseFloat((bid - priceDecrement).toFixed(2)) || lowBid >= bid))
+    {
+        labelError.innerHTML = String.format(__.jsBidValetLowestOf, uship.prefs.i18n.currency + (bid - priceDecrement).toFixed(2));
+        labelError.style.display = 'block';
+        errorDiv.style.visible = 'true';
+        errorDiv.style.display = 'block';
+        return false;
+    }
+    else if(!underBid.checked && timedBid.checked && lowBid >= bid)
+    {
+        labelError.innerHTML = String.format(__.jsBidValetLowestBidBetween, uship.prefs.i18n.currency + (bid - 0.01).toFixed(2), uship.prefs.i18n.currency + minBid);
+        labelError.style.display = 'block';
+        errorDiv.style.visible = 'true';
+        errorDiv.style.display = 'block';
+        return false;
+    }
+
+    lowBidStr.value = lowBid;
+
+    var timeStr = $(timeTxtID);
+    var priceStr = $(priceReductionTxtID);
+    
+    if (timedBid.checked) {
+        var trimmedTime = timeStr.value;
+        trimmedTime = trimmedTime.replace(/^\s*/, "").replace(/\s*$/, "");
+
+        var time = parseFloat(parseFloat(trimmedTime).toFixed(2));
+        
+        var trimmedPrice = priceStr.value;
+        trimmedPrice = trimmedPrice.replace(/^\s*/, "").replace(/\s*$/, "");
+
+        var price = parseFloat(parseFloat(trimmedPrice).toFixed(2));
+
+        if (trimmedTime == "" || isNaN(trimmedTime) || time < 2 || time > 99) {
+            labelError.innerHTML = __.jsBidValetTimeInterval;
+            labelError.style.display = 'block';
+            errorDiv.style.visible = 'true';
+            errorDiv.style.display = 'block';
+            return false;
+        }
+        else if (trimmedPrice == "" || isNaN(trimmedPrice) || parseFloat(price.toFixed(2)) <= 0) {
+            labelError.innerHTML = __.jsBidValetBidDecreased;
+            labelError.style.display = 'block';
+            errorDiv.style.visible = 'true';
+            errorDiv.style.display = 'block';
+            return false;
+        }
+        else if (price > bid) {
+            labelError.innerHTML = String.format(__.jsBidValetBidEnterAmount, uship.prefs.i18n.currency + (bid - lowBid).toFixed(2));
+            labelError.style.display = 'block';
+            errorDiv.style.visible = 'true';
+            errorDiv.style.display = 'block';
+            return false;
+        }
+        else if (price > parseFloat((bid - lowBid).toFixed(2))) {
+            if ((bid - price) < minBid) {
+                labelError.innerHTML = String.format(__.jsBidValetBidEnterAmount, uship.prefs.i18n.currency + (bid - lowBid).toFixed(2));
+            }
+            else {
+                labelError.innerHTML = String.Format(__.jsBidValetBidorLower, uship.prefs.i18n.currency + (bid - price).toFixed(2), uship.prefs.i18n.currency + (bid - lowBid).toFixed(2));
+            }
+
+            labelError.style.display = 'block';
+            errorDiv.style.visible = 'true';
+            errorDiv.style.display = 'block';
+            return false;
+        }
+
+        timeStr.value = time;
+        priceStr.value = price;
+    }
+    else {
+        timeStr.value = "";
+        priceStr.value = "";
+    }
+    
+    return true;
+}
+
+function ConfirmMultipleAction(dropdownListID, addNewGroupID, lblID, isGroup){
+    var control = $(dropdownListID);
+    
+    if(control){
+        var value = control.options[control.selectedIndex].value;
+        
+        if(value == "SelectAction"){
+            alert(__.JsPleaseSelectAction);
+        }
+        else if(value == "AddToNewGroup"){
+            var checked = false;
+            var lbl = $(lblID);
+            var ids = lbl.innerHTML;
+            
+            if(ids == null || ids.length == 0){
+                show_popup(dropdownListID, addNewGroupID + "_addNewGroup");
+                return false;
+            }
+            
+            ids = ids.substring(0, ids.length - 1);
+                            
+            var idArray = ids.split(";");
+            
+            for(var i = 0; i < idArray.length; i++){
+                var chkBox = $(idArray[i]);
+                
+                if(chkBox != null && chkBox.checked){
+                    checked = true;
+                    break;
+                }
+            }
+            
+            var addNewGroup = $(addNewGroupID + "_addNewGroup");
+            var titleID = addNewGroupID + "_lblTitle"
+            var child = addNewGroup.select('.groupbid-hd')[0];
+            
+            if(!checked){
+                child.innerHTML = __.jsBidValetCreateGroup;
+            }
+            else{
+                if(isGroup == "True"){
+                    child.innerHTML = __.jsBidValetMoveGroup;
+                }
+                else{
+                    child.innerHTML = __.jsBidValetBidAddGroup;
+                }
+            }
+
+            show_popup(dropdownListID, addNewGroupID + "_addNewGroup");
+            
+            return false;
+        }
+        else if(value == "AddToGroup"){
+            alert(__.JsPleaseSelectGroup);
+        }
+        else if(value == "UnGroup"){
+            return confirm(__.jsBidValetBidAddGroup);
+        }
+        else if(value == "Cancel"){
+            return confirm(__.jsBidValetCancelBids);
+        }
+        else{
+            var text = control.options[control.selectedIndex].text;
+            var values = '';
+            
+            for (i = 0; i < text.length; i++){
+                if(text.charCodeAt(i) != 160){
+                    values += text.charAt(i);
+                }
+            }
+            
+            var text = values.replace(/^[\s]+/g, "");
+            
+            return confirm(__.jsBidValetMoveGroupto + " " + text + " ?");
+        }
+    }
+    
+    return false;
+}

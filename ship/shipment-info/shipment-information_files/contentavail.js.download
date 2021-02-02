@@ -1,0 +1,44 @@
+var ContentAvailable = {
+	stack: [],
+	interval: null,
+	loaded: false,
+	hasNextSibling: function(el) {
+		return el.nextSibling || (el.parentNode && ContentAvailable.hasNextSibling(el.parentNode));
+	},
+	doPoll: function() {
+		var notFound = [];
+		for (var i = 0, len = ContentAvailable.stack.length; i < len; i++) {
+			var el = document.getElementById(ContentAvailable.stack[i].id);
+			if (el && (ContentAvailable.hasNextSibling(el) || ContentAvailable.loaded)) {
+				ContentAvailable.stack[i].callback();
+			}
+			else {
+				notFound.push(ContentAvailable.stack[i]);
+			}
+		}
+		if (notFound.length < 1 || ContentAvailable.loaded) {
+			ContentAvailable.stopPolling();
+		}
+		else {
+			ContentAvailable.stack = notFound;
+		}
+	},
+	startPolling: function() {
+		if (ContentAvailable.interval) { return; }
+		ContentAvailable.interval = setInterval(ContentAvailable.doPoll, 10);
+	},
+	stopPolling: function() {
+		if (!ContentAvailable.interval) {return;}
+		clearInterval(ContentAvailable.interval);
+		ContentAvailable.interval = null;
+	},
+	lastPoll: function() {
+		ContentAvailable.loaded = true;
+		ContentAvailable.doPoll();
+	}
+}
+
+function onContentAvailable(id, callback) {
+	ContentAvailable.stack.push({id:id, callback:callback});  
+	ContentAvailable.startPolling();
+}

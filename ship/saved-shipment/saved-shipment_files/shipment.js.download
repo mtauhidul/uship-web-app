@@ -1,0 +1,146 @@
+
+function handleExpirationExtend(lnkExtendExpiration, divExpirationDateEdit, spanNewExpirationDate) {
+   
+   this.spanNewExpirationDate = spanNewExpirationDate;
+   this.lnkExtendExpiration = lnkExtendExpiration;
+   this.divExpirationDateEdit = divExpirationDateEdit;
+
+   Event.observe(this.lnkExtendExpiration, 'click', this.handle_hide_show_expiration_extention.bind(this));
+  
+}
+handleExpirationExtend.prototype = {
+    handle_hide_show_expiration_extention: function (e) {
+        if (this.spanNewExpirationDate.style.display === "none") {
+                this.show.apply(this.spanNewExpirationDate);
+                this.hide.apply(this.divExpirationDateEdit);
+                this.lnkExtendExpiration.innerHTML=__.jsExtendListing;
+            }
+            else {
+                 this.show.apply(this.divExpirationDateEdit);
+                 this.lnkExtendExpiration.innerHTML=__.MainCancel;
+            	 this.hide.apply(this.spanNewExpirationDate);
+            }
+          Event.stop(e);
+          
+    },
+    show:function(){
+     	this.style.display="";
+    },
+    
+ 	hide:function(){
+    	this.style.display="none";
+    }
+};
+
+
+function handleNewExpirationDate(hdnPackageInfo, txtPickupDeliveryDate,spanNewExpirationDate, divExpirationDateMessage, divInnerNotification, spanNotificationTitle, spanNotificationMessage,divExpirationDateEdit,lnkExtendExpiration) {
+   this.PackageInfo = hdnPackageInfo;
+   this.newPickupDeliveryDate = txtPickupDeliveryDate;
+   this.spanNewExpirationDate = spanNewExpirationDate;
+   this.divExpirationDateMessage = divExpirationDateMessage;
+   this.divInnerNotification = divInnerNotification;
+   this.spanNotificationTitle = spanNotificationTitle;
+   this.spanNotificationMessage = spanNotificationMessage;
+	this.lnkExtendExpiration = lnkExtendExpiration;
+   this.divExpirationDateEdit = divExpirationDateEdit;
+     
+   Event.observe(this.newPickupDeliveryDate, 'change', this.handle_pickup_delivery_date_change.bind(this));
+   uship.events.attach('calendarset', function (id, date_text) {
+       if (this.newPickupDeliveryDate.id === id) {
+           handleNewExpirationDate.request(this.PackageInfo.value, this.newPickupDeliveryDate.value, uship.prefs.i18n.langculture, updatePackageExpiration_callback.bind(this));
+       }
+   } .bind(this));
+
+   this.init_selection();
+}
+handleNewExpirationDate.prototype = {
+    handle_pickup_delivery_date_change: function (e) {
+        if (this.newPickupDeliveryDate) {
+            handleNewExpirationDate.request(this.PackageInfo.value, this.newPickupDeliveryDate.value, uship.prefs.i18n.langculture, updatePackageExpiration_callback.bind(this));
+         }
+    },
+    init_selection: function () {
+
+        //this.handle_pickup_delivery_date_change.apply(this)
+    }
+   
+};
+
+handleNewExpirationDate.request = uship.ns.ajaxpro.register('MyuShipShipment', 'UpdatePackageExpiration', ['packageID', 'expirationDate', 'langCulture']);
+
+function updatePackageExpiration_callback(resp) {
+    var response = resp.value;
+    if (response.success) {
+        if (response.redirectToActive){
+        	window.location = '/shippers.aspx?filter=active#'+this.PackageInfo.value;
+        }
+        else{
+	        this.spanNewExpirationDate.innerHTML = response.newExpirationdate;
+	        this.divExpirationDateMessage.style.display = "block";
+	        this.divExpirationDateMessage.addClassName("success");
+	        this.divExpirationDateMessage.removeClassName("notification-error");
+	        this.divInnerNotification.removeClassName("notification-inner");
+	        this.spanNotificationTitle.innerHTML = __.jsSuccess.toUpperCase();
+	        this.spanNotificationMessage.innerHTML = __.ListingExtendedSuccessMessage;
+	        this.spanNewExpirationDate.style.display = "block";
+	        this.divExpirationDateEdit.style.display = "none";
+	        
+	        if(response.stillExtendListing){
+	        	this.lnkExtendExpiration.innerHTML="Extend Listing";
+	        }
+           	else{
+           		this.lnkExtendExpiration.style.display="none";
+           	}
+	        //showSuccess();
+           }
+    }
+    else {
+	        this.divExpirationDateMessage.style.display = "block";
+	        this.divExpirationDateMessage.addClassName("notification-error");
+	        this.divExpirationDateMessage.removeClassName("success");
+	        this.divInnerNotification.addClassName("notification-inner");
+	    	this.spanNotificationTitle.innerHTML = __.MainError.toUpperCase();
+        	var errormessage ="* ";
+        	switch (response.errormessage) {
+                           case "1":
+                               errormessage += __.status_updateErrorMsgServerError;
+                               break;
+                           case "2":
+                               errormessage += String.format(__.BidFormErrorValidExpiration,uship.prefs.date.short_date_format);
+                               break;
+                    	   case "3":
+                               errormessage += __.shipmentExtendExpirationErrorTodayMaxDays;
+                               break;
+                     	   case "4":
+                               errormessage += String.format(__.shipmentExtendExpirationError,this.spanNewExpirationDate.innerHTML, response.latestPickupDate, "6");
+                               break;
+                   }
+	       this.spanNotificationMessage.innerHTML = errormessage;
+         	//showFailure();
+       }
+ }
+ 
+ function showSuccess(){
+ 			//this.spanNewExpirationDate.innerHTML = response.newExpirationdate;
+	        this.divExpirationDateMessage.style.display = "block";
+	        this.divExpirationDateMessage.addClassName("success");
+	        this.divInnerNotification.removeClassName("notification-inner");
+	        this.spanNotificationTitle.innerHTML = "SUCCESS";
+	        this.spanNotificationMessage.innerHTML = "ExpirationDate and Latest Pickup/Delivery Information has been updated";
+	        this.spanNewExpirationDate.style.display = "block";
+	        this.divExpirationDateEdit.style.display = "none";
+	        this.lnkExtendExpiration.innerHTML="Extend Listing";
+ 
+ }
+ 
+ function showFailure(){
+  			this.divExpirationDateMessage.style.display = "block";
+	        this.divExpirationDateMessage.addClassName("notification-error");
+	        this.divExpirationDateMessage.removeClassName("success");
+	        this.divInnerNotification.addClassName("notification-inner");
+	        this.spanNotificationTitle.innerHTML = "ERROR";
+ }
+  
+ 
+ 
+ 

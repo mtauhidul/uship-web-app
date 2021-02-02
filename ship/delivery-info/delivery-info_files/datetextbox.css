@@ -1,0 +1,15 @@
+.form-input-text-date-pikaday, .form-input-text-date-pickadate {
+    cursor: pointer;
+    background: url(/sticky/images/calendar.gif) no-repeat scroll 95% 50%;
+}
+.pickadate-disabled {
+    cursor: text;
+    background: none;
+}
+
+@media only screen and (min-width: 768px) {
+    .pika-single {
+        min-width: 240px;
+    }
+}
+ 

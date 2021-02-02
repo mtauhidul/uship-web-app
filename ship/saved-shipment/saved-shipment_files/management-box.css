@@ -1,0 +1,501 @@
+.mgmt-box{
+	margin: 20px 0 10px 0;
+	border: 1px solid #d4d4d4;
+	border-radius: 4px;
+	background-color: #ffffff;
+	background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ffffff), to(#f6f6f6));
+    background-image: -moz-linear-gradient(top, #ffffff, #f6f6f6);
+    background-image: -webkit-linear-gradient(top, #ffffff, #f6f6f6);
+    background-image: -o-linear-gradient(top, #ffffff, #f6f6f6);
+    background-image: -ms-linear-gradient(top, #ffffff, #f6f6f6);
+    background-image: linear-gradient(top, #ffffff, #f6f6f6);
+    background-repeat: repeat-x;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#f6f6f6', GradientType=0);
+    -moz-box-shadow: 0 2px 1px -1px #CCCCCC;
+    -webkit-box-shadow: 0 2px 1px -1px #CCCCCC;
+ 	box-shadow: 0 2px 1px -1px #CCCCCC;
+}
+.mgmt-box-main {
+	text-align: left;
+	padding: 20px;
+    font-size: 14px;
+	font-size: 0.875rem; /*14px / 16px*/
+	color: #333333;
+}
+.mgmt-box-inner {
+		background: transparent url('/public/images/elements/faux/bgs/action_faux_bg_gray.png') repeat-y right top;
+}
+  .book-request .mgmt-box-inner {
+  	 background-position: 548px top;
+  }
+.mgmt-box-main-text {
+	position: relative;
+	display: block;
+}
+
+    .mgmt-box-main-text ul {
+        margin-left:20px;
+        list-style:disc;
+    }
+.mgmt-box-main-action-text, 
+.mgmt-box-main-action-text-block, 
+.mgmt-box-main-action-text-no-image, 
+.mgmt-box-main-action-text-no-image-sub-title,
+.mgmt-box-main-action-text-no-image-sub-title-larger {
+		color: #666666;
+        padding-left: 20px;
+        font-size: 14px;
+        font-size: 0.875rem; /*14px / 16px*/
+    }
+
+.mgmt-box-main-action-text-no-image.total-price {
+    padding-bottom: 5px;
+    padding-top: 3px;
+}
+
+.mgmt-box-main-action-text-block {
+    display:block;
+    padding-right:50px;
+}
+
+.mgmt-box-main-action-text-no-image-sub-title {
+    font-weight:bold;
+    padding-left: 0;
+    padding-bottom:2px;
+}
+
+.mgmt-box-main-action-text-no-image, .mgmt-box-main-action-text-no-image-sub-title-larger {
+    padding-left: 0;
+    padding-bottom: 10px;
+}
+
+.mgmt-box-main-action-text-no-image-sub-title-larger {
+    font-size: 16px;
+    font-size: 1rem; /*16px / 16px*/
+    font-weight:bold;
+}
+
+    .mgmt-box-main-action-text-no-image:last-child {
+        padding-bottom:0;
+    }
+
+    .mgmt-box-main-action-text a {
+        font-weight:bold;
+    }
+    .mgmt-box-safeshipping-toggle {
+    	text-transform: capitalize;
+    }
+
+    .mgmt-box-main-action-text li {
+        padding-bottom:10px;
+        padding-right:50px;
+    }
+	
+.mgmt-box-main-text-title {
+		font-size: 1rem;
+		line-height: 20px;
+		padding-bottom: 5px;
+		font-weight: bold;
+}	
+.mgmt-box-completedbylister .mgmt-box-main-text-title {
+		font-weight: normal;
+}
+
+.mgmt-box-main-text-subtitle {
+    padding-bottom: 5px;
+}
+
+.mgmt-box-main-text-subtitle:last-child {
+    padding-bottom: 0px;
+}
+
+.mgmt-box-main-action {
+	text-align: left;
+	border-top: 1px solid #eeeeee;
+    margin-left: 20px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+	.book-request .mgmt-box-main-action {
+		max-width: 450px;
+	}
+.mgmt-box-main-action-layout{
+	clear: both;
+	content: ".";
+	display: block;
+	visibility: hidden;
+}
+.mgmt-box-main-link {
+	font-weight: bold;
+    font-size: 14px;
+	font-size: 0.875rem; /*14px / 16px*/
+}
+.mgmt-box-time-remaining {
+	font-weight: bold;
+	color: #9B2F32;
+}
+.mgmt-box-side {
+ 	padding: 0 0 20px 30px;
+ 	display: inline-block;
+}
+	.book-request .mgmt-box-side {
+		padding-left: 5px;
+	}
+.mgmt-box-side-actions {
+	margin-top: 15px;
+	font-weight: bold;
+	position: relative;
+	padding-left: 25px;
+	color: #666666;
+    font-size: 14px;
+    font-size: 0.875rem; /*14px / 16px*/
+}
+
+.mgmt-box-side-actions-btn {
+	margin-top: 15px;
+	text-align: center;
+	font-weight: bold;
+	position: relative;
+	padding-right: 15px;
+	color: #666666;
+    font-size: 14px;
+    font-size: 0.875rem; /*14px / 16px*/
+}
+
+.mgmt-box-side-actions:hover {
+	color: #2266A4;
+}
+.mgmt-box-side-link {
+	color: #666666;
+	cursor: pointer;
+}
+
+.mgmt-box-question-mark {
+    background: transparent url("/public/images/icons/info-blue-12x12.png") no-repeat center center;
+    height: 16px;
+    width: 16px;
+    position: absolute;
+	right: 0;
+}
+
+.mgmt-box-side-link:hover .mgmt-box-action-svg{
+    fill: #1a63a3;
+} 
+ .mgmt-box-side-link:hover{
+    color:#1a63a3;
+    text-decoration: underline;
+}
+
+.mgmt-box-action-svg {
+	color: #666666;
+	height: 16px;
+	width: 16px;
+	position: absolute;
+	left: 0;
+	top: 0;
+}
+
+.mgmt-box-networks-svg {
+	fill: #6D4092;
+	height: 16px;
+	width: 16px;
+	left: 0;
+	top: 0;
+}
+
+.mgmt-box-action {
+	color: #666666;
+	background: url('/public/images/elements/listing/mgmt-sprite-vertical-060413.png') no-repeat left top;
+	height: 16px;
+	width: 16px;
+	position: absolute;
+	left: 0;
+	top: 0;
+}
+	.mgmt-box-action:hover {
+			color: #1a63a3;
+			text-decoration: none;
+	}
+	.book-request .mgmt-box-action {
+        font-size: 12px;
+		font-size: 0.75rem; /*12px / 16px*/
+	}
+.mgmt-box-action-edit {
+	background-position: left -64px;
+}
+	.mgmt-box-side-actions:hover .mgmt-box-action-edit {
+		background-position: left -80px;
+	}
+.mgmt-box-action-edit-price {
+	background-position: left -192px;
+}
+	.mgmt-box-side-actions:hover .mgmt-box-action-edit-price {
+		background-position: left -209px;
+	}
+.mgmt-box-action-nyp {
+	background-position: left -95px;
+}
+	.mgmt-box-side-actions:hover .mgmt-box-action-nyp,
+	.mgmt-box-main-action-nyp
+	{
+		background-position: left -111px;
+	}
+.mgmt-box-action-delete {
+		background-position: left 1px;
+	}
+	.mgmt-box-side-actions:hover .mgmt-box-action-delete {
+		background-position: left -15px;
+	}
+.mgmt-box-action-add-shipment {
+	background-position: left -160px;
+}
+.mgmt-box-side-actions:hover .mgmt-box-action-add-shipment {
+    background-position: left -176px;
+}
+.mgmt-box-action-pubrates {
+	background-position: left -560px;
+}
+.mgmt-box-action-verify {
+	background-position: left -623px;
+}
+.mgmt-box-action-payment {
+	background-position: left -607px;
+}
+.mgmt-box-action-safe-shipping {
+	background-position: left -592px;
+}
+.mgmt-box-action-list {
+	background-position: left -416px;
+}
+	.more-dropdown-actions:hover .mgmt-box-action-list {
+		background-position: left -432px;
+	}
+.mgmt-box-action-email,
+.mgmt-box-side-actions .more-dropdown .more-dropdown-actions .mgmt-box-action-email {
+	background-position: left -448px;
+}
+	.mgmt-box-side-actions:hover .mgmt-box-action-email,
+	.mgmt-box-side-actions .more-dropdown .more-dropdown-actions:hover .mgmt-box-action-email {
+		background-position: left -464px;
+	}
+
+.mgmt-box-action-print-bill-lading {
+    background-position: left -656px;
+}
+    .mgmt-box-side-actions:hover .mgmt-box-action-print-bill-lading {
+        background-position: left -672px;
+    }
+
+.mgmt-box-action-print,
+.mgmt-box-side-actions .more-dropdown .more-dropdown-actions .mgmt-box-action-print {
+	background-position: left -480px;
+}
+	.mgmt-box-side-actions:hover .mgmt-box-action-print,
+	.mgmt-box-side-actions .more-dropdown .more-dropdown-actions:hover .mgmt-box-action-print {
+		background-position: left -496px;
+	}
+.mgmt-box-action-upgrade {
+	background-position: left -127px;
+}
+	.mgmt-box-side-actions:hover .mgmt-box-action-upgrade {
+		background-position: left -143px;
+	}
+.mgmt-box-action-relist {
+	background-position: left -224px;
+}
+	.mgmt-box-side-actions:hover .mgmt-box-action-relist {
+		background-position: left -240px;
+	}
+.mgmt-box-action-list-similar,
+.mgmt-box-side-actions .more-dropdown .more-dropdown-actions .mgmt-box-action-list-similar {
+	background-position: left -415px;
+}
+	.mgmt-box-side-actions:hover .mgmt-box-action-list-similar,
+	.mgmt-box-side-actions .more-dropdown .more-dropdown-actions:hover .mgmt-box-action-list-similar {
+		background-position: left -431px;
+	}
+
+.mgmt-box-action-label {
+	background-position: left -688px;
+}
+	.mgmt-box-side-actions:hover .mgmt-box-action-label {
+		background-position: left -704px;
+	}
+.mgmt-box-action-mark-not-complete {
+	background-position: left -32px;
+	display: inline-block;
+}
+	.mgmt-box-side-actions:hover .mgmt-box-action-mark-not-complete {
+		background-position: left -48px;
+	}
+.mgmt-box-action-cancel-request {
+	background-position: left -32px;
+	display: inline-block;
+}
+	.mgmt-box-side-actions:hover .mgmt-box-action-cancel-request {
+		background-position: left -48px;
+	}
+.mgmt-box-action-book-details {
+	background-position: left -255px;
+}
+	.mgmt-box-side-actions:hover .mgmt-box-action-book-details {
+		background-position: left -271px;
+	}
+.mgmt-box-action-report {
+	background-position: left -287px;
+}
+	.mgmt-box-side-actions:hover .mgmt-box-action-report {
+		background-position: left -303px;
+	}
+.mgmt-box-action-file {
+	background-position: left -320px;
+}
+	.mgmt-box-side-actions:hover .mgmt-box-action-file {
+		background-position: left -336px;
+	}
+.mgmt-box-action-feedback {
+	background-position: left -351px;
+}
+	.mgmt-box-side-actions:hover .mgmt-box-action-feedback {
+		background-position: left -367px;
+	}
+.mgmt-box-action-track {
+	background-position: left -383px;
+}
+	.mgmt-box-side-actions:hover .mgmt-box-action-track {
+		background-position: left -399px;
+	}
+
+.mgmt-box-action-track-icon {
+    background-position: left -640px;
+}
+
+.mgmt-box-action-request {
+	background-position: left -576px;
+}
+.mgmt-box-action-question {
+	background-position: left -544px;
+}
+.mgmt-box-action-more-arrow {
+	background: url('/public/images/elements/listing/mgmt-sprite-vertical-060413.png') no-repeat left -516px;
+	position: relative;
+	height:  7px;
+	width: 16px;
+}
+.mgmt-box-side-link:hover .mgmt-box-action-more-arrow {
+	background-position: left -532px;
+}
+.mgmt-box-action:hover .mgmt-box-action-more-arrow {
+  background-position: left -532px;
+}
+.more-dropdown {
+	background-color: #ffffff;
+	border: 1px solid #b6b6b6;
+	border-radius: 4px;
+	width: 189px;
+	padding: 5px 20px 0 0;
+	position: absolute;
+	margin-top: 10px;
+	z-index: 10;
+}
+.more-dropdown-actions {
+	padding-left: 25px;
+	white-space: nowrap;
+	position: relative;
+	margin: 10px 0 10px 5px ;
+}
+.mgmt-box-provider-info {
+	text-transform: capitalize;
+	color: #666666;
+	padding-bottom: 5px;
+    font-size: 14px;
+    font-size: 0.875rem; /*14px / 16px*/
+}
+.mgmt-box-provider-img {
+	width: 75px;
+	padding: 0 0 20px 5px;
+	float: left;
+}
+.mgmt-box-italic {
+	font-style: italic;
+    font-size: 12px;
+	font-size: 0.75rem; /*12px / 16px*/
+	display: inline-block;
+	color: #666666;
+    padding-left:5px;
+}
+.mgmt-box-overflow {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+  overflow: hidden;
+}
+.mgmt-box-defaultcasing {
+	text-transform: none;
+}
+
+.mgmt-box-pricing .modalpanel-container {
+  font-size: 12px;
+}
+.mgmt-box-pricing .matchdetails-pricing-summary {
+  width: 370px;
+  padding: 10px 20px 5px 10px;
+}
+.mgmt-box-pricing .matchdetails-amountdue {
+  border-top: 2px solid #aaa;
+  font-weight: bold;
+}
+.mgmt-box-pricing .matchdetails-item {
+  margin-bottom: 5px;
+}
+.mgmt-box-pricing .matchdetails-item-description {
+  display: inline-block;
+  width: 260px;
+  margin-right: 20px;
+}
+.mgmt-box-pricing .matchdetails-item-info {
+  display: inline-block;
+  width: 85px;
+  text-align: right;
+  white-space: nowrap;;
+}
+.mgmt-box-pricing .matchdetails-insurancecoverage,
+.mgmt-box-pricing .matchdetails-subscriptionfee {
+  display: none;
+}
+.mgmt-box-pricing .notification {
+  width: 400px;
+  border-radius: 0 0 7px 7px;
+  margin: 10px 0 0 0;
+  border-top: 1px solid;
+}
+.mgmt-box-pricing .notification-hd {
+  text-transform: none;
+}
+.mgmt-box-pricing .matchdetails-paymentwarning-header {
+  display: none;
+}
+.mgmt-box .right-float-provider-image {
+    width: 50%;
+    float: right;
+}
+.mgmt-box .tracking-update-text {
+    font-size: 15px;
+    color: #777777;
+    margin-bottom: 10px;
+    display: inline-block;
+    width: 90%;
+    margin-left: 10px;
+}
+.mgmt-box .icon-pro-area {
+    float: left;
+    font-size: 16px;
+    color: #134877;
+}
+.pointer {
+	cursor: pointer;
+}
+
+.mgmt-box-reveal-payment-link {
+    font-weight: bold;
+}

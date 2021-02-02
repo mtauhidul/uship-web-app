@@ -1,0 +1,1851 @@
+div.olMap {
+    z-index: 0;
+    padding: 0 !important;
+    margin: 0 !important;
+    cursor: default;
+    background-image: url("img/grid.png");
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+div.olMapViewport {
+    text-align: left;
+}
+
+div.olLayerDiv {
+    -moz-user-select: none;
+    -khtml-user-select: none;
+}
+
+.olLayerGoogleCopyright {
+    left: 2px;
+    bottom: 2px;
+}
+
+.olLayerGoogleV3.olLayerGoogleCopyright {
+    right: auto !important;
+}
+
+.olLayerGooglePoweredBy {
+    left: 2px;
+    bottom: 15px;
+}
+
+.olLayerGoogleV3.olLayerGooglePoweredBy {
+    bottom: 15px !important;
+}
+
+.olControlAttribution {
+    font-size: 10px;
+    left: 10px;
+    bottom: 5px;
+    position: absolute;
+    display: block;
+    color: #444;
+}
+
+.olControlAttributionTopLeft {
+    left: 60px;
+    top: 12px;
+    bottom: auto;
+}
+
+.olControlAttributionTopRight {
+    left: auto;
+    top: 12px;
+    bottom: auto;
+    right: 10px;
+}
+
+.olControlAttributionBottomRight {
+    left: auto;
+    right: 10px;
+}
+
+.olControlAttribution img {
+    vertical-align: middle;
+    margin-top: -3px;
+    margin-right: 3px;
+    border: 0;
+}
+
+.olControlAttribution a {
+    color: #444;
+    text-decoration: none;
+    text-shadow: 0px 0px 5px #dedede;
+    filter: dropshadow(color=#ffffff, offx=0, offy=0);
+}
+
+.olControlInfoWarning {
+    font-size: 10px;
+    left: 10px;
+    bottom: 30px;
+    position: absolute;
+    display: block;
+    color: #444;
+}
+
+
+/* Satellite attribution - white font and dark background */
+
+.satellite a {
+    color: #fff;
+    text-decoration: none;
+    text-shadow: 0px 0px 5px #000;
+    filter: dropshadow(color=#000, offx=0, offy=0);
+}
+
+.olControlScale {
+    right: 5px;
+    bottom: 20px;
+    display: block;
+    position: absolute;
+    font-size: smaller;
+}
+
+.olControlScaleLine {
+    display: block;
+    position: absolute;
+    right: 5px;
+    bottom: 35px;
+    font-size: xx-small;
+}
+
+.olControlScaleLineBottom {
+    border: solid 2px black;
+    border-bottom: none;
+    margin-top: -2px;
+    text-align: center;
+}
+
+.olControlScaleLineTop {
+    border: solid 2px black;
+    border-top: none;
+    text-align: center;
+}
+
+.olControlPermalink {
+    right: 3px;
+    bottom: 1.5em;
+    display: block;
+    position: absolute;
+    font-size: smaller;
+}
+
+div.olControlMousePosition {
+    bottom: 5px;
+    right: 5px;
+    display: block;
+    position: absolute;
+    font-size: smaller;
+}
+
+div.olControlHeatMapLegend {
+    bottom: 70px;
+    right: 5px;
+    display: block;
+    font-size: xx-small;
+    padding: 2px;
+    background-color: rgba(245,245,245,0.7);
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+div.olControlHeatMapLegend .olTitle{
+    margin-top: 0;
+    margin-bottom: 0;
+}
+div.olControlHeatMapLegend .olMinValue {
+  float: left;
+}
+div.olControlHeatMapLegend .olMaxValue {
+    float: right;
+}
+div.olControlHeatMapLegend .olImageLegend {
+    width: 100%;
+}
+
+.olControlOverviewMapContainer {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.olControlOverviewMapElement {
+    padding: 0px 0px 10px 10px;
+    background-color: #ffffff;
+    -moz-border-radius: 1em 0 0 0;
+}
+
+.olControlOverviewMapMinimizeButton {
+    right: 0;
+    top: 10px;
+    cursor: pointer;
+}
+
+.olControlOverviewMapMaximizeButton {
+    right: 0;
+    top: 10px;
+    cursor: pointer;
+}
+
+.olControlOverviewMapExtentRectangle {
+    overflow: hidden;
+    background-image: url("img/blank.gif");
+    cursor: move;
+    border: 1px dotted red;
+}
+
+.olControlOverviewMapRectReplacement {
+    overflow: hidden;
+    cursor: move;
+    background-image: url("img/overview_replacement.gif");
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.olLayerGeoRSSDescription {
+    float: left;
+    width: 100%;
+    overflow: auto;
+    font-size: 1.0em;
+}
+
+.olLayerGeoRSSClose {
+    float: right;
+    color: gray;
+    font-size: 1.2em;
+    margin-right: 6px;
+    font-family: sans-serif;
+}
+
+.olLayerGeoRSSTitle {
+    float:left;font-size:1.2em;
+}
+
+.olPopup {
+    overflow: visible;
+}
+
+.olPopupContent {
+    padding: 5px;
+    overflow: auto;
+    font-size: 0.9em;
+    text-align: left;
+    width: auto;
+    height: auto;
+}
+
+.olFramedCloudPopupContent p, .olPopupContent p {
+	margin: 0;
+}
+
+.olControlNavigationHistory {
+    background-image: url("img/navigation_history.png");
+    background-repeat: no-repeat;
+    width: 24px;
+    height: 24px;
+}
+
+.olControlNavigationHistoryPreviousItemActive {
+    background-position: 0 0;
+    cursor: pointer;
+}
+
+.olControlNavigationHistoryPreviousItemInactive {
+    background-position: 0 -24px;
+}
+
+.olControlNavigationHistoryNextItemActive {
+    background-position: -24px 0;
+    cursor: pointer;
+}
+
+.olControlNavigationHistoryNextItemInactive {
+    background-position: -24px -24px;
+}
+
+div.olControlSaveFeaturesItemActive {
+    background-image: url(../img/save_features_on.png);
+    background-repeat: no-repeat;
+    background-position: 0 1px;
+}
+
+div.olControlSaveFeaturesItemInactive {
+    background-image: url(../img/save_features_off.png);
+    background-repeat: no-repeat;
+    background-position: 0 1px;
+}
+
+.olHandlerBoxZoomBox {
+    border: 2px solid red;
+    position: absolute;
+    background-color: white;
+    opacity: 0.50;
+    font-size: 1px;
+    filter: alpha(opacity=50);
+}
+
+.olHandlerBoxSelectFeature {
+    border: 2px solid blue;
+    position: absolute;
+    background-color: white;
+    opacity: 0.50;
+    font-size: 1px;
+    filter: alpha(opacity=50);
+}
+
+.olControlPanPanel {
+    top: 10px;
+    left: 5px;
+}
+
+.olControlPanPanel div {
+    background-image: url("img/pan-panel.png");
+    height: 18px;
+    width: 18px;
+    cursor: pointer;
+    position: absolute;
+}
+
+.olControlPanPanel .olControlPanNorthItemInactive {
+    top: 0;
+    left: 9px;
+    background-position: 0 0;
+}
+
+.olControlPanPanel .olControlPanSouthItemInactive {
+    top: 36px;
+    left: 9px;
+    background-position: 18px 0;
+}
+
+.olControlPanPanel .olControlPanWestItemInactive {
+    position: absolute;
+    top: 18px;
+    left: 0;
+    background-position: 0 18px;
+}
+
+.olControlPanPanel .olControlPanEastItemInactive {
+    top: 18px;
+    left: 18px;
+    background-position: 18px 18px;
+}
+
+.olControlZoomPanel {
+    top: 71px;
+    left: 14px;
+}
+
+.olControlZoomPanel div {
+    background-image: url("img/zoom-panel.png");
+    position: absolute;
+    height: 18px;
+    width: 18px;
+    cursor: pointer;
+}
+
+.olControlZoomPanel .olControlZoomInItemInactive {
+    top: 0;
+    left: 0;
+    background-position: 0 0;
+}
+
+.olControlZoomPanel .olControlZoomToMaxExtentItemInactive {
+    top: 18px;
+    left: 0;
+    background-position: 0 -18px;
+}
+
+.olControlZoomPanel .olControlZoomOutItemInactive {
+    top: 36px;
+    left: 0;
+    background-position: 0 18px;
+}
+
+
+/* 
+ * When a potential text is bigger than the image it move the image
+ * with some headers (closes #3154) 
+ */
+
+.olControlPanZoomBar div {
+    font-size: 1px;
+}
+
+.olPopupCloseBox {
+    background: url("img/close.png") no-repeat;
+    cursor: pointer;
+}
+
+.olFramedCloudPopupContent {
+    padding: 5px;
+    overflow: auto;
+}
+
+
+/* Add PrettyPopup in Sept 2014*/
+
+.popup {
+    position: relative;
+}
+
+.popup-close-button {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 4px 4px 0 0;
+    text-align: center;
+    width: 18px;
+    height: 14px;
+    font: 16px/14px Tahoma, Verdana, sans-serif;
+    color: #c3c3c3;
+    text-decoration: none;
+    font-weight: bold;
+    background: transparent;
+    cursor: pointer;
+}
+
+.popup-content-container {
+    background: white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    padding: 1px;
+    text-align: left;
+    border-radius: 8px;
+}
+
+.popup-content {
+    margin: 12px 20px 12px 14px;
+    overflow: auto;
+}
+
+.popup-content .single-search {
+    font: 12px/1.5 "Helvetica Neue", Arial, Helvetica, sans-serif;
+}
+
+.popup-content-forJS {
+    margin: 0 10px 0 14px;
+}
+
+.popup-content-forJS .single-search {
+    font: 12px/1.5 "Helvetica Neue", Arial, Helvetica, sans-serif;
+}
+
+.popup-stem-container {
+    margin: 0 auto;
+    width: 50px;
+    height: 30px;
+    position: relative;
+    overflow: hidden;
+}
+
+.popup-stem {
+    background: white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    width: 27px;
+    height: 27px;
+    padding: 1px;
+    margin: -16px auto 0;
+    -webkit-transform: rotate(45deg) skew(22deg, 22deg);
+    -moz-transform: rotate(45deg) skew(22deg, 22deg);
+    -ms-transform: rotate(45deg) skew(22deg, 22deg);
+    -o-transform: rotate(45deg) skew(22deg, 22deg);
+    transform: rotate(45deg) skew(22deg, 22deg);
+}
+
+
+/* End PrettyPopup*/
+
+.olControlNoSelect {
+    /*	
+	text-shadow: 1px 1px 0px #ffffff;
+	filter: dropshadow(color=#ffffff, offx=1, offy=1);
+	*/
+    -moz-user-select: none;
+    -khtml-user-select: none;
+}
+
+.olImageLoadError {
+    background-color: none;
+    opacity: 0;
+    filter: alpha(opacity=0); /* IE */
+}
+
+img.olImageLoadError {
+    display: none;
+}
+
+
+/**
+ * Cursor styles
+ */
+
+.olCursorWait {
+    cursor: wait;
+}
+
+.olDragDown {
+    cursor: move;
+}
+
+.olDrawBox {
+    cursor: crosshair;
+}
+.olControlDragFeatureOver, .olControlALKDragFeatureOver {
+    cursor: move;
+}
+
+.olControlDragFeatureActive.olControlDragFeatureOver.olDragDown {
+    cursor: -moz-grabbing;
+}
+
+
+/**
+ * Layer switcher
+ */
+
+.olControlLayerSwitcher {
+    position: absolute;
+    top: 25px;
+    right: 0;
+    width: 20em;
+    font-family: sans-serif;
+    font-weight: bold;
+    margin-top: 3px;
+    margin-left: 3px;
+    margin-bottom: 3px;
+    font-size: smaller;
+    color: #3e4449;
+    background-color: transparent;
+}
+
+.olControlLayerSwitcher .layersDiv {
+    padding-top: 5px;
+    padding-left: 10px;
+    padding-bottom: 5px;
+    padding-right: 75px;
+    background-color: white;
+    border: 1px solid #667582;
+    width: 100%;
+    height: 100%;
+}
+
+.olControlLayerSwitcher .layersDiv .baseLbl,
+.olControlLayerSwitcher .layersDiv .dataLbl {
+    margin-top: 3px;
+    margin-left: 3px;
+    margin-bottom: 3px;
+}
+
+.olControlLayerSwitcher .layersDiv .baseLayersDiv,
+.olControlLayerSwitcher .layersDiv .dataLayersDiv {
+    padding-left: 10px;
+}
+
+.olControlLayerSwitcher .maximizeDiv,
+.olControlLayerSwitcher .minimizeDiv {
+    top: 5px;
+    right: 0;
+    cursor: pointer;
+}
+
+.olBingAttribution {
+    color: #DDD;
+}
+
+.olBingAttribution.road {
+    color: #333;
+}
+
+.olGoogleAttribution.hybrid, .olGoogleAttribution.satellite {
+    color: #EEE;
+}
+
+.olGoogleAttribution {
+    color: #333;
+}
+
+span.olGoogleAttribution a {
+    color: #77C;
+}
+span.olGoogleAttribution.hybrid a, span.olGoogleAttribution.satellite a {
+    color: #EEE;
+}
+
+
+/**
+ * Editing and navigation icons.
+ * (using the editing_tool_bar.png sprint image)
+ */
+.olControlNavToolbar ,
+.olControlEditingToolbar {
+}
+.olControlNavToolbar div,
+.olControlEditingToolbar div {
+    background-image: url("img/editing_tool_bar.png");
+    background-repeat: no-repeat;
+    margin: 0 0 0 5px;
+    width: 24px;
+    height: 22px;
+    cursor: pointer
+}
+
+
+/* positions */
+
+.olControlEditingToolbar {
+    left: 54px;
+    top: 8px;
+}
+
+.olControlNavToolbar {
+    top: 295px;
+    left: 9px;
+}
+
+
+/* layouts */
+
+.olControlEditingToolbar div {
+    float: right;
+}
+
+
+/* individual controls */
+
+.olControlNavToolbar .olControlNavigationItemInactive,
+.olControlEditingToolbar .olControlNavigationItemInactive {
+    background-position: -103px -1px;
+}
+
+.olControlNavToolbar .olControlNavigationItemActive,
+.olControlEditingToolbar .olControlNavigationItemActive {
+    background-position: -103px -24px;
+}
+
+.olControlNavToolbar .olControlZoomBoxItemInactive {
+    background-position: -128px -1px;
+}
+
+.olControlNavToolbar .olControlZoomBoxItemActive {
+    background-position: -128px -24px;
+}
+
+.olControlEditingToolbar .olControlDrawFeaturePointItemInactive {
+    background-position: -77px -1px;
+}
+
+.olControlEditingToolbar .olControlDrawFeaturePointItemActive {
+    background-position: -77px -24px;
+}
+
+.olControlEditingToolbar .olControlDrawFeaturePathItemInactive {
+    background-position: -51px -1px;
+}
+
+.olControlEditingToolbar .olControlDrawFeaturePathItemActive {
+    background-position: -51px -24px;
+}
+
+.olControlEditingToolbar .olControlDrawFeaturePolygonItemInactive {
+    background-position: -26px -1px;
+}
+
+.olControlEditingToolbar .olControlDrawFeaturePolygonItemActive {
+    background-position: -26px -24px;
+}
+
+.olControlViewportInfo
+{
+	padding: 5px;
+	position: absolute;
+	left: 5px;
+	bottom: 30px;	
+	visibility: visible;
+	z-index: 999;
+	background-color: #fff;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+	font-size: smaller;
+	min-width: 175px;
+	opacity:0.8;
+	filter: alpha(opacity=80);
+}
+
+.alkMarkerLabel {
+    font-size: .8em;
+    color: black;
+    background-color: #cccccc;
+    min-width: 50px;
+    padding: 1px;
+    border: 1px #999999 solid;
+    z-index: 1000;
+    text-align: center;
+}
+
+.olMarker {
+    overflow: visible;
+}
+
+.olMarkerContent {
+    padding: 3px;
+    /*overflow: auto;*/
+    font-size: 0.9em;
+    text-align: left;
+    width: auto;
+    height: auto;
+}
+
+.olMarkerCloseBox {
+    background: url("img/close.png") no-repeat;
+    cursor: pointer;
+}
+
+.olMarkerCluster { /*http://stackoverflow.com/questions/4801181/vertically-and-horizontally-centering-text-in-circle-in-css-like-iphone-notific*/
+    background-color: green;
+    border: 2px solid white;
+    border-radius: 12px;
+    box-shadow: 1px 1px 1px black;
+    color: white;
+    font: bold 15px/13px Helvetica, Verdana, Tahoma;
+    height: 16px;
+    min-width: 14px;
+    padding: 4px 3px 3px 3px;
+    text-align: center;
+    line-height: 15px;
+    margin: -2px 6px 0px -2px;
+}
+
+.olControlALKPanel {
+    background-color: white;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    opacity: 0.8;
+    filter: alpha(opacity=80);
+    padding: 3px;
+    border: 1px solid #666;
+    display: block;
+}
+
+.olControlALKPanel div {
+    float: left;
+    margin-right: 3px;
+    height: 26px;
+    width: 26px;
+    background-position: center;
+    background-repeat: no-repeat;
+    cursor: pointer;
+}
+
+.olControlPanel {
+    background-color: white;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    opacity: 0.8;
+    filter: alpha(opacity=80);
+    padding: 3px 0px 3px 3px;
+    border: 1px solid #666;
+}
+
+.olControlPanel {
+    left: 54px;
+    top: 48px;
+}
+
+.olControlNavPanel {
+    left: 54px;
+    top: 8px;
+}
+
+.olControlEditPanel {
+    left: 54px;
+    top: 48px;
+    max-width: 26px;
+    display: none;
+}
+
+.olControlEditPanel,
+.olControlEditPanel:before,
+.olControlEditPanel:after {
+    -webkit-box-sizing: content-box;
+    -moz-box-sizing: content-box;
+    box-sizing: content-box;
+}
+
+.olControlEditPanelActive .olControlEditPanel, .olControlPointMenuActive .olControlPointMenu {
+	display:block;	
+}
+
+.olControlPanel div {
+    float: left;
+    margin-right: 3px;
+}
+
+.olControlEditPanel div, .olControlPointMenu div {
+    margin-bottom:3px;
+}
+
+ .olControlNavPanel div{
+
+ }
+
+.olControlPointMenu {
+    left: 89px;
+    top: 48px;
+    max-height: 26px;
+    padding: 3px 3px 3px 3px;
+    display: none;
+}
+
+ .olControlNavPanel .olControlNavigationHistoryItemActive,  .olControlNavPanel .olControlNavigationHistoryItemInactive {
+	height: 0;
+	width: 0;
+ }
+
+.olControlNavPanel .olControlNavigationHistoryNextItemInactive {
+    background: url(img/view_next_off.png);
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.olControlNavPanel .olControlNavigationHistoryNextItemActive {
+    background: url(img/view_next_on.png);
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.olControlNavPanel .olControlNavigationHistoryPreviousItemInactive {
+    background: url(img/view_previous_off.png);
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.olControlNavPanel .olControlNavigationHistoryPreviousItemActive {
+    background: url(img/view_previous_on.png);
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.alkEditPaneltoggleItemInactive {
+    background-image: url(img/edit_tools_off.png);
+}
+
+.alkEditPaneltoggleItemActive {
+    background-image: url(img/edit_tools_on.png);
+}
+
+.alkSelectButtontoggleItemInactive {
+    background-image: url(img/get_info_off.png);
+}
+
+.alkSelectButtontoggleItemActive {
+    background-image: url(img/get_info_on.png);
+}
+
+.alkControlSelectFeatureItemInactive {
+    background: url(img/get_info_off.png);
+}
+
+.alkControlSelectFeatureItemActive {
+    background: url(img/get_info_on.png);
+}
+
+.alkControlTransformFeatureItemInactive {
+    background: url(img/transform_off.png);
+}
+
+.alkControlTransformFeatureItemActive {
+    background: url(img/transform_on.png);
+}
+
+.alkControlModifyFeatureItemInactive {
+    background: url(img/edit_off.png);
+}
+
+.alkControlModifyFeatureItemActive {
+    background: url(img/edit_on.png);
+}
+
+.alkControlDrawFeaturePointItemInactive {
+    background: url(img/draw_point_off.png);
+}
+
+.alkControlDrawFeaturePointItemActive {
+    background: url(img/draw_point_on.png);
+}
+
+.alkControlDrawFeaturePathItemInactive {
+    background: url(img/draw_line_off.png);
+}
+
+.alkControlDrawFeaturePathItemActive {
+    background: url(img/draw_line_on.png);
+}
+
+.alkControlDrawFeatureCircleItemInactive {
+    background: url(img/draw_circle_off.png);
+}
+
+.alkControlDrawFeatureCircleItemActive {
+    background: url(img/draw_circle_on.png);
+}
+
+.alkControlDrawFeatureRectItemInactive {
+    background: url(img/draw_rect_off.png);
+}
+
+.alkControlDrawFeatureRectItemActive {
+    background: url(img/draw_rect_on.png);
+}
+
+.alkControlDrawFeaturePolygonItemInactive {
+    background: url(img/draw_polygon_off.png);
+}
+
+.alkControlDrawFeaturePolygonItemActive {
+    background: url(img/draw_polygon_on.png);
+}
+
+.alkControlDrawFeatureFreehandItemInactive {
+    background: url(img/draw_freeline_off.png);
+}
+
+.alkControlDrawFeatureFreehandItemActive {
+    background: url(img/draw_freeline_on.png);
+}
+
+.alkControlDrawFeatureFreePolyItemInactive {
+    background: url(img/draw_freepoly_off.png);
+}
+
+.alkControlDrawFeatureFreePolyItemActive {
+    background: url(img/draw_freepoly_on.png);
+}
+
+.alkPointCircleItemInactive {
+    background: url(img/circle_off.png);
+}
+
+.alkPointSquareItemInactive {
+    background: url(img/square_off.png);
+}
+
+.alkPointTriangleItemInactive {
+    background: url(img/triangle_off.png);
+}
+
+.alkPointPlusItemInactive {
+    background: url(img/plus_off.png);
+}
+
+.alkPointExItemInactive {
+    background: url(img/x_off.png);
+}
+
+.alkPointStarItemInactive {
+    background: url(img/star_off.png);
+}
+
+.alkPointTruckItemInactive {
+    background: url(img/truck_off.png);
+}
+
+.alkPointCircleItemActive {
+    background: url(img/circle_on.png);
+}
+
+.alkPointSquareItemActive {
+    background: url(img/square_on.png);
+}
+
+.alkPointTriangleItemActive {
+    background: url(img/triangle_on.png);
+}
+
+.alkPointPlusItemActive {
+    background: url(img/plus_on.png);
+}
+
+.alkPointExItemActive {
+    background: url(img/x_on.png);
+}
+
+.alkPointStarItemActive {
+    background: url(img/star_on.png);
+}
+
+.alkPointTruckItemActive {
+    background: url(img/truck_on.png);
+}
+
+.olControlGeolocate {
+    bottom: 30px;
+    left: 12px;
+}
+
+.olControlGeolocate div {
+    float: none;
+}
+
+.alkLocationToggleItemActive {
+    background: url(img/locate_on.png);
+}
+
+.alkLocationToggleItemInactive {
+    background: url(img/locate_off.png);
+}
+
+.alkLocLockToggleItemActive {
+    background: url(img/lock_on.png);
+}
+
+.alkLocLockToggleItemInactive {
+    background: url(img/lock_off.png);
+}
+
+.olControlTouchZoom {
+    top: 8px;
+    left: 12px;
+}
+
+.olControlTouchZoom div {
+    background-color: white;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    opacity: 0.8;
+    filter: alpha(opacity=80);
+    padding: 3px;
+    border: 1px solid #666;
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: pointer;
+    height: 22px;
+    width: 24px;
+}
+
+.alkTouchZoomInItemInactive {
+    background: url(img/zoom_in_off.png);
+}
+
+.alkTouchZoomOutItemInactive {
+    margin-top: 3px;
+    background: url(img/zoom_out_off.png);
+}
+
+.olControlMiniZoomPanel {
+    top: 71px;
+    left: 14px;
+    width: 20px;
+    height: 40px;
+}
+
+.olControlMiniZoomPanel div {
+    width: 18px;
+    height: 18px;
+}
+
+.alkMiniZoomInItemInactive {
+    background-image: url("img/zoom-panel.png");
+    background-position: 0px 0px;
+}
+
+.alkMiniZoomOutItemInactive {
+    background-image: url("img/zoom-panel.png");
+    background-position: 0px -36px;
+}
+
+.olControlCustomButtonToggleItemActive {
+    background: url(img/geocode_on.png);
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: pointer;
+    height: 22px;
+    width: 24px;
+}
+
+.olControlCustomButtonToggleItemInactive {
+    background: url(img/geocode_off.png);
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: pointer;
+    height: 22px;
+    width: 24px;
+}
+
+.olControlMouseDefaultsItemInactive, .olControlNavigationItemInactive{ 
+	background: url(img/pan_off.png);
+	cursor: pointer; 
+	height: 22px; 
+	width: 24px; 
+}
+
+.olControlMouseDefaultsItemActive, .olControlNavigationItemActive{ 
+	background: url(img/pan_on.png);
+	cursor: pointer; 
+	height: 22px; 
+	width: 24px; 
+}
+
+.olControlZoomBoxItemInactive {
+    background: url(img/drag-rectangle-off.png);
+    cursor: pointer;
+    height: 22px;
+    width: 24px;
+}
+
+.olControlZoomBoxItemActive {
+    background: url(img/drag-rectangle-on.png);
+    cursor: pointer;
+    height: 22px;
+    width: 24px;
+}
+
+.olControlLoadingPanel {
+    background-image: url(../theme/default/img/loading.gif);
+    position: relative;
+    width: 195px;
+    height: 11px;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: none;
+}
+
+div.olControlContextMenu {
+    background-color: #cccccc;
+    border: 1px solid #667582;
+    padding: 0px;
+    z-index: 1000;
+    -webkit-box-shadow: 1px 1px 6px 0px rgba(0, 0, 0, .2);
+    -moz-box-shadow: 1px 1px 6px 0px rgba(0, 0, 0, .2);
+    box-shadow: 1px 1px 6px 0px rgba(0, 0, 0, .2);
+}
+
+div.olControlContextMenu ul {
+    margin: 0;
+    list-style: none;
+    padding: 0;
+}
+
+div.olControlContextMenu li {
+    margin: 0;
+    list-style: none;
+}
+
+div.olControlContextMenu li.separator {
+    list-style: none;
+    border-bottom: 1px solid #999;
+}
+
+div.olControlContextMenu li a {
+    display: block;
+    padding: 3px 8px 3px 6px;
+}
+
+div.olControlContextMenu li a:hover {
+    background-color: #94cced;
+}
+
+div.olControlContextMenuFeature {
+    background-color: #cccccc;
+    border: 1px solid #667582;
+    padding: 0px;
+    z-index: 1000;
+    -webkit-box-shadow: 1px 1px 6px 0px rgba(0, 0, 0, .2);
+    -moz-box-shadow: 1px 1px 6px 0px rgba(0, 0, 0, .2);
+    box-shadow: 1px 1px 6px 0px rgba(0, 0, 0, .2);
+}
+
+div.olControlContextMenuFeature ul {
+    margin: 0;
+    list-style: none;
+    padding: 0;
+}
+
+div.olControlContextMenuFeature li {
+    margin: 0;
+    list-style: none;
+}
+
+div.olControlContextMenuFeature li.separator {
+    list-style: none;
+    border-bottom: 1px solid #999;
+}
+
+div.olControlContextMenuFeature li a {
+    display: block;
+    padding: 3px 8px 3px 6px;
+}
+
+div.olControlContextMenuFeature li a:hover {
+    background-color: #94cced;
+}
+
+.alkMapLoadingIcon {
+    background-color: white;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    opacity: 0.5;
+    filter: alpha(opacity=50);
+    padding: 3px;
+    position: absolute;
+    left: 49%;
+    top: 49%;
+}
+
+.olControlFindLocationButtonItemInactive {
+    background-image: url(img/find_off.png);
+}
+
+.olControlFindLocationButtonItemActive {
+    background-image: url(img/find_on.png);
+}
+
+.olControlFindLocationPanel {
+    bottom: 80px;
+    right: 10px
+}
+
+.olControlFindLocationContainer {
+    position: absolute;
+    bottom: 5px;
+    right: 48px;
+}
+
+.olControlFindLocationElement {
+    padding: 0px 0px 10px 10px;
+    background-color: #ffffff;
+    -moz-border-radius: 1em 0 0 0;
+}
+
+
+/*.olControlFindLocationMinimizeButton {
+    right: 0;
+    top: 0;
+    cursor: pointer;
+}    
+
+.olControlFindLocationMaximizeButton {
+    right: 0;
+    top: 0;
+    cursor: pointer;
+}
+*/
+
+.olControlFindLocationInputDiv {
+    width: 220px;
+    height: 125px;
+    background-color: #FFF;
+    padding: 5px 10px;
+    border: 1px solid #667582;
+}
+
+.olControlFindLocationInput {
+    display: block;
+}
+
+.olControlFindLocationInput span {
+    display: block;
+    font-size: smaller;
+    font-weight: bold;
+}
+
+.olControlFindLocationInputAddress input {
+    width: 200px;
+}
+
+.olControlFindLocationInputCity input {
+    width: 110px;
+}
+
+.olControlFindLocationInputState input {
+    width: 30px;
+}
+
+.olControlFindLocationInputZIP input {
+    width: 40px;
+}
+.olControlFindLocationInputCity, .olControlFindLocationInputState, .olControlFindLocationInputZIP{
+    display:inline-block;
+    margin-right: 5px;
+}
+
+.olControlFindLocationInputDiv button {
+    display: block;
+    margin-top: 5px;
+    margin-left: 0;
+}
+
+.olControlFindLocationMessage {
+    font-size: smaller;
+}
+
+
+/******** Report Styles ********/
+
+
+/* Base Report Table */
+
+.alkReportTable {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: small;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.alkReportTable th {
+    text-align: left;
+    border-bottom: 3px solid #666;
+    padding: 5px;
+}
+
+.alkReportTable td {
+    border-top: 1px solid #EEE;
+    padding: 8px;
+    vertical-align: top;
+}
+
+.alkReportTable .alkNumericCol {
+    text-align: right;
+}
+
+.alkReportTable .alkTimeCol {
+    text-align: right;
+}
+
+.alkReportTable .alkCurrencyCol {
+    text-align: right;
+}
+
+
+/* Directions Report */
+
+.alkDirectionsReport {
+    font-family: Arial, Helvetica, sans-serif;
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.alkDirectionsReport .alkHeaderRow {
+    display: none;
+}
+
+.alkDirectionsReport li {
+    padding: 0 15px 0 30px;
+    overflow: hidden;
+}
+
+.alkDirectionsReport .alkDirectionCol {
+    display: block;
+}
+
+.alkDirectionsReport .alkOdometerCol {
+    display: block;
+    float: right;
+    width: 60px;
+    text-align: right;
+    margin-top: -16px;
+}
+
+.alkDirectionsReport .alkTimeCol {
+    display: block;
+    float: right;
+    width: 45px;
+    text-align: right;
+    margin-bottom: 5px;
+    margin-top: -16px;
+    margin-right: 60px;
+}
+
+.alkDirectionsReport .alkDelayCol {
+    display: block;
+    float: left;
+    margin-bottom: 5px;
+    margin-top: -2px;
+    font-weight: bold;
+    color: #633;
+}
+
+.alkDirectionsReport .alkStop {
+    background-image: url(../../img/flag_waypoint.png);
+    background-repeat: no-repeat;
+    font-weight: bold;
+    min-height: 30px;
+    margin: 10px 0;
+    font-size: medium;
+}
+
+.alkDirectionsReport .alkStop .alkOdometerCol,
+.alkDirectionsReport .alkStop .alkTimeCol {
+    font-weight: normal;
+    font-size: small;
+    margin-right: 0;
+    margin-top: 0;
+}
+
+.alkDirectionsReport .alkOrigin {
+    background-image: url(../../img/flag_start.png);
+    background-repeat: no-repeat;
+}
+
+.alkDirectionsReport .alkDestination {
+    background-image: url(../../img/flag_end.png);
+    background-repeat: no-repeat;
+}
+
+.alkDirectionsReport .alkDestination .alkOdometerCol,
+.alkDirectionsReport .alkDestination .alkTimeCol {
+    border-top: 2px solid #666;
+    margin-top: 20px;
+}
+
+.alkDirectionsReport .alkNormal {
+    font-size: small;
+    color: #888;
+}
+
+.alkDirectionsReport .alkNormal .alkDirectionCol {
+    display: block;
+    padding-right: 110px;
+}
+
+.alkDirectionsReport .alkDirection {
+    margin-top: 15px;
+    margin-bottom: 5px;
+    font-size: medium;
+}
+
+.alkDirectionsReport .alkWarning {
+    font-style: italic;
+    margin-top: 15px;
+    margin-bottom: 3px;
+}
+
+.alkDirectionsReport .alkCopyright {
+    font-size: small;
+    margin-top: 30px;
+    margin-bottom: 10px;
+    padding-left: 5px;
+}
+
+.alkDirectionsReport .alkDisclaimer {
+    font-size: x-small;
+    padding-left: 5px;
+}
+
+
+/* WeatherAlerts Report */
+
+.alkWeatherAlertsReport {
+    font-family: Arial, Helvetica, sans-serif;
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.alkWeatherAlertsReport .alkHeaderRow {
+    display: none;
+}
+
+.alkWeatherAlertsReport li {
+    padding: 0 15px 0 30px;
+    overflow: hidden;
+}
+
+.alkWeatherAlertsReport .alkSummaryCol {
+    display: block;
+}
+
+.alkWeatherAlertsReport .alkEventCol {
+    display: block;
+    float: right;
+    width: 60px;
+    text-align: right;
+    margin-top: -16px;
+}
+
+.alkWeatherAlertsReport .alkAreasCol {
+    display: block;
+    float: right;
+    width: 45px;
+    text-align: right;
+    margin-bottom: 5px;
+    margin-top: -16px;
+    margin-right: 60px;
+}
+
+.alkWeatherAlertsReport .alkDateTimeCol {
+    display: block;
+    float: left;
+    margin-bottom: 5px;
+    margin-top: -2px;
+    font-weight: bold;
+    color: #633;
+}
+
+.alkWeatherAlertsReport .alkFilterCol {
+    display: block;
+    float: left;
+    margin-bottom: 5px;
+    margin-top: -2px;
+    font-weight: bold;
+    color: #633;
+}
+
+
+/* iPhone */
+
+@media only screen and (max-width: 480px) {
+	.olControlGeolocate {	
+		
+	}
+}
+
+/* iPad and iPhone */
+
+@media only screen and (max-width: 1025px) and (min-width: 481px) {
+
+	.olControlEditPanel div, .olControlPointMenu div, .olControlNavPanel div, .olControlGeolocate div, .olControlTouchZoom div{
+		height: 36px;
+		width: 36px;
+	}
+	
+	.olControlNavPanel {
+		left: 62px;
+	}
+	
+	.olControlEditPanel {
+		max-width: 36px;
+		left: 62px;
+    	top: 56px;
+	}
+	
+	.olControlPointMenu {
+		left: 108px;
+		top: 56px;
+		max-height: 36px;
+	}
+	
+	.olControlGeolocate {	
+		
+	}
+	
+	.olControlPanel {
+        left: 63px;
+        top: 55px;
+    }
+    .olControlCustomButtonToggleItemActive {
+        height: 36px;
+        width: 36px;
+    }
+    .olControlCustomButtonToggleItemInactive {
+        height: 36px;
+        width: 36px;
+    }
+}
+
+.olControlWeatherAlertLegend {
+    display: block;
+    right: 5px;
+    bottom: 80px;
+    width: 200px;
+    height: 180px;
+    /*z-index: 750;*/
+    border-color: #ddd;
+    background-color: #fff;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
+    box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
+}
+
+.olControlWeatherAlertLegend-header {
+    color: #333;
+    background-color: #f5f5f5;
+    border-color: #ddd;
+    padding: 8px 15px;
+    border-bottom: 1px solid transparent;
+}
+
+.olControlWeatherAlertLegend-header .title {
+    margin-top: 0;
+    margin-bottom: 0;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.olControlWeatherAlertLegend-body {
+    overflow-y: auto;
+    max-height: 124px;
+    padding: 6px;
+}
+
+.olControlWeatherAlertLegend-body div {
+    /*margin: 0 0 10px;*/
+    border: 1px solid #ccc;
+    margin-bottom: 2px;
+    font-size: 11px;
+    padding: 1px 3px 2px;
+    line-height: 12px;
+}
+
+.olControlWeatherAlertLegend-body div input {
+    vertical-align: middle;
+    margin: 0px 2px 0px 0px;
+}
+
+.olControlWeatherAlertOption {
+    display: block;
+    right: 5px;
+    bottom: 266px;
+    width: 200px;
+    height: 180px;
+    /*z-index: 750;*/
+    border-color: #ddd;
+    background-color: #fff;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
+    box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
+}
+
+.olControlWeatherAlertOption-header {
+    color: #333;
+    background-color: #f5f5f5;
+    border-color: #ddd;
+    padding: 8px 15px;
+    border-bottom: 1px solid transparent;
+}
+
+.olControlWeatherAlertOption-header .title {
+    margin-top: 0;
+    margin-bottom: 0;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.olControlWeatherAlertOption-body {
+    padding: 15px;
+    font-size: 11px;
+}
+
+.olControlWeatherAlertOption-body div {
+    float: left;
+    padding-bottom: 4px;
+    width: 100%;
+}
+
+.olControlWeatherAlertOption-body label {
+    font-weight: 700;
+    display: inline-block;
+    width: 34%;
+}
+
+.olControlWeatherAlertOption-body select {
+    width: 66%;
+}
+
+.olControlWeatherAlertOption-body .olProgress {
+    width: 50%;
+}
+
+.olControlWeatherAlertOption-body .olDiv {
+    width: 50%;
+}
+
+.olControlFeatureSlicerLineEndOver {
+    cursor: sw-resize;
+}
+
+.olControlFeatureSlicerLineOver {
+    cursor: crosshair;
+}
+
+.alkmaps-topleft {
+    top: 10px;
+    left: 50px;
+}
+
+.alkmaps-geo-wide {
+    width: 400px;
+}
+
+.alkmaps-geo-panel {
+    position: relative;
+    padding: 0;
+    font: 12px/1.5 "Helvetica Neue", Arial, Helvetica, sans-serif;
+}
+
+.alkmaps-geo-panel .alkmaps-input-sm {
+    padding: 5px;
+}
+
+.alkmaps-geo-panel .btn {
+    margin-right: 4px;
+}
+
+.alkmaps-geo-panel .show {
+    display: block;
+}
+
+.alkmaps-geo-panel .hide {
+    display: none;
+}
+
+.alkmaps-geo-panel .alert {
+    padding: 8px;
+    margin-bottom: 5px;
+}
+
+.alkmaps-geo-panel .alert-danger {
+    color: #a94442;
+    background-color: #f2dede;
+    border-color: #ebccd1;
+}
+
+.alkmaps-geo-panel .alkmaps-geo-row {
+    margin: 5px 0;
+}
+
+.alkmaps-geo-panel .alkmaps-geo-row:after {
+    clear: both;
+    display: table;
+    content: " ";
+}
+
+.alkmaps-geo-panel .alkmaps-geo-input {
+    float: left;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+.alkmaps-geo-panel .alkmaps-geo-address {
+    width: 100%;
+    margin-right: 0;
+}
+
+.alkmaps-geo-panel .alkmaps-geo-city {
+    width: 57%;
+    margin-right: 1%;
+}
+
+.alkmaps-geo-panel .alkmaps-geo-state {
+    width: 16%;
+    margin-right: 1%;
+}
+
+.alkmaps-geo-panel .alkmaps-geo-zip {
+    width: 24%;
+    margin-right: 0;
+}
+
+.alkmaps-geo-panel-position {
+    position: absolute;
+    padding: 10px;
+    margin-bottom: 0;
+    background: #FFF;
+    z-index: 1001;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    border: 1px solid #DDD;
+    border-radius: 4px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+}
+
+.alkmaps-geo-panel .alkmaps-geo-resultsList {
+    position: absolute;
+    background: #FFF;
+    padding: 5px 0;
+    width: 100%;
+    margin: 0;
+    left: 0;
+    z-index: 1005;
+    max-height: 250px;
+    overflow: auto;
+    border: 1px solid #ccc;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+}
+
+.alkmaps-geo-panel .alkmaps-geo-resultsList li {
+    list-style: none;
+    border-bottom: 1px solid #ddd;
+}
+
+.alkmaps-geo-panel .alkmaps-geo-resultsList li a {
+    display: block;
+    padding: 3px 15px;
+    text-decoration: none;
+    color: #333;
+}
+
+.alkmaps-geo-panel .alkmaps-geo-resultsList li a:hover,
+.alkmaps-geo-panel .alkmaps-geo-resultsList li a:focus {
+    background-color: #f5f5f5;
+}
+
+.alkmaps-geo-panel .alkmaps-geo-resultsList .label-position {
+    float: right;
+    bottom: 5px;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.alkmaps-geo-panel .alkmaps-geo-resultsList .label {
+    display: inline;
+    padding: .2em .6em .3em;
+    font-size: 75%;
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: .25em;
+}
+
+.alkmaps-geo-panel .alkmaps-geo-resultsList .label-warning {
+    background-color: #f0ad4e;
+}
+
+.alkmaps-geo-panel .alkmaps-geo-resultsList .results-icon {
+    float: left;
+    margin: 3px 5px 3px -5px;
+}
+
+.alkmaps-geo-panel .alkmaps-geo-resultsList .results-address {
+    display: block;
+    overflow: hidden;
+    -ms-text-overflow: ellipsis;
+    -o-text-overflow: ellipsis;
+    text-overflow: ellipsis;
+    line-height: 15px;
+    margin-bottom: 2px;
+    white-space: nowrap;
+}
+
+.alkmaps-geo-panel .alkmaps-geo-resultsList .results-poi-text {
+    font-weight: 700;
+    color: #0079c2;
+}
+
+.alkmaps-geo-panel .alkmaps-geo-resultsList .results-text {
+    font-weight: 600;
+    color: #333;
+}
+
+.alkmaps-geo-panel .alkmaps-geo-resultsList .results-city {
+    line-height: 15px;
+    margin-bottom: 4px;
+}
+
+map-styles img.square{
+    min-width: 32px;
+    min-height: 32px;
+    background: url(../../img/map_style_default.png);
+}

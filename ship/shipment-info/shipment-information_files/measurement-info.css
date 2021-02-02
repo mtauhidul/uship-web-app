@@ -1,0 +1,157 @@
+/**
+ * ns: measurement-info
+ * path: controls/user/listingcontrols/custom/measurementInfo.ascx
+ * 
+ * generic measurement control
+ */
+
+.ie6 .measurement-info,
+.ie7 .measurement-info, 
+.ie8 .measurement-info  {
+	zoom: 1;
+}
+.measurement-info {
+	position: relative;
+}
+.measurement-info-unit-system {
+	margin-bottom: 5px;
+}
+.measurement-info-input input {
+    width: 30px;
+}
+.measurement-info-weight .measurement-info-input-weight input {
+    width: 50px;
+}
+.measurement-info-input .m,
+.measurement-info-input .kg,
+.measurement-info-input .cm,
+.measurement-info-metric .measurement-info-input .ft,
+.measurement-info-metric .measurement-info-input .in,
+.measurement-info-metric .measurement-info-input .lbs {
+    display: none;
+}
+.measurement-info-metric .measurement-info-input .m,
+.measurement-info-metric .measurement-info-input .cm,
+.measurement-info-metric .measurement-info-input .kg {
+    display: inline;
+}
+/*
+.webkit.responsive-page .measurement-info-input-description,
+	.ff18.responsive-page .measurement-info-input-description {
+		display:none;
+	} */
+
+@media only screen and (max-width: 767px) {
+	/* All measurements */
+    .responsive-page .measurement-info .measurement-info-item .measurement-info-description {
+        font-weight: 600;
+        color: #333333;
+    }
+
+    /* US Measurements*/
+    .responsive-page .measurement-info .measurement-info-item .measurement-info-input .ft,
+    .responsive-page .measurement-info .measurement-info-item .measurement-info-input .in {
+        float: left;
+        width: 50% !important; 
+    }
+    .responsive-page .measurement-info .measurement-info-item .measurement-info-input .ft input.form-input-type-text,
+    .responsive-page .measurement-info .measurement-info-item .measurement-info-input .in input.form-input-type-text {
+        width: 67% !important; /*90% these have like ft. trailing it so we need a little room */
+        margin-top: 0.5em;
+    }
+    .responsive-page .measurement-info .measurement-info-item .measurement-info-input .lbs input.form-input-type-text,
+    .responsive-page .measurement-info .measurement-info-item .measurement-info-input .kg input.form-input-type-text {
+        width: 80% !important; /*90% these have like ft. trailing it so we need a little room */
+        margin-top: 0.5em;
+    }
+	/* for webkit browsers the placeholder tag is valid */
+	.webkit.responsive-page .measurement-info .measurement-info-item .measurement-info-input .ft input.form-input-type-text,
+    .webkit.responsive-page .measurement-info .measurement-info-item .measurement-info-input .in input.form-input-type-text {
+        width: 89% !important; /*67%, 90% these have like ft. trailing it so we need a little room */
+        margin-top: 0.5em;
+    }
+    .webkit.responsive-page .measurement-info .measurement-info-item .measurement-info-input .lbs input.form-input-type-text,
+    .webkit.responsive-page .measurement-info .measurement-info-item .measurement-info-input .kg input.form-input-type-text {
+        width: 94% !important; /*80% 90% these have like ft. trailing it so we need a little room */
+        margin-top: 0.5em;
+    }
+	/* for ie browsers the placeholder tag is not valid */
+	.ie9.responsive-page .measurement-info .measurement-info-item .measurement-info-input .ft input.form-input-type-text,
+    .ie9.responsive-page .measurement-info .measurement-info-item .measurement-info-input .in input.form-input-type-text {
+        width: 69% !important; /*67%, 90% these have like ft. trailing it so we need a little room */
+        margin-top: 0.5em;
+    }
+    .ie9.responsive-page .measurement-info .measurement-info-item .measurement-info-input .lbs input.form-input-type-text,
+    .ie9.responsive-page .measurement-info .measurement-info-item .measurement-info-input .kg input.form-input-type-text {
+        width: 79% !important; /*80% 90% these have like ft. trailing it so we need a little room */
+        margin-top: 0.5em;
+    }
+
+    /* Metric Measurements need a little extra space, plus the weight measurement*/
+    .responsive-page .measurement-info .measurement-info-item .measurement-info-input .m,
+    .responsive-page .measurement-info .measurement-info-item .measurement-info-input .cm {
+        float: left;
+        width: 50%!important;
+    }
+    .responsive-page .measurement-info .measurement-info-item .measurement-info-input .m input.form-input-type-text,
+    .responsive-page .measurement-info .measurement-info-item .measurement-info-input .cm input.form-input-type-text {
+        width: 62% !important; /*88%*/
+        margin-top: 0.5em;
+    }
+	/* for webkit browsers the placeholder tag is valid */
+	.webkit.responsive-page .measurement-info .measurement-info-item .measurement-info-input .m input.form-input-type-text,
+    .webkit.responsive-page .measurement-info .measurement-info-item .measurement-info-input .cm input.form-input-type-text {
+        width: 85% !important; /*88%*/
+        margin-top: 0.5em;
+    }
+	/* for webkit browsers the placeholder tag is valid */
+	.ie9.responsive-page .measurement-info .measurement-info-item .measurement-info-input .m input.form-input-type-text,
+    .ie9.responsive-page .measurement-info .measurement-info-item .measurement-info-input .cm input.form-input-type-text {
+        width: 65% !important; /*88%*/
+        margin-top: 0.5em;
+    }
+}
+
+.measurement-info-item {
+	margin-bottom: 5px;
+}
+@media only screen and (max-width: 767px) {
+	.responsive-page .measurement-info-item {
+        margin-bottom: 5px;
+    }
+  }
+.measurement-info-description {
+	display: block;
+	float: left;
+	position: relative;
+	width: 65px;
+}
+@media only screen and (max-width: 767px) {
+	.responsive-page .measurement-info-description {
+        display: inline; /* block */
+        float: left; /* .layout-unit */
+        position: relative;
+        width: auto; /*65px, .layout-unit*/
+        zoom: 1; /*.layout-unit*/
+        clear: left;
+        margin-top: 0.5em;
+    }
+  }
+.measurement-info-input {
+	margin-left: 75px;
+}
+@media only screen and (max-width: 767px) {
+	.responsive-page .measurement-info-input {
+        margin-left: 0px !important; /* 75px */
+
+        float: left; /*.layout-unit*/
+        width: 100%; /*.layout-unit*/
+        zoom: 1; /*.layout-unit*/
+
+        /*width: 50%; .layout-1of2*/
+
+        clear: left;
+    }
+  }
+  
+  

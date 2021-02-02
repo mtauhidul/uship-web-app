@@ -1,0 +1,16 @@
+/*********
+ * ns: streetaddresses
+ * path: /Controls/User/myuship/StreetAddresses.ascx
+ *
+ * used to edit address details on an existing listing
+ */ 
+
+.streetaddresses-header {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.streetaddresses-button {
+    max-width: 125px;
+    margin-bottom: 10px;
+}

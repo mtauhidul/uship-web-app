@@ -1,0 +1,114 @@
+.progress-bar {
+  width: 100%;
+  padding: 0;
+  margin: 10px 0;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  *zoom: 1; }
+  .progress-bar:before, .progress-bar:after {
+    content: " ";
+    display: table; }
+  .progress-bar:after {
+    clear: both; }
+
+.ie8 .progress-bar {
+  border-right: 1px solid #ccc; }
+
+.progress-bar-state {
+  position: relative;
+  float: left;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  border-top: 1px solid #cccccc;
+  border-bottom: 1px solid #cccccc;
+  margin: 0;
+  padding: 6px 6px 6px 15px;
+  line-height: 1em;
+  color: #999999;
+  background-color: #eeeeee;
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #eeeeee), color-stop(100%, #e3e3e3));
+  background-image: -webkit-linear-gradient(#eeeeee, #e3e3e3);
+  background-image: linear-gradient(#eeeeee, #e3e3e3);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  overflow: hidden;
+  max-height: 26px; }
+
+.progress-bar-state:after {
+  content: " ";
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 8px;
+  height: 24px;
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAYCAYAAADH2bwQAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2hpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo0NjdFQzYwQTIwMjA2ODExOTEwOTg1MUZGMkE5RDJFRSIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDo3MjhGRDFDMDAxRDkxMUUzQTA5NUQwMDQxQUQ3RDVDQSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo3MjhGRDFCRjAxRDkxMUUzQTA5NUQwMDQxQUQ3RDVDQSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M2IChNYWNpbnRvc2gpIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6NzFEOUZCNUIyQjIwNjgxMTgwODNDNTU1M0QzMTAwQzgiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6NDY3RUM2MEEyMDIwNjgxMTkxMDk4NTFGRjJBOUQyRUUiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz5loS3UAAABMElEQVR42nRSu0rFQBAdl1wChrxICmv7a5POL/AT/AFBbL2NhaUgNjYKgqX+hmArJIWVjXXAXIzkQSIhyXpGDKi7GRjOIXvm7MxkRRzHz8iFlJJ0KVzX3SGiY5oJFjCeJkmyrRUYhkFBEGyCX2sFfI/jOGRZ1h5c9hXBRFiEuITIUxw4TdMk9LOFb+daBw7f9xkO4LKrOEwZhiEX3UC0UBw40CzZtr2cdrORZZn8L+r7ntI0bUCXQjc778bzPN7NlcH36mIcR4Y3rUPXdVSW5Rp0pXWoqophFUXRu9AdNk3zAHr33c9vh2EYqCiKT9BDVEtlD3VdM5zh8FVZddu2LHgBvfgz8nRFnudMjlDdKT/rp+t7HD4q74FnhuBj7l0KjMR4gur1nOAJeDv3qr8EGAAKRp5Hntk+EAAAAABJRU5ErkJggg==) no-repeat center center; }
+
+.progress-bar-state.is-active {
+  color: white;
+  font-weight: bold;
+  text-shadow: black 0 1px;
+  border-color: #255c8e;
+  background-color: #256aa7;
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #256aa7), color-stop(50%, #1e64a0), color-stop(100%, #255c8d));
+  background-image: -webkit-linear-gradient(#256aa7 0%, #1e64a0 50%, #255c8d 100%);
+  background-image: linear-gradient(#256aa7 0%, #1e64a0 50%, #255c8d 100%);
+  box-shadow: inset 0 1px 0 #3273ab; }
+
+.progress-bar-state.is-active + .progress-bar-state:after {
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAYCAYAAADH2bwQAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2hpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo0NjdFQzYwQTIwMjA2ODExOTEwOTg1MUZGMkE5RDJFRSIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDoxMEEzRTM4OTAxRDkxMUUzQTA5NUQwMDQxQUQ3RDVDQSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDoxMEEzRTM4ODAxRDkxMUUzQTA5NUQwMDQxQUQ3RDVDQSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M2IChNYWNpbnRvc2gpIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6NzFEOUZCNUIyQjIwNjgxMTgwODNDNTU1M0QzMTAwQzgiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6NDY3RUM2MEEyMDIwNjgxMTkxMDk4NTFGRjJBOUQyRUUiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz6+MZZfAAABXklEQVR42nSSvUrEQBDHJ7kEPZOYBC3USuzPB/AJfAAFX+BAbD0EC0tBr7FREOzUzmcQbC2tbKwVOY4rIvnaj3HmQsjlktsw2Zmd385/sllz8+D6g8xGRGgz0/ODXQA4hQXDtLsezxdbh8OdVkBoA1aDtRXy71oBzTpdFxzX26cqRw2AGxFSQWfZ4fiGoKAG8IsYQNMG1w83KLxqVGCTSlMVl9f6VGWvAqB6BEFeuM5V7wmyCwlkjcK0RtCdJXA9v1eejbHdf8RZTcMAsMmi8U9MYc+c/yxuWKIBjh/y2dxa3OD8ULSmhGT310JoAigFyDgakTuoNVka5glzg++Xs3FDAvMYVJ68kvvEcV0CNaj0LyXvmHZPE1Ytn01LX1Lyq1yrJFQGOo8/yRs2fhYPnURMntDufBYoKgg+NHim5FvjPoCW/FmTRffSBJnxfE67R60AivSd5odFt/pfgAEAivi2nWi4jPoAAAAASUVORK5CYII=) no-repeat center center; }
+
+.progress-bar-state:first-child {
+  padding-left: 10px;
+  border-left: 1px solid #cccccc;
+  border-top-left-radius: 3px;
+  border-bottom-left-radius: 3px; }
+
+.progress-bar-state:first-child:after {
+  display: none; }
+
+.progress-bar-state:last-child {
+  border-right: 1px solid #cccccc;
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 3px; }
+
+.two-states .progress-bar-state {
+  width: 50%; }
+
+.three-states .progress-bar-state {
+  width: 33.33333%; }
+
+.four-states .progress-bar-state {
+  width: 25%; }
+
+.five-states .progress-bar-state {
+  width: 20%; }
+
+.six-states .progress-bar-state {
+  width: 16.66667%; }
+
+.seven-states .progress-bar-state {
+  width: 14.28571%; }
+
+.eight-states .progress-bar-state {
+  width: 12.5%; }
+
+.nine-states .progress-bar-state {
+  width: 11.11111%; }
+
+.ten-states .progress-bar-state {
+  width: 10%; }
+
+.mgmt-box .progress-bar {
+  margin: 0 0 5px 0;
+  background-color: #eeeeee;
+}
+
+.mgmt-box-inner {
+  border-top: 1px solid #ccc;
+}
+
+.mgmt-box .progress-bar-state {
+  border-width: 0 0 1px 0;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}

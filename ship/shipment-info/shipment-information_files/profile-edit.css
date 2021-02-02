@@ -1,0 +1,112 @@
+/*********
+ * ns: profile-edit
+ * path: /profile_edit_sp.aspx,/profile_edit_shipper.aspx
+ *
+ * profile edit page for both shipper and tsp
+ */
+.profile-edit-h {
+  background-color: #D0E6EF;
+  color: #414042;
+}
+.profile-edit-form {
+	padding: 0 15px;
+}
+.profile-edit-progress {
+  background-color: #D0E6EF;
+  text-align: center;
+}
+.profile-edit-progress-inner {
+  padding: 15px 70px;
+}
+.profile-edit-progress-hd {
+  margin-bottom: 15px;
+}
+.profile-edit-progress-score {
+  padding: 7px;
+  background-color: #fff;
+  font-size: 14px;
+  font-weight: bold;
+}
+.profile-edit-videoupload {
+  margin-top: 10px;
+  padding-top: 15px;
+  border-top: 2px solid #E3E4E5;
+}
+.profile-edit-videoupload-actions {
+  position: relative;
+}
+    .ie6 .profile-edit-videoupload-actions {
+      top: 4px;
+    }
+.profile-edit-videoupload-actions {
+  position: absolute;
+}
+.profile-edit-videoupload-progress-bar {
+  height:10px;
+  margin: 5px 0;
+  border: 1px solid #000;
+  background-color: #fff;
+}
+.profile-edit-videoupload-progress-bar-inner {
+  height: 10px;
+  background-color: #5B8FB5;
+}
+.profile-edit-char-count {
+  color: #999;
+  font-size: 11px;
+}
+.profile-edit-warning {
+  padding: 6px 0 0 22px;
+  min-height: 22px;
+  background:transparent url(/public/images/icons/important_16x16.png) no-repeat scroll 0 4px;
+  font-size: 11px;
+  font-weight: bold;
+}
+.profile-edit-field-info {
+  height: 26px;
+  width: 400px;
+  position: relative;
+}
+.profile-edit-field-info .profile-edit-char-count {
+  position: absolute;
+  top: 5px;
+}
+.profile-edit-field-info .profile-edit-warning {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+.profile-edit-carrierwatchstatus {
+   width: 500px;
+   padding:10px;
+}
+.profile-edit-carrierwatchstatus strong {
+   font-weight:bold;
+}
+.profile-edit-carrierwatchstatus-verified {
+   background-color: #E1F1D6;
+   border:1px solid #CEDCC5;
+}
+.profile-edit-carrierwatchstatus-pending {
+   background-color: #FEF8D4;
+   border:1px solid #FEE99A;
+}
+.profile-edit-carrierwatchstatus-denied {
+   background-color: #F1D8D4;
+   border:1px solid #EACBC6;
+}
+.profile-edit-carrierwatch-id  {
+	border-top: 1px solid #ccc;
+	padding-top: 5px;
+}
+.profile-edit-carrierwatch-choices {
+	margin-left: 10px;
+}
+.profile-edit-carrierwatch-choice-description {
+	font-weight: bold;
+	width: 150px;
+	display: inline-block;
+}
+.profile-edit-info-update {
+	margin-bottom: 5px;
+}

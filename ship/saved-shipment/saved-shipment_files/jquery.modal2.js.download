@@ -1,0 +1,75 @@
+﻿(function($) {
+
+    $.fn.modal = function(options) {
+        options = $.extend({}, $.fn.modal.defaultOptions, options);
+        
+        var everythingElse = $(options.everythingElseSelector);
+        var overrideContainer = options.container ? $(options.container) : null;
+        var overrideClose = options.close ? $(options.close) : null;
+
+        return this.each(function(i,e) {
+            var modalLink = $(e);
+            var modalContainer = overrideContainer || modalLink.find(options.containerSelector);
+            var modalClose = overrideClose || modalLink.find(options.closeSelector);
+
+            bindShowBehavior();
+            modalContainer.click(function (event) { event.stopPropagation(); });
+            modalClose.click(hideModal);
+
+            function hideModal(event) {
+                event.stopPropagation();
+                modalContainer.hide(options.closeSpeed);
+                bindShowBehavior();
+            };
+            function showModal(event) {
+                event.stopPropagation();
+                modalContainer.show(options.openSpeed);
+                bindHideBehavior();
+            };
+            function bindShowBehavior() {
+                modalLink.click(showModal);
+                everythingElse.unbind('click', hideModal);
+            };
+            function bindHideBehavior() {
+                everythingElse.click(hideModal);
+                modalLink.unbind('click', showModal);
+            };
+        });
+
+    };
+
+    $.fn.modal.defaultOptions = {
+        containerSelector: '.modal-container',
+        closeSelector: '.modal-close',
+        everythingElseSelector: 'body',
+        openSpeed: 400,
+        closeSpeed: 400
+    };
+
+})(jQuery);
+    
+// To initialize modal behavior...
+/*
+jQuery(function() {
+    $('.parent-classname').modal();
+});
+
+// OR
+// with custom classnames...
+jQuery(function() {
+    $('.parent-classname').modal({
+        containerSelector: '.container-classname',
+        closeSelector: '.close-classname'
+    });
+});
+
+// OR
+// for non-conventional DOM structure...
+// *NOTE: will not work for multiple modals*
+jQuery(function() {
+    $('.parent-classname').modal({
+        container: $('#containerId'),
+        close: $('#closeId')
+    });
+});
+*/

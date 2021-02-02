@@ -1,0 +1,38 @@
+var ModalForm = function(options) {
+	var self = this,
+		showOkButton = typeof options.okButton !== "undefined" ? options.okButton : true,
+		showCancelButton = typeof options.cancelButton !== "undefined" ? options.cancelButton : true;
+	
+
+	self.modal = jQuery(options.modal_container_selector);
+	self.showModal = function (e) {
+		e && e.stopPropagation && e.stopPropagation();
+		e && e.preventDefault && e.preventDefault();
+		self.modal.ushipModal('open');
+	};
+	self.hideModal = function (e) {
+		e && e.stopPropagation && e.stopPropagation();
+		e && e.preventDefault && e.preventDefault();
+		self.modal.ushipModal('close');	
+	}
+
+	self.init = function () {
+		self.modal.ushipModal({
+			id: options.modal_id || 'Modal',
+			title: options.titleText || '',
+			okButtonText: options.confirmText || 'Confirm',
+			cancelButtonText: options.cancelText || 'Cancel',
+			okButton: showOkButton,
+			cancelButton: showCancelButton,
+			width: options.width || '700px',
+			show: false
+		});
+	};
+	self.init();
+	var submit = self.modal.find(options.modal_submit_selector);
+	if (submit && submit.length) {
+		self.modal.on('ok.modal', function() {
+			submit.click();
+		})
+	}
+};

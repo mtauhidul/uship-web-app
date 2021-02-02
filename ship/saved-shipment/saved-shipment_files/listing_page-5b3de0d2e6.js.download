@@ -1,0 +1,1029 @@
+'use strict';
+
+/* globals uship: false, jQuery: false, $: false, Effect: false, __: false, __doPostBack: false, ALKMaps: false, IsFirstLegBpt: false, IsFirstLegBptWithAnyMatchedSecondLeg: false */
+function bidEnlargement(zip1, zip2) {
+    // eslint-disable-line no-unused-vars
+    uship.utils.popup_page('/popups/showroute.aspx?zip1=' + zip1 + '&zip2=' + zip2 + '&height=750&width=500', { width: 700, height: 450 });
+}
+
+function bidPopup(bidID) {
+    // eslint-disable-line no-unused-vars
+    uship.utils.popup_page('/popups/bid_details.aspx?ID=' + bidID, { width: 778, height: 725 });
+}
+
+function bookingPopup(bookingID) {
+    // eslint-disable-line no-unused-vars
+    uship.utils.popup_page('/popups/booking_details.aspx?ID=' + bookingID, { width: 700, height: 350 });
+}
+
+function redirectToSaferWatch() {
+    // eslint-disable-line no-unused-vars
+    window.location = '/profile_mc_verify.aspx/';
+}
+
+function Gallery(imgId, numOfImgId, prevId, nextId, magnifyId, images) {
+    this.imgElem = $(imgId);
+    this.numOfImg = $(numOfImgId);
+    this.lnkPrev = $(prevId);
+    this.lnkNext = $(nextId);
+    this.lnkMagnify = $(magnifyId);
+    if (images && images.length > 0) {
+        for (var i = 0, len = images.length; i < len; i++) {
+            var imgSrc = images[i];
+            var imgType = this._getType(images[i]);
+            images[i] = {
+                src: imgSrc,
+                type: imgType.type,
+                path: imgType.path
+            };
+        }
+        this.images = images;
+
+        this.current = 0;
+    }
+    if (images.length > 0) {
+        this.lnkMagnify.parentNode.style.display = 'block';
+    } else {
+        this.lnkMagnify.parentNode.style.display = 'none';
+        this.imgElem.style.cursor = 'auto';
+    }
+    if (images.length > 1) {
+        this.lnkPrev.parentNode.style.display = 'block';
+    } else {
+        this.lnkPrev.parentNode.style.display = 'none';
+    }
+    Event.observe(this.lnkPrev, 'click', this.handlePrevClick.bind(this));
+    Event.observe(this.lnkNext, 'click', this.handleNextClick.bind(this));
+    Event.observe(this.lnkMagnify, 'click', this.handleMagnifyClick.bind(this));
+    if (this.images) {
+        Event.observe(this.imgElem, 'click', this.handleMagnifyClick.bind(this));
+    }
+}
+Gallery.prototype = {
+    show: function show(i) {
+        this.current = i;
+        this.imgElem.src = this.images[i].path;
+        if (document.all) {
+            this.numOfImg.innerText = i + 1 + ' of ' + this.images.length;
+        } else {
+            this.numOfImg.textContent = i + 1 + ' of ' + this.images.length;
+        }
+    },
+    next: function next() {
+        if (this.current + 1 < this.images.length) {
+            this.show(this.current + 1);
+        } else {
+            this.show(0);
+        }
+    },
+    prev: function prev() {
+        if (this.current - 1 >= 0) {
+            this.show(this.current - 1);
+        } else {
+            this.show(this.images.length - 1);
+        }
+    },
+    popup: function popup() {
+        window.open('/Popups/profilePic.aspx?imagePath=' + this.images[this.current].src.replace('.jpg', ''), 'window', 'location=0,menubar=0,scrollbars=1,status=0,toolbar=0,resizable=1,width=200,height=200');
+    },
+    _getType: function _getType(imageName) {
+        var type = void 0;
+        var path = void 0;
+        if (imageName.indexOf('http') > -1) {
+            //auction url
+            type = 3;
+            path = '/listing/show_listingImage.aspx?maxwidth=270&maxheight=210&filename=' + imageName;
+        } else if (imageName.indexOf('/sticky/images/icons/category/') > -1) {
+            //category path
+            type = 2;
+            path = '/' + imageName;
+        } else {
+            //uploaded name
+            type = 1;
+            path = '/listing/show_listingImage.aspx?maxwidth=270&maxheight=210&filename=/' + imageName;
+        }
+        return {
+            type: type,
+            path: path
+        };
+    },
+    _preload: function _preload() {
+        var preloadImageObject = [];
+        for (var i = 0; i < this.images.length; i++) {
+            preloadImageObject[i] = new Image();
+            preloadImageObject[i].src = this.images.path;
+        }
+    },
+    handlePrevClick: function handlePrevClick(e) {
+        Event.stop(e);
+        this.prev();
+    },
+    handleNextClick: function handleNextClick(e) {
+        Event.stop(e);
+        this.next();
+    },
+    handleMagnifyClick: function handleMagnifyClick(e) {
+        Event.stop(e);
+        this.popup();
+    }
+};
+
+var startPoints = {
+    1: { // US
+        lat: 37.09024,
+        lng: -95.712891,
+        zoom: 4,
+        region: 'NA'
+    },
+    2: { // Canada
+        lat: 56.130366,
+        lng: -106.346771,
+        zoom: 4, // should be 3, but it gets around a weird bug
+        region: 'NA',
+        dataset: 'PCM_NA'
+    },
+    3: { // UK
+        lat: 54.0,
+        lng: -2.0,
+        zoom: 5,
+        region: 'EU',
+        dataset: 'PCM_EU'
+    },
+    5: { // Australia
+        lat: -25.274398,
+        lng: 133.775136,
+        zoom: 4,
+        region: 'OC',
+        dataset: 'PCM_OC'
+    },
+    19: { //Austria
+        lat: 47.516231,
+        lng: 14.550072,
+        zoom: 6,
+        region: 'EU',
+        dataset: 'PCM_EU'
+    },
+    9: { // France
+        lat: 46.227638,
+        lng: 2.213749,
+        zoom: 5,
+        region: 'EU',
+        dataset: 'PCM_EU'
+    },
+    8: { // Germany
+        lat: 51.165691,
+        lng: 10.451526,
+        zoom: 5,
+        region: 'EU',
+        dataset: 'PCM_EU'
+    },
+    6: { // India
+        lat: 20.593684,
+        lng: 78.962880,
+        zoom: 4,
+        region: 'AS',
+        dataset: 'PCM_AS'
+    },
+    10: { //Netherlands
+        lat: 52.132633,
+        lng: 5.291266,
+        zoom: 6,
+        region: 'EU',
+        dataset: 'PCM_EU'
+    },
+    184: { // Sweden
+        lat: 60.128161,
+        lng: 18.643501,
+        zoom: 5,
+        region: 'EU',
+        dataset: 'PCM_EU'
+    },
+    11: { // Spain
+        lat: 41.4282,
+        lng: 1.7943,
+        zoom: 5,
+        region: 'EU',
+        dataset: 'PCM_EU'
+    },
+    4: { // European Union
+        lat: 48.0341518,
+        lng: 17.306995,
+        zoom: 4,
+        region: 'EU',
+        dataset: 'PCM_EU'
+    },
+    7: { // Global Site
+        lat: 37.09024,
+        lng: -95.712891,
+        zoom: 4,
+        region: 'EU',
+        dataset: 'current'
+    },
+    14: { // Mexico
+        lat: 25.059101,
+        lng: -103.000000,
+        zoom: 5,
+        region: 'NA',
+        dataset: 'PCM_NA'
+    },
+    21: { // Brazil
+        lat: -13.256659,
+        lng: -51.218262,
+        zoom: 3,
+        region: 'SA',
+        dataset: 'PCM_SA'
+    },
+    22: { // Argentina
+        lat: -38.424011,
+        lng: -59.655762,
+        zoom: 3,
+        region: 'SA',
+        dataset: 'PCM_SA'
+    },
+    23: { // Chile
+        lat: -33.921145,
+        lng: -64.357910,
+        zoom: 3,
+        region: 'SA',
+        dataset: 'PCM_SA'
+    },
+    26: { // Peru
+        lat: -9.823423,
+        lng: -72.762451,
+        zoom: 5,
+        region: 'SA',
+        dataset: 'PCM_SA'
+    },
+    27: { // Colombia
+        lat: 3.847122,
+        lng: -72.399902,
+        zoom: 5,
+        region: 'SA',
+        dataset: 'PCM_SA'
+    },
+    28: { // Venezuela
+        lat: 6.647552,
+        lng: -65.170898,
+        zoom: 5,
+        region: 'SA',
+        dataset: 'PCM_SA'
+    },
+    15: { // South Africa
+        lat: -29.8191,
+        lng: 25.3499,
+        zoom: 5,
+        region: 'AF',
+        dataset: 'PCM_AF'
+    }
+};
+
+var countryIds = {
+    0: { // Global
+        siteId: 7
+    },
+    1: { // United States
+        siteId: 1
+    },
+    2: { // Canada
+        siteId: 2
+    },
+    3: { // UK
+        siteId: 3
+    },
+    12: { // Argentina
+        siteId: 22
+    },
+    15: { // Australia
+        siteId: 5
+    },
+    16: { // Austria
+        siteId: 19
+    },
+    31: { // Brazil
+        siteId: 21
+    },
+    44: { // Chile
+        siteId: 23
+    },
+    70: { // France
+        siteId: 9
+    },
+    76: { // Germany
+        siteId: 8
+    },
+    94: { // India
+        siteId: 6
+    },
+    129: { // Mexico
+        siteId: 14
+    },
+    139: { // Netherlands
+        siteId: 10
+    },
+    154: { // Peru
+        siteId: 26
+    },
+    178: { // South Africa
+        siteId: 15
+    },
+    179: { // Spain
+        siteId: 11
+    },
+    184: { // Sweden
+        siteId: 4
+    },
+    207: { // Venezuela
+        siteId: 28
+    }
+};
+
+function ALKMap(origin, destination, originCountryId, destCountryId) {
+    var self = this;
+
+    //set vars
+    this.loadCount = 0;
+    this.o = this.cleanLocationData(origin);
+    this.d = this.cleanLocationData(destination);
+    this.origin = {
+        lon: this.o.latLng.lng,
+        lat: this.o.latLng.lat
+    };
+
+    this.destination = {
+        lon: this.d.latLng.lng,
+        lat: this.d.latLng.lat
+    };
+
+    //initialize options
+    var sId = uship.prefs.i18n.siteid;
+
+    var start = startPoints[sId];
+
+    //get siteid from countryid
+    var shipmentOriginSiteId = countryIds[originCountryId] != undefined ? countryIds[originCountryId] : countryIds[0];
+
+    var shipmentDestinationSiteId = countryIds[destCountryId] != undefined ? countryIds[destCountryId] : countryIds[0];
+
+    //get origin and destination country object
+    var shipmentOriginCountry = startPoints[shipmentOriginSiteId.siteId];
+
+    var shipmentDestinationCountry = startPoints[shipmentDestinationSiteId.siteId];
+
+    var shipmentCountry = shipmentOriginCountry.region == shipmentDestinationCountry.region ? shipmentOriginCountry : startPoints[7]; // setting to global if origin and destination countries differ
+
+    var midpoint = this.getMidpoint(this.origin.lat, this.origin.lon, this.destination.lat, this.destination.lon);
+
+    if (start.dataset != undefined) {
+        this.map = new ALKMaps.Map('listing-map', { region: start.region, dataset: start.dataset, controls: [] });
+    } else {
+        this.map = new ALKMaps.Map('listing-map', { region: start.region, controls: [] });
+    }
+
+    this.map.addControl(new ALKMaps.Control.PanZoomBar());
+
+    originCountryId == destCountryId ? this.initCenter = new ALKMaps.LonLat(shipmentOriginCountry.lng, shipmentOriginCountry.lat).transform(new ALKMaps.Projection('EPSG:4326'), this.map.getProjectionObject()) : this.initCenter = new ALKMaps.LonLat(midpoint[1], midpoint[0]).transform(new ALKMaps.Projection('EPSG:4326'), this.map.getProjectionObject());
+
+    shipmentOriginCountry == shipmentDestinationCountry && shipmentOriginSiteId.siteId != 7 ? this.zoom = shipmentCountry.zoom : shipmentOriginCountry.region == shipmentDestinationCountry.region && shipmentOriginCountry.dataset != 'current' && shipmentDestinationCountry.dataset != 'current' ? this.zoom = 4 : this.zoom = 2; // setting zoom to origin country default only if origin and destination are same country
+
+    this.map.setCenter(this.initCenter, this.zoom);
+
+    this.baseMap = new ALKMaps.Layer.BaseMap('base', { region: shipmentCountry.region,
+        dataset: shipmentCountry.dataset,
+        style: ALKMaps.STYLE.DEFAULT });
+
+    this.map.addLayer(this.baseMap);
+
+    this.stops = [new ALKMaps.LonLat(this.origin.lon, this.origin.lat), new ALKMaps.LonLat(this.destination.lon, this.destination.lat)];
+
+    this.stops = ALKMaps.LonLat.transformArray(this.stops, new ALKMaps.Projection('EPSG:4326'), this.map.getProjectionObject());
+
+    this.storeCenterAndZoom.bind(this);
+
+    // this conditional is because global uses EU so if it's global and a country which we don't have a static point for then there's no way to tell if it's in the same region or not
+
+    // load routes for locations in the same region
+    if (shipmentOriginCountry.region == shipmentDestinationCountry.region) {
+
+        this.routingLayer = new ALKMaps.Layer.Routing('Route');
+
+        this.map.addLayer(this.routingLayer);
+
+        this.routingLayer.addRoute({
+            stops: this.stops,
+            functionOptions: {
+                routeId: 'listing-route',
+                failure: function failure() {
+                    self.handleRouteResponse.bind(self);
+                    self.handleRouteResponse();
+                }
+            },
+            routeOptions: {
+                highwayOnly: false,
+                tollDiscourage: true,
+                distanceUnits: uship.prefs.i18n.inmiles ? 0 : 1
+            }
+        });
+
+        this.coords = [[this.origin.lon, this.origin.lat], [this.destination.lon, this.destination.lat]];
+
+        // Getting route mileage and details
+
+        ALKMaps.Services.getReports({
+            coords: this.coords,
+            options: {
+                vehicleType: 2,
+                routingType: 0,
+                routeOptimization: 0,
+                highwayOnly: false,
+                distanceUnits: uship.prefs.i18n.inmiles ? 0 : 1,
+                tollCurrency: 0,
+                inclTollData: false,
+                region: shipmentCountry.region //required if we want time
+            },
+            reportOptions: {
+                type: 'Mileage', // Other options include Directions, State (a list of the mileage per state crossed), and more.
+                format: 'json',
+                dataVersion: shipmentCountry.dataset
+            },
+            success: function success(resp) {
+                self.handleRouteResponse.bind(self);
+                self.handleRouteResponse(resp);
+            }
+        });
+    } else {
+        self.handleRouteResponse.bind(self);
+        self.handleRouteResponse();
+    }
+}
+
+ALKMap.prototype = {
+    addMapControls: function addMapControls() {},
+    cleanLocationData: function cleanLocationData(location) {
+        var data = {};
+
+        if (location.latLng) {
+            data.latLng = {
+                lat: location.latLng.lat,
+                lng: location.latLng.lng
+            };
+        } else {
+            if (location.city) {
+                data.city = location.city;
+            }
+            if (location.state) {
+                data.state = location.state;
+            }
+            if (location.country) {
+                data.country = location.country;
+            }
+            if (location.postalCode) {
+                data.postalCode = location.postalCode;
+            }
+        }
+
+        return data;
+    },
+    getMidpoint: function getMidpoint(lat1, lng1, lat2, lng2) {
+        Math.degrees = function (rad) {
+            return rad * (180 / Math.PI);
+        };
+        Math.radians = function (deg) {
+            return deg * (Math.PI / 180);
+        };
+        lat1 = Math.radians(lat1);
+        lng1 = Math.radians(lng1);
+        lat2 = Math.radians(lat2);
+        lng2 = Math.radians(lng2);
+        var bx = Math.cos(lat2) * Math.cos(lng2 - lng1);
+        var by = Math.cos(lat2) * Math.sin(lng2 - lng1);
+        var lat3 = Math.atan2(Math.sin(lat1) + Math.sin(lat2), Math.sqrt((Math.cos(lat1) + bx) * (Math.cos(lat1) + bx) + Math.pow(by, 2)));
+        var lon3 = lng1 + Math.atan2(by, Math.cos(lat1) + bx);
+        return [Math.round(Math.degrees(lat3), 5), Math.round(Math.degrees(lon3), 5)];
+    },
+    handleRouteResponse: function handleRouteResponse(resp) {
+        //we don't have a route. no worries, let's just add our points to the map
+        if (resp) {
+            var details = resp[0].ReportLines[1];
+            //routeController.setRouteData(resp.route); What's this??
+            //var locations = resp.route.locations;
+
+            //update distance label with map's distance and time estimates
+            if (details.LMiles) {
+                var t = details.LHours.split(':');
+                var h = parseInt(t[0]);
+                var m = parseInt(t[1]);
+
+                //debugger;
+
+                var timeOutput = '';
+                if (h > 0) {
+                    timeOutput = h + ' ' + __.ShippersLeaveFeedbackHours + ', ' + m + ' ' + __.UpdateJsMinutes;
+                } else {
+                    timeOutput = m + ' ' + __.UpdateJsMinutes;
+                }
+
+                var distance = void 0;
+                if (uship.prefs.i18n.inmiles) {
+                    distance = uship.js.number.humanize(details.LMiles, 0) + ' ' + __.JsMi;
+                } else {
+                    distance = uship.js.number.humanize(details.LMiles, 0) + ' ' + __.MainKm;
+                }
+
+                //add time/distance output
+                $('conEstimatedMiles').innerHTML = distance + ' | ' + timeOutput;
+                jQuery('.olControlPanZoomBar').css('z-index', 750);
+            }
+
+            //need to set some route vars
+            this.routeStart = new ALKMaps.LonLat(this.origin.lon, this.destination.lat);
+            this.routeEnd = new ALKMaps.LonLat(this.destination.lon, this.destination.lat);
+        } else {
+            // No route was determined so just add origin and destination markers
+            var markers = new ALKMaps.Layer.Markers('Markers');
+            this.map.addLayer(markers);
+            var size = new ALKMaps.Size(21, 25);
+            var offset = new ALKMaps.Pixel(-(size.w / 2), -size.h);
+            var originIcon = new ALKMaps.Icon('https//maps.alk.com/api/1.2/img/flag_start.png', size, offset);
+            var destinationIcon = new ALKMaps.Icon('https://maps.alk.com/api/1.2/img/flag_end.png', size, offset);
+            markers.addMarker(new ALKMaps.Marker(this.stops[0], originIcon, uship.loc('JsPickup')));
+            markers.addMarker(new ALKMaps.Marker(this.stops[1], destinationIcon, uship.loc('MainDelivery')));
+            jQuery('.olControlPanZoomBar').css('z-index', 750);
+        }
+
+        this.storeCenterAndZoom.bind(this);
+        this.storeCenterAndZoom();
+    },
+    storeCenterAndZoom: function storeCenterAndZoom() {
+        //get map center and zoom after fitting map
+
+        if ($(this.map.loadingDiv) && $(this.map.loadingDiv).visible() && this.loadCount <= 20) {
+            var self = this;
+            setTimeout(function () {
+                self.storeCenterAndZoom();
+                self.loadCount++;
+            }, 500);
+        } else {
+            var mc = this.map.getCenter();
+            this.mCenter = window.mc = mc;
+            this.defZoom = window.defZoom = this.map.zoom;
+        }
+    },
+    center: function center(point) {
+        var zoom = 12;
+        this.map.setCenter(point, zoom);
+    },
+    showOriginalView: function showOriginalView() {
+        this.map.setCenter(this.m_center, this.defZoom);
+    },
+    handleViewStartClick: function handleViewStartClick(e) {
+        if (e) {
+            Event.stop(e);
+        }
+
+        if (this.stops[0]) {
+            this.center(this.stops[0]);
+        }
+    },
+    handleViewEndClick: function handleViewEndClick(e) {
+        if (e) {
+            Event.stop(e);
+        }
+
+        if (this.stops[1]) {
+            this.center(this.stops[1]);
+        }
+    },
+    handleViewOriginalClick: function handleViewOriginalClick(e) {
+        if (e) {
+            Event.stop(e);
+        }
+
+        this.showOriginalView();
+    }
+};
+
+function HoverZoom(elem, highlightColor) {
+    this.element = $(elem);
+    this.highlightColor = highlightColor;
+    this.fireEvent = false;
+    this.isClicked = false;
+    this.isBlocked = false;
+    this.__t;
+    this.__t2;
+    Event.observe(this.element, 'mouseover', this.handleMouseOver.bind(this));
+    Event.observe(this.element, 'mouseout', this.handleMouseOut.bind(this));
+    Event.observe(this.element, 'click', this.handleClick.bind(this));
+}
+HoverZoom.prototype = {
+    highlight: function highlight() {
+        this.element.style.backgroundColor = this.highlightColor;
+    },
+    ignore: function ignore() {
+        // for lack of better word
+        this.element.style.backgroundColor = '#fff';
+    },
+    isWithin: function isWithin() {},
+    handleDelayedHover: function handleDelayedHover(e) {
+        if (this.onhover) {
+            this.onhover(e);
+        }
+    },
+    handleDelayedOut: function handleDelayedOut(e) {
+        if (this.ondelayedout) {
+            this.ondelayedout(e);
+        }
+    },
+    handleMouseOver: function handleMouseOver(e) {
+        clearTimeout(this.__t2);
+        this.__t = setTimeout(this.handleDelayedHover.bind(this, e), 1000);
+        if (this.onmouseover) {
+            this.onmouseover(e);
+        }
+    },
+    handleMouseOut: function handleMouseOut(e) {
+        clearTimeout(this.__t);
+        this.__t2 = setTimeout(this.handleDelayedOut.bind(this, e), 1000);
+        if (this.onmouseout) {
+            this.onmouseout(e);
+        }
+    },
+    handleClick: function handleClick(e) {
+        clearTimeout(this.__t);
+        if (this.onclick) {
+            this.onclick(e);
+        }
+    }
+};
+
+function flagAlert(clientID) {
+    // eslint-disable-line no-unused-vars
+    if (confirm(__('By clicking on the report flag at the end of a message that you feel is in violation, not only will you notify uShip of the offense, but you will also initiate an email that will be sent directly to the offender!  Please be sure a violation has occurred before you hit Ok. \n \nOnly genuine questions/answers from interested carriers are allowed � no other comments are appropriate in the Q&A.  It is a violation of uShip rules to post any of the following in Q&A: \n \n -Email Addresses \n -Phone Numbers \n -Web Addresses \n -Fax Numbers \n -Profanity or Hostile Language.\n -Any communication that references uShip fees, uShip commission or similar phrases (Price discussion should only reference All-inclusive Total Bids) \n -Any communication that attempts to direct a shipper offsite. \n -Any communication that is directed at another carrier (Q&A is for communicating with the shipper) \n -Any communication unrelated to the delivery of this shipment. \n\n Please note - It is NOT a violation to post Company Names or Personal Names.\n\n Click Ok if you feel this message is in violation, or Cancel to exit.'))) {
+        __doPostBack(clientID, '');
+    }
+    return false;
+}
+
+function setDropdown(dropDown, value) {
+    // eslint-disable-line no-unused-vars
+    var numOptions = dropDown.options.length;
+    for (var i = 0; i < numOptions; i++) {
+        if (dropDown.options[i].value == value) {
+            dropDown.options[i].selected = true;
+        }
+    }
+}
+
+function show_popup(lnk_invoker, popupDivID) {
+    // eslint-disable-line no-unused-vars, camelcase
+    if (window.HideNumberToComplete != undefined) {
+        window.HideNumberToComplete();
+    }
+
+    uship.utils.position_element(popupDivID, lnk_invoker);
+    new Effect.Appear(popupDivID, { duration: .2 });
+}
+
+function cancel_addgroup(groupDiv, txtID, drpdwnID, lblErrorID) {
+    // eslint-disable-line no-unused-vars, camelcase
+    new Effect.Fade(groupDiv, { duration: .2 });
+
+    if (window.ShowNumberToComplete != undefined) {
+        window.ShowNumberToComplete();
+    }
+
+    // reset values
+    var name = $(txtID);
+    name.value = '';
+
+    var number = $(drpdwnID);
+    number.options.selectedIndex = 0;
+
+    var error = $(lblErrorID);
+    error.innerHTML = '';
+    error.style.display = 'none';
+}
+
+function validateGroupName(txtID, drpdwnID, lblErrorID) {
+    // eslint-disable-line no-unused-vars
+    var name = $(txtID);
+    var labelError = $(lblErrorID);
+
+    var trimedName = name.value;
+    trimedName = trimedName.replace(/^\s*/, '').replace(/\s*$/, '');
+
+    if (trimedName == '') {
+        labelError.innerHTML = __('Please enter a group name');
+        labelError.style.display = 'block';
+        return false;
+    }
+
+    var number = $(drpdwnID);
+
+    if (number.options.selectedIndex == 0) {
+        labelError.innerHTML = __('Please select number of matches');
+        labelError.style.display = 'block';
+        return false;
+    }
+
+    return true;
+}
+
+function safelyReloadPage() {
+    // Resubmits the form
+    // window.reload(true);
+
+    // Hashes in the current URL prevent a reload
+    // window.location = window.location
+
+    window.location.href = window.location.pathname;
+}
+
+jQuery(function ($) {
+
+    var changeStatusModal = $('#listingChangeStatusDialog'),
+        changeMessages = changeStatusModal.find('.js-update-msg'),
+        selectStatusChange = changeStatusModal.find('#listing-select-new-status');
+
+    function changeTransitStatus() {
+        var statusChangeData = {
+            action: 'transitStatusChange',
+            id: changeStatusModal.data('listingId'),
+            status: selectStatusChange.val()
+        };
+
+        $.ajax({
+            url: '/drivers.aspx',
+            method: 'POST',
+            data: statusChangeData
+        }).then(function () {
+            window.location.reload(true);
+        });
+
+        changeStatusModal.ushipModal('updateContainerText', { okButtonText: __.MainLoading });
+        changeStatusModal.ushipModal('disableOk');
+    }
+
+    function markAsDelivered() {
+        if (IsFirstLegBpt && !IsFirstLegBptWithAnyMatchedSecondLeg) {
+            return;
+        }
+        var bidId = changeStatusModal.data('bidId');
+        window.location = '/drivers_leavefeedback.aspx?mac=1&pmid=' + bidId;
+    }
+
+    changeStatusModal.ushipModal({
+        title: __.ChangeStatus,
+        okButtonText: __.ChangeStatus,
+        show: false
+    });
+
+    changeStatusModal.ushipModal('disableOk');
+
+    changeStatusModal.on('cancel.modal', function () {
+        selectStatusChange.val('');
+        selectStatusChange.trigger('change');
+    });
+
+    changeStatusModal.on('ok.modal', function () {
+        if (!selectStatusChange.val()) return;
+        if (selectStatusChange.val() === 'Delivered') {
+            markAsDelivered();
+        } else {
+            changeTransitStatus();
+        }
+    });
+
+    selectStatusChange.on('change', function () {
+        var selected = $(this).find('option:selected').val();
+        var okToggle = selected ? 'enableOk' : 'disableOk';
+
+        if (IsFirstLegBpt && !IsFirstLegBptWithAnyMatchedSecondLeg && selected === 'Delivered') {
+            okToggle = 'disableOk';
+        }
+
+        changeMessages.each(function () {
+            var el = $(this);
+            el.data('action') === selected ? el.show(200) : el.hide();
+        });
+        changeStatusModal.ushipModal(okToggle);
+    });
+
+    $('#listing-change-status-trigger').on('click', function () {
+        changeStatusModal.ushipModal('toggle');
+    });
+});
+
+jQuery(function ($) {
+
+    var deleteShipmentModal = $('#deleteShipmentDialog');
+    var deleteShipmentContent = $('#deleteShipmentContent');
+    var shipmentId = 0;
+
+    function deleteShipment() {
+        var request = uship.ns.ajaxpro.register('listing2', 'DeleteShipment', ['shipmentId']);
+        request(shipmentId, function () {
+            safelyReloadPage();
+        });
+
+        deleteShipmentModal.ushipModal('updateContainerText', { okButtonText: __.MainLoading });
+        deleteShipmentModal.ushipModal('disableOk');
+    }
+
+    deleteShipmentModal.ushipModal({
+        title: __.DeleteShipmentModalTitle,
+        okButtonText: __.DeleteShipmentModalOkButtonText,
+        show: false,
+        id: 'deleteShipmentModal'
+    });
+
+    deleteShipmentModal.on('ok.modal', function () {
+        deleteShipment();
+    });
+
+    $(document).on('click', 'body .delete-shipment-trigger', function (event) {
+        shipmentId = $(event.target).data('shipmentId');
+        deleteShipmentContent.text(__.DeleteShipmentModalMessage);
+        deleteShipmentModal.ushipModal('toggle');
+    });
+});
+
+jQuery(function ($) {
+
+    var takeOwnershipModal = $('#takeOwnershipDialog');
+    var takeOwnershipContent = $('#takeOwnershipContent');
+    var listingId = 0;
+
+    function takeOwnership() {
+        var request = uship.ns.ajaxpro.register('listing2', 'TakeOwnership', ['listingId']);
+        request(listingId, function () {
+            safelyReloadPage();
+        });
+
+        takeOwnershipModal.ushipModal('updateContainerText', { okButtonText: __.MainLoading });
+        takeOwnershipModal.ushipModal('disableOk');
+    }
+
+    takeOwnershipModal.ushipModal({
+        title: __.TakeOwnershipModalTitle,
+        okButtonText: __.TakeOwnershipModalOkButtonText,
+        show: false,
+        id: 'takeOwnershipModal'
+    });
+
+    takeOwnershipModal.on('ok.modal', function () {
+        takeOwnership();
+    });
+
+    $(document).on('click', 'body .take-ownership-trigger', function (event) {
+        listingId = $(event.target).data('listingId');
+        takeOwnershipContent.text(__.TakeOwnershipModalMessage);
+        takeOwnershipModal.ushipModal('toggle');
+    });
+});
+
+jQuery(function ($) {
+
+    var changeStatusModal = $('#changeShipmentTransitStatusDialog'),
+        changeMessages = changeStatusModal.find('.js-update-msg'),
+        selectStatusChange = changeStatusModal.find('#shipment-select-new-status'),
+        currentStatusMessage = changeStatusModal.find('#shipmentCurrentStatusMessage');
+
+    var shipmentId = 0;
+
+    function changeTransitStatus() {
+        var request = uship.ns.ajaxpro.register('listing2', 'ChangeShipmentTransitStatus', ['shipmentId', 'transitStatus']);
+        var transitStatus = selectStatusChange.val();
+        request(shipmentId, transitStatus, function () {
+            safelyReloadPage();
+        });
+
+        changeStatusModal.ushipModal('updateContainerText', { okButtonText: __.MainLoading });
+        changeStatusModal.ushipModal('disableOk');
+    }
+
+    function loadTransitStatusOptions() {
+        var request = uship.ns.ajaxpro.register('listing2', 'ShipmentTransitStatusOptions', ['shipmentId']);
+        request(shipmentId, function (response) {
+            var value = response.value;
+            selectStatusChange.val('');
+            selectStatusChange.empty();
+
+            currentStatusMessage.html(String.format(__.CurrentStatusMessage, __[value.currentStatus.localizationKey]));
+
+            var placeHolder = $('<option>', { value: '', text: __.ChangeStatus });
+            selectStatusChange.append(placeHolder);
+            $.each(value.availableStatuses, function (i, item) {
+                var option = $('<option>', { value: item.value, text: __[item.localizationKey] });
+                selectStatusChange.append(option);
+            });
+        });
+    }
+
+    changeStatusModal.ushipModal({
+        title: __.ChangeStatus,
+        okButtonText: __.ChangeStatus,
+        show: false,
+        id: 'changeShipmentTransitStatusModal'
+    });
+
+    changeStatusModal.ushipModal('disableOk');
+
+    changeStatusModal.on('cancel.modal', function () {
+        selectStatusChange.val('');
+        selectStatusChange.trigger('change');
+    });
+
+    changeStatusModal.on('ok.modal', function () {
+        changeTransitStatus();
+    });
+
+    selectStatusChange.on('change', function () {
+        var selected = $(this).find('option:selected').val();
+
+        changeMessages.each(function () {
+            var el = $(this);
+            el.data('action') === selected ? el.show(200) : el.hide();
+        });
+
+        var okToggle = selected ? 'enableOk' : 'disableOk';
+        changeStatusModal.ushipModal(okToggle);
+    });
+
+    $(document).on('click', 'body .shipment-change-status-trigger', function (event) {
+        shipmentId = $(event.target).data('shipmentId');
+        loadTransitStatusOptions();
+        changeStatusModal.ushipModal('toggle');
+    });
+});
+
+jQuery(function ($) {
+
+    var editAttachmentNotesModal = $('#editAttachmentNotesDialog');
+    var editAttachmentContent = $('#editAttachmentNotesContent');
+    var listingId = 0;
+    var attachmentId = 0;
+    var attachmentNotes = '';
+    var allowEdit = false;
+
+    function updateAttachmentNotes() {
+        var request = uship.ns.ajaxpro.register('listing2', 'UpdateAttachmentNotes', ['listingId', 'attachmentId', 'attachmentNotes']);
+        var editedAttachmentNotes = editAttachmentContent.val();
+        request(listingId, attachmentId, editedAttachmentNotes, function () {
+            safelyReloadPage();
+        });
+
+        editAttachmentNotesModal.ushipModal('updateContainerText', { okButtonText: __.MainLoading });
+        editAttachmentNotesModal.ushipModal('disableOk');
+    }
+
+    editAttachmentNotesModal.ushipModal({
+        title: __.ListingAttachmentsNotes,
+        okButtonText: __.MainUpdate,
+        show: false,
+        id: 'editAttachmentNotesModal'
+    });
+
+    editAttachmentNotesModal.on('cancel.modal', function () {
+        editAttachmentContent.val(attachmentNotes);
+    });
+
+    editAttachmentNotesModal.on('ok.modal', function () {
+        updateAttachmentNotes();
+    });
+
+    editAttachmentNotesModal.on('open.modal', function () {
+        $('#editAttachmentNotesModal .with-buttons').toggle(allowEdit);
+    });
+
+    $('.attachment-notes-trigger').on('click', function (event) {
+        var element = $(event.target);
+        listingId = element.data('listingId');
+        attachmentId = element.data('attachmentId');
+        attachmentNotes = element.data('attachmentNotes');
+        allowEdit = element.data('allowEdit');
+
+        editAttachmentContent.text(attachmentNotes);
+        editAttachmentNotesModal.ushipModal('toggle');
+    });
+});
+
+jQuery(function ($) {
+
+    var termsAndConditionsModal = $('#termsAndConditionsModal');
+    var termsAndConditionsContent = $('#termsAndConditionsContent');
+    var termsAndConditionsText = '';
+
+    termsAndConditionsModal.ushipModal({
+        title: __.bidDetailsTermsConditions,
+        show: false,
+        id: 'termsAndConditionsModal',
+        cancelButton: false,
+        okButton: false
+    });
+
+    $('.terms-modal-trigger').on('click', function (event) {
+        termsAndConditionsText = $(event.target).data('termsAndConditionsText');
+        termsAndConditionsContent.text(termsAndConditionsText);
+        termsAndConditionsModal.ushipModal('toggle');
+    });
+});

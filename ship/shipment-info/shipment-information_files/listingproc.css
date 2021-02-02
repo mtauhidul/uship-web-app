@@ -1,0 +1,810 @@
+/*
+ * path: /listing2.aspx
+ * ns:   listingproc
+ * 
+ * styles used through the listing process and it's controls
+ */ 
+  
+ /** Listing Process Content **/
+
+/* general */
+.listingproc-content {
+    border: 1px solid #e5e5e5;
+    position: relative;
+    -moz-border-radius: 10px;
+    -webkit-borderradius: 10px;
+    border-radius: 10px;
+}
+
+@media only screen and (max-width: 767px) {
+	.responsive-page .listingproc-content {
+        /* Remove exterior rounded boxes*/
+        padding: 0.6em;
+        border: none;
+
+        -moz-border-radius: 0px;
+        -webkit-border-radius: 0px;
+        border-radius: 0px;
+    }
+}
+
+/** page titles **/
+.listingproc-port-dropdown {
+	display: block;	
+	margin: 5px 0 0;	
+	width: 264px; 
+}
+.listingproc-port-overlay {
+	position:absolute;
+	background-color: #FFFFFF;
+	opacity: 0.1;
+	z-index: 100;
+}
+.ie6 .listingproc-port-overlay,
+.ie7 .listingproc-port-overlay,
+.ie8 .listingproc-port-overlay {
+	filter: alpha(opacity=1);
+}
+
+/** section headers **/
+.listingproc-h {
+  background-color: #D0E6EF;
+  margin: 0 -10px 10px -10px;
+  color: #414042;
+}
+.listingproc-element {
+  margin-bottom:10px;
+}
+.listingproc-addressexample-text {
+  font-size: 11px;
+  color: #8c8c8c;
+}
+.listingproc-sintitle {
+	margin:0 10px;
+	font-size:14px;
+}
+.listingproc-navbuttons {
+    padding: 0;
+}
+.listingproc-navbutton {
+  padding-left: 0 !important;
+}
+@media only screen and (max-width: 767px) {
+  .responsive-page .listingproc-navbuttons {
+    padding-left: 0;
+  }
+  .responsive-page .listingproc-navbuttons-new {
+    text-align: center;
+    padding: 20px 0 0 0;
+  }	
+	.responsive-page .listingproc-navbuttons-new .button {
+		text-align: center;
+    width: 100%;
+    margin-right: 5px;
+    padding: 6px 0px 5px 0px;
+    margin-bottom: 10px
+	}
+}
+
+/** Choose Commodity Styles **/
+.listingproc-choose-CommoditySelect{
+	padding-right:0;	
+	/*background-color:#EFF6FA;*/
+}
+	@media only screen and (max-width: 767px) {
+		.responsive-page .listingproc-choose-CommoditySelect {
+			width: 100%;
+		}
+	}
+.listingproc-choose-selections{	
+	width:840px;
+	padding-top:10px;	
+	margin:0 auto;
+}
+.ie6 .listingproc-choose-selections{
+	height:1px;	
+}
+	@media only screen and (max-width: 767px) {
+		.responsive-page .listingproc-choose-selections {
+			width: 96%;
+			padding: 10px 10px 0px 10px;
+			/*margin: 0 auto*/;
+		}
+	}
+.listingproc-choose-selections-commodity-select{
+	float:left;
+	/*width:300px;*/
+	width:400px;
+	margin-right:20px;	
+}
+	@media only screen and (max-width: 767px) {
+		.responsive-page .listingproc-choose-selections-commodity-select {
+			float: left;
+			width: 96%;
+		}
+		.responsive-page .listingproc-choose-selections-commodity-select select {
+			 width: 95%;
+			/*height: 2em;*/
+		}
+	}
+.listingproc-choose-selections-q{
+	min-height:1px;
+	margin-bottom:3px;	
+	font-size:12px;
+	text-align:left;
+	font-weight:bold;
+	position:relative;
+} 
+.listingproc-choose-selections-q .req{
+	font-weight:bold;
+	left:-12px;
+	position:absolute;
+	top:0;
+	font-size:12px;
+	text-align:left;
+}
+.listingproc-choose-selections select{
+	/*width:300px;*/
+	width:400px;
+	margin-bottom:10px;	
+}
+.listingproc-choose-commodity-name {
+  margin-top: 10px;
+  border: 7px solid #A3C5D8;
+}
+.listingproc-choose-commodity-name-inner {
+    height:20px;
+    padding: 10px 0 10px 55px;
+    background:url('/public/images/icons/congrats_16x16.png') no-repeat 30px center;
+    font-size:14px;
+    line-height:20px;
+}
+.listingproc-choose-commodity-name strong {
+	font-weight:bold;
+}
+.listingproc-option-list {
+	list-style-type:none;
+	margin:0;
+	padding:0;
+}
+.listingproc-option-list li {
+	margin: 0 0 8px 0;
+}
+
+/* Login */
+.listingproc-login-invalid-login-title {
+	color: red;
+	font-weight: bold;
+}
+
+/*** listingproc forms ***/
+.listingproc-form {
+  padding: 0 15px;
+}
+	@media only screen and (max-width: 767px) {
+		.responsive-page .listingproc-form {
+			padding: 0;
+			width:100%;
+		}
+
+        .responsive-page .listingproc-form .form-item .form-item-description {
+		    display: block;
+		    float: none;
+		    width: auto;
+		    margin-left: 0; 
+        }	
+        .responsive-page .listingproc-form .form-item .form-item-inputs select{
+		    width: 100%; 
+        }
+	}
+	
+.listingproc-form .form-item-indent .form-item-description {
+  width: 110px !important;
+}
+@media only screen and (max-width: 767px){
+  .responsive-page .listingproc-form .form-item-indent .form-item-description {
+    display: block;
+    float: none;
+    width: 100% !important;
+  }
+}
+	.listingproc-form .form-item-indent .form-item-inputs {
+	  margin-left: 120px !important;
+	}
+	
+.listingproc-additional-information-example {
+  display: block;
+  width: 210px;
+  float: right;
+  margin: 28px 126px 0 0;
+}
+  @media only screen and (max-width: 767px) {
+	.responsive-page .listingproc-additional-information-example {
+        display: none;
+    }
+  }
+.ie6 .listingproc-additional-information-example {
+  margin-right: 149px;
+}
+  .webkit.responsive-page .listingproc-additional-information-example,
+	.ff18.responsive-page .listingproc-additional-information-example {
+		display:none;
+	}
+
+.listingproc-important {
+  margin: 15px 0 0 0;
+  width: 482px;
+}
+	@media only screen and (max-width: 767px) {
+		.responsive-page .listingproc-group {
+			padding-bottom: 0.5em;
+		}		
+	}
+.listingproc-important span {
+  font-weight: bold;
+}
+.listingproc-prev-address-select {
+  max-width: 700px;
+}
+.ie7 .listingproc-prev-address-select {
+  width: 400px;
+}
+
+
+/** group styles **/
+.listingproc-group {
+    background: none;
+    margin: 0;
+}
+	@media only screen and (max-width: 767px) {
+		.responsive-page .listingproc-group {
+			padding-bottom: 0.5em;
+		}		
+	}
+
+.listingproc-grouptitle {
+  color: #3c698e;
+  line-height: 17px;
+  height: auto;
+  padding: 0 0 13px 0;
+  margin: 0 0 15px 0;
+}
+@media only screen and (max-width: 767px) {
+	.responsive-page .listingproc-grouptitle {
+        color: #3c698e;
+        line-height: 1em; /* 17px */
+        height: auto;
+        padding: 0 0 0.25em 0; /* 13px */
+        margin: 0 0 0.25em 0; /* 15px */
+    }	
+}
+
+/* auction styles*/
+.listingproc-auctiontype-container .listingproc-auctiontype-select {
+	margin-left:20px;
+}
+
+@media only screen and (max-width: 767px) {
+    .responsive-page .listingproc-auctiontype-container .listingproc-auctiontype-select {
+		margin-left:0px; 
+    }
+
+    .responsive-page .listingproc-auctiontype-container {
+		margin-top:15px; 
+    }
+}
+
+
+/* Tip Toggle */
+.listingproc-toggle-item {
+  cursor: pointer;
+  border: 1px solid transparent;
+  display: none;
+  position: absolute;
+  padding: 4px;
+  top: 5px;
+  right: 5px;
+  z-index: 750; }
+
+.listingproc-toggle-item:hover,
+.listingproc-toggle-item:active {
+  border: 1px dotted #666; }
+
+.listingproc-toggle-tip {
+  height: 16px;
+  width: 16px; }
+
+.listingproc-close-tip {
+  height: 13px;
+  width: 13px;
+  padding: 7px;
+  border-color: #F5F5F5; }
+
+
+
+@media only screen and (max-width: 767px) {
+    .responsive-page .listingproc-tip-open-popup-link-inpage {
+		float:right; 
+		position:relative;
+    }
+	.responsive-page .listingproc-tip-open-popup-link,
+	.responsive-page .listingproc-tip-open-popup-link-inpage { 
+		z-index:1;	
+		width:25px; 
+		height:25px; 
+		display: block;
+		padding:0px;
+		border: 1px solid #cccccc;
+		border-radius: 50%;
+		background: -moz-linear-gradient(top, white 0%, #efefef 100%);
+		background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, white), color-stop(100%, #efefef));
+		background: -webkit-linear-gradient(top, white 0%, #efefef 100%);
+		background: -o-linear-gradient(top, white 0%, #efefef 100%);
+		background: -ms-linear-gradient(top, white 0%, #efefef 100%);
+		background: linear-gradient(to bottom, #ffffff 0%, #efefef 100%);
+		filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#efefef',GradientType=0 );
+		background-repeat: repeat;
+		-webkit-box-shadow: rgba(0, 0, 0, 0.35) 0 1px 1px;
+		-moz-box-shadow: rgba(0, 0, 0, 0.35) 0 1px 1px;
+		box-shadow: rgba(0, 0, 0, 0.35) 0 1px 1px; 
+	}
+    .responsive-page .white-popup {
+		position: relative;
+		background: #FFF;
+		padding: 20px;
+		width: auto;
+		max-width: 500px;
+		margin: 20px auto;
+		border: 1px solid #cccccc;
+		border-radius: 5px; 
+    }
+	.responsive-page .white-popup .notification { 
+		background-color: transparent; 
+	}
+    .responsive-page .listingproc-toggle-item.off {
+		display: none; 
+    }
+	.responsive-page .listingproc-toggle-item {
+		cursor: pointer;
+		border: 1px solid transparent;
+		display: block;
+		position:relative;
+		top:auto;
+		right:auto; 
+	}
+	.responsive-page .listingproc-toggle-item:hover,
+	.responsive-page .listingproc-toggle-item:active {
+		border: 1px dotted #666; 
+	}
+}
+
+/* ebay info styles */
+.listingproc-ebayinfo-title {
+  font-weight: bold;
+  font-size: 13px;
+}
+.listingproc-ebayinfo-title-normal {
+  font-weight: normal;
+  font-size: 11px;
+}
+
+.listingproc-ebayinfo-section {
+  margin-bottom: 8px;
+}
+.listingproc-ebayinfo-linkacc {
+  padding: 10px 0px 0px 0px;
+}
+
+.listingproc-ebayinfo-linkacc-center {
+    margin-bottom:2px;
+    text-align:center;
+}
+
+.listingproc-ebayinfo-prefill-container {
+    margin: 20px 0 15px 30px;
+}
+
+.listingproc-ebayinfo-prefill {
+    margin-left: 10px; 
+    margin-top: 5px; 
+    width: 356px;
+}
+
+
+@media only screen and (max-width:767px) {
+    .responsive-page .listingproc-ebayinfo-prefill-container {
+        margin: 1em 0;
+    }
+
+
+    .responsive-page .listingproc-ebayinfo-prefill-label {
+        display:block;
+        margin-bottom:10px;
+        font-size: 16px !important;
+        height: 24px;
+    }
+
+    .responsive-page .listingproc-ebayinfo-prefill {
+        width:100%;
+    }
+
+    .responsive-page .listingproc-ebayinfo-ebayLogo-container {
+        margin-top: 15px;
+    }
+
+    .responsive-page .listingproc-ebay-import-question {
+        padding-right: 10%;
+    }
+}
+
+.listingproc-ebayinfo-ebayLogo-container {
+    position:relative;
+    height:60px;
+}
+
+.listingproc-ebayinfo-ebayLogo-image {
+    position:absolute;
+    right:0px;
+}
+
+.ebay-application {
+  padding-right: 90px;
+}
+.listingproc-ebayinfo .notification {
+  margin-right: 90px;
+}
+
+/* ebay box */
+.listingproc-ebayinfo {
+  border-color: #c9dec5;
+  margin: 0 35px 0 0px;
+}
+.listingproc-ebayinfo-background-wrapper { 
+  padding-left: 0px;
+  /*background: transparent url('/public/images/promo/partners/ebay/ebay_compatible.gif') no-repeat right;*/
+}
+.listingproc-ebayinfo-linkacc-description {
+  margin: 0 0 5px 20px;
+  color: #939598;
+}
+
+/* Cobranded import styles */
+.listingproc-cobrand-import {
+	border-color: #3888B9;
+	padding-top: 0px;
+}
+.listingproc-cobrand-import-prefill {
+    padding-right: 235px;
+}
+
+/* Proxibid import styles */
+.listingproc-proxibid-import-background-wrapper {
+    background: transparent url('/public/images/elements/logo/proxibid_logo_100x26.png') no-repeat right 15px;	
+}
+
+/* Etsy import styles */
+.listingproc-etsy-import-background-wrapper {
+    background: transparent url('/public/images/promo/partners/etsy/etsy_logo.png') no-repeat right 15px;	
+}
+
+/* Network International info styles */
+.listingproc-networkinternational-import-lotnumber {
+	border-color: #E71737;
+	padding-top: 0px;
+}
+ 
+.listingproc-networkinternational-import-background-wrapper {
+	padding-left: 0px;
+    background: transparent url('/public/images/elements/logo/NetworkInternational.png') no-repeat right;	
+}
+
+.networkinternational-import-form .form-item	{
+	padding-left: 20px;
+}
+	.networkinternational-import-form .form-item .form-item-description {
+		width: 183px;
+	}
+	.networkinternational-import-form .form-item .form-item-inputs {
+		margin-left: 193px;
+	}
+	
+.listingproc-auctionends-tip {
+  margin-top: 10px;
+  font-style: italic;
+}
+	
+/* Ritchie Bros. info styles */
+.listingproc-rb-import-lotnumber {
+	border-color: #d97736;
+	padding-top: 0px;
+}
+
+.listingproc-ritchiebros-import-background-wrapper {
+    background: url("/public/images/promo/partners/rb/rb_transparent_logo.png") no-repeat scroll 97% -1px transparent;
+}
+
+.ritchiebros-import-form .form-item	{
+	padding-left: 20px;
+}
+	.ritchiebros-import-form .form-item .form-item-description {
+		width: 183px;
+	}
+	.ritchiebros-import-form .form-item .form-item-inputs {
+		margin-left: 193px;
+	}
+
+/* example */
+.listingproc-dimensions-example {
+  width: 280px;
+  position: relative;
+  float: right;
+  margin-right: 200px;
+}
+	.ie6 .listingproc-dimensions-example {
+	  margin-right: 100px;
+	}
+	@media only screen and (max-width: 767px) {
+		.responsive-page .listingproc-dimensions-example {
+			display: none; /* this is the measurements example */
+		}
+	}
+.listingproc-dimensions-example .h3 {
+  margin-bottom: 5px;
+}
+.listingproc-dimensions-example-helptext {
+  width: 118px;
+  position: absolute;
+  top: 28px;
+  left: 155px;
+  color: #6d6e71;
+}
+
+
+/* header */
+.listingproc-h .optional {
+  font-weight: normal;
+  display: none;
+}
+
+.listingproc-title-subhead {
+  font-weight: bold;
+}
+
+
+/* ebay logo */
+.listing-auction-ebay-logo {
+  float: right;
+}
+
+.call-out-plain-outline {
+    background-color: #DDDDDD;
+    padding: 1px;
+}
+
+.call-out-plain-content {
+    padding: 15px 20px;
+}
+
+.call-out-plain-content strong {
+    font-weight: bold;
+}
+
+.call-out-plain {
+    background-color: #F8F8F8;
+    height: 100%;
+}
+
+.listingproc-quick-details {
+	margin-left: 290px;
+}
+
+.listingproc-quick-privacy-body {
+	margin-top:5px;
+}
+
+.listingproc-quick-privacy-line {
+	margin-top:5px;
+}
+
+.listingproc-quick-details {
+	margin-left: 10px;
+}
+
+.listingproc-quick-details-box {
+	margin: 15px 0 0 195px;
+}
+
+.listingproc-quick-inputs {
+	margin-left: 40px;
+}
+
+.listingproc-quick-privacy {
+	padding-top: 5px;
+}
+
+.listingproc-quick-register {
+	font-weight: bold;
+}
+
+.listingproc-quick-header {
+	position: static;
+}
+
+/* hide elements added specifically for A/B style test 
+.listingproc-newstylesonly {
+    display: none;
+} */
+
+@media only screen and (max-width:499px) {
+    /* commodity selector */
+    .responsive-page .listingproc-req-notice {
+        position: static;
+        float: left;
+        font-size: 0.75em;
+    }
+}
+    
+.bab-box, .listingproc-choose-commodity-name {
+    border:none;
+}
+
+.listingproc-req-notice {
+    position: absolute;    
+    text-transform: lowercase;
+    top: 35px;
+    bottom: 20px;
+}
+
+.listingproc-navbuttons-old {
+    display: none;
+}
+
+.listingproc-navbuttons-new {
+    padding: 20px;
+}
+
+@media only screen and (max-width: 767px) {
+	.responsive-page .listingproc-navbuttons {
+		text-align: center;
+		padding-left: 0;
+	}
+}
+
+.listingproc-navbuttons .button-medium {
+    margin-right: 5px;
+}
+
+/* register view */
+.listingproc-userinfo {
+    border: none;
+}
+
+/* check-email view */
+.listingproc-complete {
+    display: none;
+}
+
+.listingproc-checkemail {
+    border: none;
+}
+
+.listingproc-checkemail-header {
+    background: none;
+    display: block;
+    font-size: 22px;
+    font-weight: bold;
+    padding: 20px 0;
+}
+
+.listingproc-checkemail-wrapper {
+    border: 1px solid #e5e5e5;
+    padding: 15px;
+    -moz-border-radius: 10px;
+    -webkit-borderradius: 10px;
+    border-radius: 10px;
+}
+
+.listingproc-checkemail-instructions {
+    background: transparent url('/public/images/icons/email_36x36.png') no-repeat 0px 10px;
+    line-height: 25px;
+    padding: 5px 0 15px 45px;
+}
+
+.listingproc-checkemail-tiplist {
+    font-weight: normal;
+    line-height: 25px;
+}
+
+.listingproc-addinfo {
+    padding: 11px 0px 9px 21px;
+    background: transparent url('/public/images/icons/icon-description-16x16.png') no-repeat 0px 10px;
+}
+
+.listingproc-addadditionaldetails {
+    padding: 6px 0px 9px 36px;
+    background: transparent url('/public/images/icons/icon-description-16x16.png') no-repeat 15px 5px;
+}
+
+.listingproc-addpictures,
+.listingproc-servicetypes,
+.listingproc-moveitems {
+    padding: 11px 0px 4px 36px;
+    background: transparent url('/public/images/icons/icon-picture-16x16.png') no-repeat 15px 10px;
+}
+
+.listingproc-servicetypes {
+    background: transparent url('/public/images/icons/icon-servicetype-16x16.png') no-repeat 15px 10px;
+}
+
+.listingproc-moveitems {
+    background: transparent url('/public/images/icons/icon-clipboard-16x16.png') no-repeat 15px 10px;
+}
+
+.form-section.listingproc-moves {
+    border: none;
+}
+
+.listingproc-moves-instructions {
+    padding-left: 30px;
+    margin-bottom: 5px;
+}
+
+.listingproc-moveitemscontainer {
+    padding: 0 15px;
+    margin-bottom: -15px;
+}
+
+.listingproc-link {
+    cursor:pointer;
+}
+
+.listingproc-form-new {
+  padding: 0 0px;
+}
+
+.listingproc-ebayinfo-box {
+    padding: 5px;
+}
+
+.listing-ebayinfo-link-box {
+    padding-left: 0px;
+}
+
+.listingproc-cobrand-box {
+    padding: 0px;
+}
+
+.listingproc-ni-box {
+    padding: 0px;
+}
+
+.listingproc-gutter {
+    margin: 15px 0 0;
+}
+
+@media only screen and (max-width:767px) {
+    /* commodity selector */
+	.responsive-page .req,
+    .responsive-page .listingproc-req-notice {
+		display: none;
+        /*position: static;
+        float: left;
+        font-size: 0.75em;*/
+    }
+}
+
+ /**** Orphaned Responsive Styles ****/
+ @media only screen and (max-width: 767px) {
+ 	.responsive-page .h {
+        font-weight: 600;
+        color: #333333;
+ 	}
+	.responsive-page .process-hd {
+		margin-bottom: 0px;
+		padding: .6em .6em 0 .6em;
+	}
+	.responsive-page .emailentry-toggle-login-new {
+		display: none;
+	}
+ }
+ 

@@ -1,0 +1,321 @@
+/**
+ * pickadate.js
+ * 
+ * Dependencies:
+ *  jQuery
+ *  moment.js
+ */
+
+uship.ns('pickadate', function (ns) {
+    ns.dateboxes = [];
+    ns.init = function() {
+        var opts = ns.opts = buildOptions();
+        if (calendarDoesNotSupportBrowser()) {
+            jQuery('.form-input-text-date-pickadate').addClass('pickadate-disabled');
+            return false;
+        }
+        var inputs = buildDateboxes(opts);
+        
+        inputs.each(function(i,e) {
+          ns.dateboxes.push(new ns.datebox(e, opts));
+        });
+        
+        jQuery.each(ns.dateboxes, function(i,e) {
+            if (e.timeframe) {
+                ns[e.timeframe] = e;
+            }
+        });
+
+        uship.events.fire("pickadate_init", ns);
+    };
+    
+    function buildDateboxes(opts) {
+        return jQuery('.datepicker').pickadate(opts);
+    };
+    
+    function buildOptions() {
+        return jQuery.extend({
+            monthsFull: uship.prefs.i18n.month_names,
+            weekdaysShort: uship.prefs.i18n.day_names_short,
+            format: uship.prefs.i18n.dateformat,
+            formatSubmit: false,
+            today: uship.localization.MyInvToday,
+            clear: uship.localization.Mobile_Find_Clear,
+            firstDay: parseInt(uship.localization.FirstDayOfWeek),
+            dateMin: true,
+            dateMax: 179,
+            // onStart: function() {triggerDateboxEvent(this, 'start')},
+            // onOpen: function() {triggerDateboxEvent(this, 'open')},
+            onSelect: function() {
+                showHideClearButton(this);
+                putCalendarDateInTextbox(this);
+                triggerDateboxEvent(this, 'select');
+                hideCalendar(this.datebox);
+            },
+            onClose: function() {
+                triggerDateboxEvent(this, 'close');
+            }
+            //, onRender: function() {triggerDateboxEvent(this, 'render')}
+        }, ns.opts || {});
+    }
+
+    function calendarDoesNotSupportBrowser() {
+        return isIE8OrLower() || isGingerbreadOrLower();
+    }
+    
+    // TODO: export browser detection methods to a central utilites area
+    function isIE() {
+        return jQuery.browser.msie;
+    };
+    function isIE8OrLower() {
+        return (isIE() && parseInt(jQuery.browser.version) <= 8);
+    };
+    function isGingerbreadOrLower() {
+        return navigator.userAgent.indexOf("Android 2") > -1;
+    };
+    
+    ns.datebox = function(input, opts) {
+        var input = jQuery(input);
+        this.input = input;
+        this.textbox = input.prev('.form-input-text-date-pickadate') 
+        if(!this.textbox.length>0){
+            this.textbox = jQuery(input).parent().find('.form-input-text-date-pickadate');
+        }
+        this.calendarContainer = input.next();
+        this.calendar = jQuery.extend(input.data('pickadate'), {datebox: this});
+        this.timeframe = this.textbox.data('timeframe');
+        this.dateFormat = opts.format.toUpperCase();
+        this.minDate = this.createMinDate();
+        this.maxDate = this.createMaxDate();
+        var datebox = this;
+
+        this.setMinDate();
+
+        //Setting to readonly so native mobile datepicker does not come up
+        isSmallDevice() && this.textbox.attr('readonly', true);
+        
+        if(!this.textbox.val()){
+            this.hideClearButton();
+            this.minDate && this.setDefaultDate(this.minDate);
+        }
+        else if(this.textbox.val() && this.validDateFormat(this.textbox.val())){
+            this.setDate(moment(this.textbox.val(), this.dateFormat));
+        }
+        
+        //Determining what caused the blur event
+        jQuery(document).mousedown(function (e) {
+            datebox.clearButtonClicked = jQuery(e.target).is('.pickadate__button--clear');
+            datebox.todayButtonClicked = jQuery(e.target).is('.pickadate__button--today');
+        });
+
+        this.textbox.on({
+            focus: function () {
+                showCalendar(datebox);
+            },
+            click: function () {
+                showCalendar(datebox);
+            },
+            blur: function () {
+                if (datebox.clearButtonClicked) {
+                    datebox.calendar.clear();
+                    datebox.clearButtonClicked = false;
+                }
+
+                if (datebox.todayButtonClicked) {
+                    datebox.setDate(moment(), false);
+                    datebox.todayButtonClicked = false;
+                }
+
+                hideCalendar(datebox);
+            },
+            change: function () {
+                var dateEntered = jQuery(this).val();
+                if (datebox.validDateFormat(dateEntered)) {
+                    datebox.setDate(moment(dateEntered, datebox.dateFormat));
+                }
+            }
+        });
+    }
+    
+    ns.datebox.prototype = {
+        createMinDate: function () {
+            var minDate;
+            if (this.textbox.data('mindate')) {
+                //The mindate data attribute is always formated for US, so I have to  
+                //re-format it to the proper date format for the region
+                var minDateString = moment(this.textbox.data('mindate')).format(this.dateFormat);
+                minDate = moment(minDateString, this.dateFormat);
+            } else {
+                minDate = moment(this.calendar.getDateLimit(), this.dateFormat);
+            }
+            return minDate;
+        },
+        createMaxDate: function () {
+            var maxDate;
+            if (this.textbox.data('maxdate')) {
+                //The maxdate data attribute is always formated for US, so I have to  
+                //re-format it to the proper date format for the region
+                var maxDateString = moment(this.textbox.data('maxdate')).format(this.dateFormat);
+                maxDate = moment(maxDateString, this.dateFormat);
+            } else {
+                maxDate = moment(this.calendar.getDateLimit(true), this.dateFormat);
+            }
+            return maxDate;
+        },
+        validDateFormat: function(dateEntered) {
+            return moment && moment(dateEntered, this.dateFormat).isValid();
+        },
+        getSelectedDate: function() {
+            return moment(this.calendar.getDate(), this.dateFormat);
+        },
+        getDefaultDate: function() {
+            return moment(this.calendar.getDate(), this.dateFormat);
+        },
+        
+        setDate: function(date, calendarOnly) {
+            if (date) {
+                var dateObj = getDateObj(date);
+                this.calendar.setDate(dateObj[0], dateObj[1], dateObj[2], calendarOnly);
+            }
+        },
+        setDefaultDate: function(date) {
+            this.setDate(date, true);
+        },        
+        clearDate: function() {
+            if (this.getSelectedDate()) {
+                this.calendar.clear();
+            }
+        },
+        
+        setMinDate: function(date, addDays) {
+            var minDate = date || this.minDate;
+            if (minDate) {
+                this.calendar.setDateLimit(getDateObj(moment(minDate).add('d', addDays || 0)));
+                if (this.getDefaultDate() < minDate) {
+                    this.setDefaultDate(minDate);
+                }
+            }
+            else {
+                this.calendar.setDateLimit();
+            }
+            this.showHideTodayButton(minDate);
+        },
+        setMaxDate: function(date, addDays) {
+            var maxDate = date || this.maxDate;
+            if (maxDate) {
+                this.calendar.setDateLimit(getDateObj(moment(maxDate).add('d', addDays || 0)), true);
+                if (this.getDefaultDate() > maxDate) {
+                    this.setDefaultDate(maxDate);
+                }
+            }
+            else {
+                this.calendar.setDateLimit(true);
+            }
+        },
+        
+        showHideTodayButton: function (minDate) {
+            if (minDate > moment()) {
+                this.hideTodayButton();
+            }
+            else {
+                this.showTodayButton();
+            }
+        },
+        showTodayButton: function() {
+            this.calendarContainer.removeClass('pickadate__holder--noToday');
+        },
+        hideTodayButton: function() {
+            this.calendarContainer.addClass('pickadate__holder--noToday');
+        },
+        
+        showClearButton: function() {
+            this.calendarContainer.removeClass('pickadate__holder--noClear');
+        },
+        hideClearButton: function() {
+            this.calendarContainer.addClass('pickadate__holder--noClear');
+        }
+    };
+    
+    function getDateObj(date) {
+        var day = date.date();
+        var month = date.month() + 1; // moment (unlike pickadate) uses zero-based months
+        var year = date.year();
+        return [year, month, day];
+    };
+    
+    function showHideClearButton(calendar) {
+        var datebox = calendar.datebox;
+        if (datebox.getSelectedDate()) {
+            datebox.showClearButton();
+        }
+        else {
+            datebox.hideClearButton();
+        }
+    };
+
+    function putCalendarDateInTextbox(calendar) {
+        var datebox = calendar.datebox;
+        datebox.textbox.val(calendar.getDate());
+    };
+
+    function showCalendar(datebox) {
+        //This is our custom class name to pickadate.DefaultAndClassic.css
+        datebox.input.addClass('pseudo-focused');
+    };
+
+    function hideCalendar(datebox) {
+        datebox.input.removeClass('pseudo-focused');
+    };
+    
+    function triggerDateboxEvent(calendar, event) {
+        jQuery(calendar.datebox).trigger(event);
+    };
+
+    function isSmallDevice() {
+        var windowWidth = window.innerWidth || window.document.documentElement.clientWidth || window.document.body.clientWidth || 0;
+        return windowWidth < 768;
+    };
+    
+    var createAfterRule = ns.createAfterRule = function(beforeBox, afterBox, addDays) {
+        jQuery(beforeBox).bind('close', afterBox, function(e) {
+            e.data.setMinDate(this.getSelectedDate(), addDays);
+        });
+
+        //When text entry is enabled
+        if (beforeBox.textbox) {
+            var boxes = {
+                before: beforeBox,
+                after: afterBox
+            }
+            jQuery(beforeBox.textbox).bind('blur', boxes, function (e) {
+                e.data.after.setMinDate(e.data.before.getSelectedDate(), addDays);
+            });
+        }
+    };
+    
+    var createBeforeRule = ns.createBeforeRule = function(beforeBox, afterBox, addDays) {
+        jQuery(afterBox).bind('close', beforeBox, function(e) {
+            e.data.setMaxDate(this.getSelectedDate(), addDays);
+        });
+
+        //When text entry is enabled
+        if (afterBox.textbox) {
+            var boxes = {
+                before: beforeBox,
+                after: afterBox
+            }
+            jQuery(afterBox.textbox).bind('blur', boxes, function (e) {
+                e.data.before.setMaxDate(e.data.after.getSelectedDate(), addDays);
+            });
+        }
+    };
+    
+    ns.createDateRule = function(beforeBox, afterBox, daysBetween) {
+        createAfterRule(beforeBox, afterBox, daysBetween);
+        createBeforeRule(beforeBox, afterBox, -1 * (daysBetween || 0));
+    };
+});
+
+uship.dom.events.attach(document, 'ready', function() {
+    uship.ns.pickadate.init();
+});

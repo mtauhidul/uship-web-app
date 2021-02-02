@@ -1,0 +1,116 @@
+/*------------------------------------------------------------------------------------------------*/
+
+var lightbox = Class.create();
+lightbox.prototype = {
+    initialize: function(ctrl, generated_id) {
+        this.content = ctrl.href;
+        this.generated_id = lightbox.generated_id = generated_id;
+
+        // to make the width 550px for the 'edit pictures' lightbox 
+        if (ctrl.href.indexOf("images") > -1) {
+            Event.observe(ctrl, 'click', this.activateImages.bindAsEventListener(this), false);
+        }
+        else {
+            Event.observe(ctrl, 'click', this.activate.bindAsEventListener(this), false);
+        }
+
+        if (!lightbox.instance) {
+            lightbox.instance = new uship.utils.Lightbox($('listing-overlay'));
+        }
+    },
+
+    // Turn everything on - mainly the IE fixes
+    activate: function(e) {
+        Event.stop(e);
+        Event.observe('listing-overlay', 'click', hideLightBox.bindAsEventListener(this), false);
+        this.displayLightbox();
+    },
+
+    /**** To expand the width of the lightbox when editing listing images****/
+    activateImages: function() {
+        Event.observe('listing-overlay', 'click', hideLightBox.bindAsEventListener(this), false);
+        this.displayLightboxImages();
+    },
+
+    displayLightboxImages: function() {
+        var offset = window.pageYOffset || document.body.scrollTop || document.documentElement.scrollTop;
+        var listinglightbox = $('listing-lightbox');
+
+        listinglightbox.style.top = offset.top + 'px';
+        listinglightbox.style.display = 'block';
+        listinglightbox.innerHTML = '<div id="lbLoadMessage"><p><img src="/images/ajaxloading.gif" align="absmiddle"><span stlye="margin-left: 10px; font-weight:bold">'+__('Loading...')+'</span></p></div>';
+        lightbox.instance.show();
+
+        this.loadInfo();
+    },
+    /**** end: To expand the width of the lightbox when editing listing images****/
+
+    displayLightbox: function() {
+        var offset = window.pageYOffset || document.body.scrollTop || document.documentElement.scrollTop;
+        var listinglightbox = $('listing-lightbox');
+
+        listinglightbox.style.top = 100 + offset + 'px';
+        listinglightbox.style.left = ((document.body.offsetWidth - 460) / 2) + 'px';
+        listinglightbox.style.display = 'block';
+        listinglightbox.innerHTML = '<div id="lbLoadMessage"><p><img src="/images/ajaxloading.gif" align="absmiddle"><span stlye="margin-left: 10px; font-weight:bold">'+__('Loading...')+'</span></p></div>';
+        lightbox.instance.show();
+
+        this.loadInfo();
+    },
+
+    // Begin Ajax request based off of the href of the clicked linked
+    loadInfo: function() {
+        var myAjax = new Ajax.Updater('listing-lightbox', this.content + '?generatedid=' + this.generated_id, { method: 'get', asynchronous: true, evalScripts: true });
+    },
+
+
+    // Example of creating your own functionality once lightbox is initiated
+    deactivate: function() {
+        hideLightbox();
+    }
+}
+
+/*-----------------------------------------------------------------------------------------------*/
+
+// easier way to hide the lightbox
+function hideLightBox() {
+    if ($('listing-overlay').style.display != 'none') {
+	    lightbox.instance.hide();
+	    $('listing-lightbox').style.display = 'none';
+	    
+	    $('listing-lightbox').innerHTML = '<div id="lbLoadMessage"><p>'+__('Loading')+'</p></div>';
+	}
+}
+
+// called when we get script back from the server containing fields to update
+function populateOnCallback(fields) {
+	fields.each(function(field) {
+	    
+		if(field && $(field.k) != null && $(field.k).innerHTML != field.v)
+		{
+			new Effect.Highlight(field.k);
+			$(field.k).innerHTML = field.v;
+		}
+	});
+}
+
+function buildPostBody() {
+	var f = $('listing-lightbox');
+	return Form.serialize(f );
+}
+
+function wireup(editpage, onBeforeSubmit) {
+    onBeforeSubmit = onBeforeSubmit || function() {};
+	Event.observe('ok','click',function(e) {
+	    onBeforeSubmit();
+	    
+		var opt = {
+			asynchronous: true,
+			method: 'post',
+			postBody: buildPostBody(),
+			evalScripts: true
+		}
+		new Ajax.Updater('listing-lightbox', editpage, opt)
+	});
+	Event.observe('cancel', 'click', function() { hideLightBox(); });
+}
