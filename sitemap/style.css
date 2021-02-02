@@ -394,8 +394,6 @@ input[type="radio"] {
 }
 
 
-@charset "UTF-8";
-
 @font-face {
     font-family: 'uship-icons';
     src: url("../type/uship-icons.1b53a352a8.eot?v=11");
