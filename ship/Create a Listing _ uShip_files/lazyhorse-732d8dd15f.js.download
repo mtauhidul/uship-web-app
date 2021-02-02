@@ -1,0 +1,381 @@
+'use strict';
+
+(function (root, $) {
+    var _this = this;
+
+    var doc = root.document;
+    var head = doc.head || doc.getElementsByTagName('head')[0];
+    var readyStates = 'addEventListener' in root ? {} : { 'loaded': 1, 'complete': 1 };
+    var activeResources = {};
+    var resourceTypes = { js: 'js', html: 'html', css: 'css' };
+    var regex = {};
+    var logTrace = false;
+
+    Object.keys(resourceTypes).forEach(function (type) {
+        regex[type] = new RegExp('.' + type + '$');
+    });
+
+    var ie = function () {
+        var myNav = navigator.userAgent.toLowerCase();
+        return myNav.indexOf('msie') != -1 ? parseInt(myNav.split('msie')[1]) : false;
+    }();
+
+    var log = function log() {
+        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+            args[_key] = arguments[_key];
+        }
+
+        /* eslint-disable no-console */
+        logTrace && console && console.log && (ie === 8 ? console.log(args) : console.log.apply(console, args));
+        /* eslint-enable no-console */
+    };
+
+    var noop = function noop() {};
+
+    var capitalizeFirstLetter = function capitalizeFirstLetter(str) {
+        return str.charAt(0).toUpperCase() + str.slice(1);
+    };
+
+    // test the extensions against known resourceTypes.
+    // const isKnownType = (resourceType, resources) => !resources.some(url => !regex[resourceType].test(url));
+
+    var unique = function unique(resources) {
+        var seen = Object.create(null);
+        return resources.filter(function (r) {
+            if (!r.url || r.url in seen) return false;
+            return seen[r.url] = true;
+        });
+    };
+
+    var createNode = function createNode(name, attrs) {
+        var node = doc.createElement(name);
+        $.each(attrs, function (attr, val) {
+            node.setAttribute(attr, val);
+        });
+
+        return node;
+    };
+
+    // dumbed down version of searching through a dom node for ie8. kill me now
+    var hasAttribute = function hasAttribute(nodeList, attr, value) {
+        var has = false;
+        for (var i = nodeList.length - 1; i >= 0; i--) {
+            var node = nodeList[i];
+            if (node[attr] && node[attr].indexOf(value) > -1) {
+                has = true;
+                break;
+            }
+        }
+        return has;
+    };
+
+    var existingAsset = function existingAsset(resource, type) {
+        if (type === resourceTypes.html) return false;
+
+        return type === resourceTypes.css ? hasAttribute(document.styleSheets, 'href', resource.url) : hasAttribute(document.scripts, 'src', resource.url);
+    };
+
+    var resolvers = {
+        loadEventResolver: function loadEventResolver(node) {
+            var defer = new $.Deferred();
+
+            var process = function process(ev) {
+                ev = ev || root.event;
+                if (ev.type == 'load' || readyStates[node.readyState]) {
+                    node.onload = node.onreadystatechange = node.onerror = null;
+                    log('loaded: ', node.src || node.href);
+                    defer.resolve(node.src || node.href);
+                }
+            };
+
+            var fail = function fail() /* ev */{
+                log('failed: ', node.src || node.href);
+                defer.reject(new Error('Syntax or http error: ' + (node.src || node.href)));
+            };
+
+            node.onload = node.onreadystatechange = process;
+            node.onerror = fail;
+            return defer.promise();
+        },
+        buildGlobalCallbackResolver: function buildGlobalCallbackResolver() {
+            var callbackName = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'initialize';
+            var timeout = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 5000;
+
+            return function (node) {
+                var dfd = new $.Deferred();
+
+                var tId = window.setTimeout(function () {
+                    dfd.reject(node.src || node.href);
+                    delete window[callbackName];
+                }, timeout);
+
+                window[callbackName] = function () {
+                    dfd.resolve(node.src || node.href);
+                    window.clearTimeout(tId);
+                    delete window[callbackName];
+                };
+
+                return dfd.promise();
+            };
+        }
+    };
+
+    /**
+     * Allows resources to use custom resolution logic.
+     * This is useful in special cases where an added script may load further scripts of its own
+     * @param {string|Object} resource
+     * @param {Element} node
+     * @returns {function}
+     */
+    var getResourceResolver = function getResourceResolver(resource, node) {
+        if (Object.prototype.hasOwnProperty.call(resource, 'resolver')) {
+            return function () {
+                return resource.resolver(node);
+            };
+        }
+
+        return function () {
+            return resolvers.loadEventResolver(node);
+        };
+    };
+
+    //Lazy Horse definition.
+    var LazyHorse = function LazyHorse() {
+        var jsNodeList = [];
+        var _resources = {};
+        var _pendingResources = {};
+        var _onLoad = {};
+        var _resourceOrder = [];
+        var _recentLoadType = void 0;
+        var _htmlContainer = null;
+        var _loadOrder = false;
+
+        $.each(resourceTypes, function (type) {
+            _resources[type] = [];
+            _pendingResources[type] = [];
+            _onLoad[type] = new $.Deferred();
+        });
+
+        var loadResource = {
+            html: function html(_ref) {
+                var url = _ref.url;
+
+                var pr = $.get(url);
+                activeResources[url] = pr;
+
+                //returning a new promise based on the response inorder to change the response format for caller.
+                return pr.then(function (html) {
+                    _htmlContainer && $(_htmlContainer).append(html);
+                    log('loaded: ', url);
+                    return { url: url, html: html };
+                }, function () {
+                    log('failed: ', url);
+                    delete activeResources[url];
+                });
+            },
+            js: function js(resource) {
+                var jsNode = createNode('script', {
+                    src: resource.url,
+                    type: 'text/javascript',
+                    charset: 'utf-8'
+                });
+
+                jsNode.async = false;
+                jsNode.defer = false;
+                var promise = getResourceResolver(resource, jsNode)();
+
+                //this is to make sure that the scripts dont endup getting executed out of order.
+                //After we build all the nodes, we attach them to the doc head atonce in the specific order
+                //they are requested.
+                jsNodeList.push(jsNode);
+
+                if (jsNodeList.length === _pendingResources[resourceTypes.js].length) {
+                    jsNodeList.forEach(function (node) {
+                        log('requested: ', node.src);
+                        head.insertBefore(node, head.lastChild);
+                    });
+                }
+
+                //remove the resource so we can let the user try download in future
+                return promise.fail(function () {
+                    delete activeResources[resource.url];
+                });
+            },
+            css: function css(resource) {
+                var cssNode = createNode('link', {
+                    href: resource.url,
+                    rel: 'stylesheet',
+                    charset: 'utf-8',
+                    defer: false
+                });
+
+                var promise = getResourceResolver(resource, cssNode)();
+
+                head.insertBefore(cssNode, head.lastChild);
+
+                return promise.fail(function () {
+                    delete activeResources[resource.url];
+                });
+            }
+        };
+
+        var loadResources = function loadResources(type) {
+            var promises = [];
+
+            _resources[type].forEach(function (resource) {
+                if (activeResources[resource.url]) {
+                    promises.push(activeResources[resource.url]);
+                } else if (existingAsset(resource, type)) {
+                    log('Existing ' + type + ': ' + resource);
+                    var promise = new $.Deferred().resolve().promise();
+                    activeResources[resource.url] = promise;
+                    promises.push(promise);
+                } else {
+                    _pendingResources[type].push(resource);
+                }
+            });
+
+            //Split this to another loop to handle special case scenario for js files. we need to count the number of pending
+            //assets to be downloaded onto the page, which we will use to determine when the script
+            //nodes get added to the document.
+            _pendingResources[type].forEach(function (resource) {
+                var promise = loadResource[type](resource);
+                activeResources[resource.url] = promise;
+                promises.push(promise);
+            });
+
+            return $.when.apply($, promises).done(function () {
+                for (var _len2 = arguments.length, params = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+                    params[_key2] = arguments[_key2];
+                }
+
+                log('received all the ' + type);
+                _onLoad[type].resolve(params);
+            }).always(function () {
+                _pendingResources[type] = [];
+            });
+        };
+
+        //this is init method for LazyHorse
+        var lazyLoader = {
+            loadAsync: function loadAsync() {
+                var defer = new $.Deferred();
+                var promises = [];
+
+                if (_loadOrder) {
+                    // if loadorder is specified, the resources will be downloaded one after the other.
+                    // this ensures that dependencies between different types is maintained.
+                    var chain = function chain(currentPromise, pointer) {
+                        log('processing: ', _resourceOrder[pointer]);
+                        promises.push(currentPromise);
+
+                        if (pointer >= _resourceOrder.length - 1) {
+                            log('Compleleted resourceOrder chain: ', _resourceOrder.join('->'));
+                            $.when.apply($, promises).done(function () {
+                                for (var _len3 = arguments.length, results = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+                                    results[_key3] = arguments[_key3];
+                                }
+
+                                log('Received resourceOrder chain: ', _resourceOrder.join('->'));
+                                defer.resolve(results);
+                            });
+                        } else {
+                            currentPromise.always(function () {
+                                log('processing next: ', _resourceOrder[pointer + 1]);
+                                chain(loadResources(_resourceOrder[pointer + 1]), pointer + 1);
+                            });
+                        }
+                    };
+
+                    chain(loadResources(_resourceOrder[0]), 0);
+                } else {
+                    //load all resources in parallel.
+                    for (var i = 0; i < _resourceOrder.length; i++) {
+                        promises.push(loadResources(_resourceOrder[i]));
+                    }
+
+                    $.when.apply($, promises).done(function () {
+                        for (var _len4 = arguments.length, results = Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+                            results[_key4] = arguments[_key4];
+                        }
+
+                        defer.resolve(results);
+                    });
+                }
+
+                return defer.promise();
+            }
+        };
+
+        var addResources = function addResources(resourceType) {
+            for (var _len5 = arguments.length, resources = Array(_len5 > 1 ? _len5 - 1 : 0), _key5 = 1; _key5 < _len5; _key5++) {
+                resources[_key5 - 1] = arguments[_key5];
+            }
+
+            if (!resources.length) {
+                return lazyLoader;
+            }
+
+            // Lift plain url strings into object form
+            resources = resources.map(function (r) {
+                return typeof r === 'string' ? { url: r } : r;
+            });
+
+            //an array of assets should all be of same extension
+            //if(!isKnownType(resourceType, resources)) throw `Invalid ${type} files`;
+
+            resources = _resources[resourceType].concat(resources);
+
+            _recentLoadType = resourceType;
+            _resourceOrder.push(resourceType);
+            _resources[resourceType] = unique(resources);
+
+            return lazyLoader;
+        };
+
+        var getCurrentResources = function getCurrentResources(resourceType) {
+            return _resources[resourceType];
+        };
+
+        //just making sure that I have getter/setter for all the resource types. Makes your life easier if you
+        //need to add another type (ex: image/video etc..)
+        $.each(resourceTypes, function (type) {
+            lazyLoader[type] = addResources.bind(null, type);
+            lazyLoader['get' + capitalizeFirstLetter(type)] = getCurrentResources.bind(null, type);
+        });
+
+        lazyLoader.debug = function () {
+            if (arguments.length === 0) return logTrace;
+            logTrace = arguments.length <= 0 ? undefined : arguments[0];
+            return lazyLoader;
+        };
+
+        // onload is dependent on the type of content you requested in the previous call.
+        // make sure to call .html()/.js() or .css() before attaching an onload callback
+        lazyLoader.onLoad = function () {
+            var success = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : noop;
+            var error = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : noop;
+
+            if (!_recentLoadType) throw 'onLoad should be followed by html, js or css load calls, or else, I dont know which process you need this attachment for.';
+            _onLoad[_recentLoadType].then(success.bind(_this), error.bind(_this));
+            return lazyLoader;
+        };
+
+        lazyLoader.htmlContainer = function () {
+            if (arguments.length === 0) return _htmlContainer;
+            _htmlContainer = arguments.length <= 0 ? undefined : arguments[0];
+            return lazyLoader;
+        };
+
+        lazyLoader.loadOrder = function () {
+            if (arguments.length === 0) return _loadOrder;
+            _loadOrder = arguments.length <= 0 ? undefined : arguments[0];
+            return lazyLoader;
+        };
+
+        return lazyLoader;
+    };
+
+    LazyHorse.resolvers = resolvers;
+    root.LazyHorse = LazyHorse;
+})(window, window.jQuery);

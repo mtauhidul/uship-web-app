@@ -1,0 +1,445 @@
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+(function () {
+    var utils = this.uship.utils;
+
+
+    var noop = function noop() {};
+
+    // Safeguard against the edge case where we have multiple containers running on the page.
+    var gtmOnce = function gtmOnce(func) {
+        var fired = false;
+        return function (containerName) {
+            if (fired) return;
+            if (!containerName || !/^GTM/.test(containerName)) return;
+            fired = true;
+            func();
+        };
+    };
+    var loggingIsEnabled = !!utils.getUrlParam('enablelogging');
+
+    /**
+     * Maps the Recorder API to the Mixpanel API
+     * @type {Object}
+     */
+    var mixpanelSink = {
+        name: 'mixpanel.js',
+
+        test: function test(env) {
+            return !!window.mixpanel && env.isThrottled;
+        },
+        event: function event(eventName, data, callback) {
+            if (!window.mixpanel || !window.mixpanel.track) return;
+            window.mixpanel.track(eventName, data, callback);
+        },
+        includeProperties: function includeProperties(props) {
+            if (!window.mixpanel || !window.mixpanel.register) return;
+            window.mixpanel.register(props);
+        },
+        includeOnce: function includeOnce(props) {
+            if (!window.mixpanel || !window.mixpanel.register_once) return;
+            window.mixpanel.register_once(props);
+        },
+        identifyUser: function identifyUser(id) {
+            if (!window.mixpanel || !window.mixpanel.identify) return;
+            window.mixpanel.identify(id);
+        },
+        linkClick: function linkClick(linkSelector, eventName, data) {
+            if (!window.mixpanel || !window.mixpanel.track_links) return;
+            // linkSelector can either be an elment or a element selector
+            // no need to manually implement logic as we do in buildLinkTracker below for Google Analytics
+            // see documentation: https://mixpanel.com/help/reference/javascript-full-api-reference#mixpanel.track_links
+            window.mixpanel.track_links(linkSelector, eventName, data);
+        },
+
+
+        setDimension: noop,
+
+        pageView: function pageView() {
+            this.event.apply(this, arguments);
+        }
+    };
+    /**
+     * Maps the actual name of the dimension to its Google Analytics identifier
+     * Reflects the current GA dimensions and their dataLayer variable names in Google Tag Manager.
+     */
+    var dimensionsLookup = {
+        category: 'listingTopLevelCommodity',
+        site: 'site',
+        subcategory: 'listingSubCommodity',
+        userType: 'userType'
+    };
+
+    /**
+     * Maps the Recorder API to the Google Analytics analytics.js API
+     */
+    var googleAnalyticsSink = {
+        name: 'analytics.js',
+
+        test: function test() {
+            return !!window.dataLayer;
+        },
+        event: function event(eventName, data, callback) {
+            if (!googleAnalyticsSink.test()) return;
+
+            if (loggingIsEnabled && !data.action) {
+                console.warn('Event action is required'); // eslint-disable-line no-console
+            }
+            var event = {
+                event: data.action,
+                gaCategory: data.category || eventName,
+                gaLabel: data.label,
+                gaValue: data.value,
+                isGoogleAnalyticsEvent: true
+            };
+
+            if (typeof callback === 'function') {
+                event.eventCallback = gtmOnce(callback);
+                // So the callback always fires.
+                event.eventTimeout = 2000;
+            }
+            window.dataLayer.push(event);
+        },
+
+
+        includeProperties: noop,
+
+        includeOnce: noop,
+
+        identifyUser: function identifyUser(id) {
+            if (!googleAnalyticsSink.test()) return;
+            if (!id) return;
+            window.dataLayer.push({ userId: id });
+        },
+
+
+        linkClick: buildLinkTracker(function (linkType, href, data, hitCallback) {
+            data.label = data.label || href;
+            data.action = data.action || linkType;
+            googleAnalyticsSink.event('Tracked Link', data, hitCallback);
+        }),
+
+        setDimension: function setDimension(dimension, value) {
+            if (!googleAnalyticsSink.test()) return;
+
+            if (!Object.keys(dimensionsLookup).map(function (key) {
+                return dimensionsLookup[key];
+            }).includes(dimension)) {
+                var errorMessage = '\nAttempted to set an unspecified dimension.\nMake sure you have added the dimension to Google Tag Manager and the approriate dimension dataLayer variable to "dimensionsLookup" in "recorder.js"';
+                console.error(errorMessage); // eslint-disable-line no-console
+                return;
+            }
+
+            window.dataLayer.push(_defineProperty({}, dimension, value));
+        },
+        pageView: function pageView(page, data, callback) {
+            if (!googleAnalyticsSink.test()) return;
+            var event = _extends({}, data, {
+                event: 'pageView',
+                pagePath: page
+            });
+
+            if (typeof callback === 'function') {
+                event.eventCallback = gtmOnce(callback);
+                // So the callback always fires.
+                event.eventTimeout = 2000;
+            }
+            window.dataLayer.push(event);
+        }
+    };
+
+    /**
+     * Maps the Recorder API to output to the console
+     * @type {Object}
+     */
+    var consoleSink = {
+        name: 'console',
+
+        test: function test() {
+            return !!window.console && loggingIsEnabled;
+        },
+        event: function event(eventName, data, callback) {
+            window.console.info('[Recorder] Event:', eventName, data);
+            callback();
+        },
+        includeProperties: function includeProperties(props) {
+            window.console.info('[Recorder] Include properties:', props);
+        },
+        includeOnce: function includeOnce(props) {
+            window.console.info('[Recorder] Include properties once:', props);
+        },
+        identifyUser: function identifyUser(id) {
+            window.console.info('[Recorder] Identify user:', id);
+        },
+        linkClick: function linkClick(linkSelector, eventName, data) {
+            var els = linkSelector instanceof Element ? [linkSelector] : Array.prototype.slice.call(document.querySelectorAll(linkSelector), 0);
+
+            els.filter(function (el) {
+                return el.nodeName === 'A' && !!el.href;
+            }).forEach(function (el) {
+                el.addEventListener('click', function () {
+                    window.console.info('[Recorder] Attaching link recording:', linkSelector, eventName, data);
+                });
+            });
+        },
+        setDimension: function setDimension(page, data) {
+            window.console.info('[Recorder] setDimension:', page, data);
+        },
+        pageView: function pageView(page, data) {
+            window.console.info('[Recorder] Pageview:', page, data);
+        }
+    };
+
+    /**
+     * Defines the default list of sinks to dispatch to for each method in the Recorder API
+     * @type {Object}
+     */
+    var defaultMethodSinks = {
+        event: [mixpanelSink, consoleSink],
+        eventAsync: [mixpanelSink, consoleSink],
+        includeProperties: [mixpanelSink, consoleSink],
+        includeOnce: [mixpanelSink, consoleSink],
+        identifyUser: [mixpanelSink, googleAnalyticsSink, consoleSink],
+        linkClick: [mixpanelSink, consoleSink],
+        setDimension: [googleAnalyticsSink, consoleSink],
+        pageView: [mixpanelSink, googleAnalyticsSink, consoleSink]
+    };
+
+    var Recorder = function () {
+        function Recorder() {
+            var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+                _ref$methodSinks = _ref.methodSinks,
+                methodSinks = _ref$methodSinks === undefined ? {} : _ref$methodSinks,
+                _ref$throttlingRate = _ref.throttlingRate,
+                throttlingRate = _ref$throttlingRate === undefined ? 1 : _ref$throttlingRate,
+                _ref$timeout = _ref.timeout,
+                timeout = _ref$timeout === undefined ? 300 : _ref$timeout;
+
+            _classCallCheck(this, Recorder);
+
+            this.methodSinks = _extends({}, defaultMethodSinks, methodSinks);
+            this.isThrottled = isThrottled(throttlingRate);
+            this.timeout = timeout;
+        }
+
+        _createClass(Recorder, [{
+            key: 'getSinks',
+            value: function getSinks(method) {
+                var _this = this;
+
+                var settings = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+                // Sinks may be overridden by method options
+                var sinks = Array.isArray(settings.sinks) ? settings.sinks : this.methodSinks[method];
+
+                // Sinks can be excluded by method options
+                var exclude = Array.isArray(settings.exclude) ? settings.exclude : [];
+
+                return sinks.filter(function (sink) {
+                    return exclude.indexOf(sink) === -1 && sink.test({ isThrottled: _this.isThrottled });
+                });
+            }
+        }, {
+            key: 'event',
+            value: function event(eventName) {
+                var data = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+                var settings = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
+                this.getSinks('event', settings).forEach(function (sink) {
+                    return sink.event(eventName, data, noop);
+                });
+            }
+        }, {
+            key: 'eventAsync',
+            value: function eventAsync(eventName, data) {
+                var _this2 = this;
+
+                var settings = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
+                var requests = this.getSinks('eventAsync', settings).map(function (sink) {
+                    return new Promise(function (resolve) {
+                        window.setTimeout(resolve, settings.timeout || _this2.timeout);
+                        sink.event(eventName, data, resolve);
+                    });
+                });
+                return Promise.all(requests);
+            }
+        }, {
+            key: 'includeProperties',
+            value: function includeProperties(props) {
+                var settings = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+                this.getSinks('includeProperties', settings).forEach(function (sink) {
+                    return sink.includeProperties(props);
+                });
+            }
+        }, {
+            key: 'includeOnce',
+            value: function includeOnce(props) {
+                var settings = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+                this.getSinks('includeOnce', settings).forEach(function (sink) {
+                    return sink.includeOnce(props);
+                });
+            }
+        }, {
+            key: 'identifyUser',
+            value: function identifyUser(id) {
+                var settings = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+                this.getSinks('identifyUser', settings).forEach(function (sink) {
+                    return sink.identifyUser(id);
+                });
+            }
+        }, {
+            key: 'linkClick',
+            value: function linkClick(linkSelector, eventName, data, settingsOrCallback, callback) {
+                var _this3 = this;
+
+                var _resolveSettingsAndCa = resolveSettingsAndCallback(settingsOrCallback, callback),
+                    settings = _resolveSettingsAndCa.settings,
+                    cb = _resolveSettingsAndCa.cb;
+
+                this.getSinks('linkClick', settings).forEach(function (sink) {
+                    return sink.linkClick(linkSelector, eventName, data, cb, settings.timeout || _this3.timeout);
+                });
+            }
+        }, {
+            key: 'setDimension',
+            value: function setDimension(dimension, value) {
+                var settings = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
+                this.getSinks('setDimension', settings).forEach(function (sink) {
+                    return sink.setDimension(dimension, value);
+                });
+            }
+        }, {
+            key: 'pageView',
+            value: function pageView(page, data, settingsOrCallback, callback) {
+                var _resolveSettingsAndCa2 = resolveSettingsAndCallback(settingsOrCallback, callback),
+                    settings = _resolveSettingsAndCa2.settings,
+                    cb = _resolveSettingsAndCa2.cb;
+
+                this.getSinks('pageView', settings).forEach(function (sink) {
+                    return sink.pageView(page, data, cb);
+                });
+            }
+        }]);
+
+        return Recorder;
+    }();
+
+    function resolveSettingsAndCallback() {
+        var settingsOrCallback = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+        var cb = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : noop;
+
+        var settings = void 0;
+
+        if (typeof settingsOrCallback === 'function') {
+            settings = {};
+            cb = settingsOrCallback;
+        } else {
+            settings = settingsOrCallback;
+        }
+
+        return { settings: settings, cb: cb };
+    }
+
+    function isThrottled(throttlingRate) {
+        return Math.random() < throttlingRate;
+    }
+
+    function buildLinkTracker(log) {
+        return function (linkSelector, eventName, data) {
+            var callback = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : noop;
+            var timeout = arguments[4];
+
+            var els = linkSelector instanceof Element ? [linkSelector] : Array.prototype.slice.call(document.querySelectorAll(linkSelector), 0);
+
+            els.filter(function (el) {
+                return el.nodeName === 'A' && !!el.href;
+            }).forEach(function (el) {
+                el.addEventListener('click', function (e) {
+                    var href = e.currentTarget.getAttribute('href');
+                    var supportsBeacon = window.sendBeacon || window.navigator.sendBeacon;
+                    var hitCallback = callback;
+
+                    if (supportsBeacon) {
+                        data.transport = 'beacon';
+                    }
+
+                    if (!supportsBeacon && linkClickWillUnloadCurrentPage(e, e.currentTarget) && !event.defaultPrevented) {
+                        e.preventDefault();
+
+                        hitCallback = function hitCallback() {
+                            callback();
+                            document.location.assign(href);
+                        };
+
+                        // Without this timeout, navigation will never happen if GA doesn't respond
+                        window.setTimeout(hitCallback, timeout);
+                    }
+
+                    log(eventName, href, data, hitCallback);
+                });
+            });
+        };
+    }
+
+    /**
+     * Determines if a link click event will cause the current page to upload.
+     * Note: most link clicks *will* cause the current page to unload because they
+     * initiate a page navigation. The most common reason a link click won't cause
+     * the page to unload is if the clicked was to open the link in a new tab.
+     * @param {Event} event The DOM event.
+     * @param {Element} link The link element clicked on.
+     * @return {boolean} True if the current page will be unloaded.
+     */
+    function linkClickWillUnloadCurrentPage(event, link) {
+        return !(
+        // The event type can be customized; we only care about clicks here.
+        event.type != 'click' ||
+        // Links with target="_blank" set will open in a new window/tab.
+        link.target == '_blank' ||
+        // On mac, command clicking will open a link in a new tab. Control
+        // clicking does this on windows.
+        event.metaKey || event.ctrlKey ||
+        // Shift clicking in Chrome/Firefox opens the link in a new window
+        // In Safari it adds the URL to a favorites list.
+        event.shiftKey ||
+        // On Mac, clicking with the option key is used to download a resouce.
+        event.altKey ||
+        // Middle mouse button clicks (which == 2) are used to open a link
+        // in a new tab, and right clicks (which == 3) on Firefox trigger
+        // a click event.
+        event.which > 1);
+    }
+
+    var defaultRecorder = new Recorder();
+
+    defaultRecorder.withSettings = function (settings) {
+        return new Recorder(settings);
+    };
+
+    defaultRecorder.enableLogging = function () {
+        return loggingIsEnabled = true;
+    };
+
+    defaultRecorder.dimensions = dimensionsLookup;
+
+    defaultRecorder.sinks = {
+        mixpanel: mixpanelSink,
+        googleAnalytics: googleAnalyticsSink,
+        console: consoleSink
+    };
+
+    this.uship.recorder = defaultRecorder;
+}).call(this);
