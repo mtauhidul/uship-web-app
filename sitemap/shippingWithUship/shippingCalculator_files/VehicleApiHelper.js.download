@@ -1,0 +1,157 @@
+﻿var ymmLookup = (function () {
+    var cache = {};
+    return {
+        years: function (cat, callback) {
+            if (!cache[cat]) cache[cat] = {};
+
+            var resp = cache[cat]['years'];
+
+            if (resp) {
+                callback(resp);
+            }
+            else {
+
+                switch (cat) {
+                    case "79":
+                        ns.GetVehicleYears(function (resp) {
+                            cache[cat]['years'] = resp;
+                            callback(resp);
+                        });
+                        break;
+                    case "80":
+                        ns.GetMotorcycleYears(function (resp) {
+                            cache[cat]['years'] = resp;
+                            callback(resp);
+                        });
+                        break;
+                }
+            }
+
+        },
+        makes: function (cat, year, callback) {
+            if (!cache[cat]) cache[cat] = {};
+
+            var resp = cache[cat][year];
+
+            if (resp) {
+                callback(resp);
+            }
+            else {
+
+                switch (cat) {
+                    case "79":
+                        ns.GetMakesByYear(year, function (resp) {
+                            cache[cat][year] = resp;
+                            callback(resp);
+                        });
+                        break;
+                    case "80":
+                        ns.GetMotoMakesByYear(year, function (resp) {
+                            cache[cat][year] = resp;
+                            callback(resp);
+                        });
+                        break;
+                }
+            }
+        },
+        models: function (cat, year, make, callback) {
+            if (!cache[cat]) cache[cat] = {};
+
+            var KEY = year + '-' + make;
+            var resp = cache[cat][KEY];
+            if (resp) {
+                callback(resp);
+            }
+            else {
+
+                switch (cat) {
+                    case "79":
+                        ns.GetModelsByYearMake(year, make, function (resp) {
+                            cache[cat][KEY] = resp;
+                            callback(resp);
+                        });
+                        break;
+                    case "80":
+
+                        ns.GetMotoModelsByYearMake(year, make, function (resp) {
+                            cache[cat][KEY] = resp;
+                            callback(resp);
+                        })
+                        //              	var resp = { value: [
+                        //              		{0: -1, 1: "-Select a Model-"},
+                        // {0: 0, 1: "Other"}
+                        //             		]};
+                        //              	callback(resp);
+                        break;
+
+                }
+            }
+        }
+    };
+})();
+var ns = {
+    GetVehicleYears: uship.ns.ajaxpro.register('CarListingItemControl', 'GetYears', []),
+    GetMakesByYear: uship.ns.ajaxpro.register('CarListingItemControl', 'GetMakesByYear', ['year']),
+    GetModelsByYearMake: uship.ns.ajaxpro.register('CarListingItemControl', 'GetModelsByYearMake', ['year', 'make']),
+    GetMotorcycleYears: uship.ns.ajaxpro.register('MotoListingItemControl', 'GetYears', []),
+    GetMotoMakesByYear: uship.ns.ajaxpro.register('MotoListingItemControl', 'GetMakesByYear', ['year']),
+    GetMotoModelsByYearMake: uship.ns.ajaxpro.register('MotoListingItemControl', 'GetModelsByYearMake', ['year', 'make'])
+};
+
+function addOptionElements(parent, options) {
+    //Object like [ [ id, name ], [id, name], ...]
+    for (var i = 0; i < options.length; i++) {
+        jQuery(parent).append("<option value='" + options[i][0] + "'>" + options[i][1] + "</option>");
+    }
+}
+
+
+
+function appendYearSelect(controlCount) {
+    var category = jQuery('#child_commodity_ddl_' + controlCount).val();
+
+    var yearSelect = jQuery("#vehicleYear_ddl_" + controlCount);
+    yearSelect.css('width', '475px');
+
+    ymmLookup.years(category,
+        function (resp) {
+            yearSelect.append("<option value='0'>Year</option>");
+            addOptionElements(yearSelect, resp.value);
+        });
+}
+
+function getMakes(controlCount) {
+    var category = jQuery('#child_commodity_ddl_' + controlCount).val();
+
+    var yearSelect = jQuery("#vehicleYear_ddl_" + controlCount);
+    var makeSelect = jQuery("#vehicleMake_ddl_" + controlCount);
+
+    yearSelect.css('width', '234px');
+    makeSelect.css('width', '236px')
+        .show();
+    jQuery("#vehicleModel_ddl_" + controlCount).hide();
+
+    ymmLookup.makes(category, yearSelect.val(),
+        function (resp) {
+            makeSelect.html("");
+            addOptionElements(makeSelect, resp.value);
+        });
+}
+
+function getModels(controlCount) {
+    var category = jQuery('#child_commodity_ddl_' + controlCount).val();
+
+    yearSelect = jQuery("#vehicleYear_ddl_" + controlCount);
+    makeSelect = jQuery("#vehicleMake_ddl_" + controlCount);
+    modelSelect = jQuery("#vehicleModel_ddl_" + controlCount);
+
+    yearSelect.css('width', '119px');
+    makeSelect.css('width', '174px');
+    modelSelect.show();
+
+    ymmLookup.models(category, yearSelect.val(), makeSelect.val(),
+        function (resp) {
+            modelSelect.html("");
+            addOptionElements(modelSelect, resp.value);
+        });
+}

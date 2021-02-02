@@ -1,0 +1,260 @@
+'use strict';
+
+(function (_ref) {
+    var uship = _ref.uship,
+        jQuery = _ref.jQuery,
+        ko = _ref.ko;
+
+
+    function defaultEnter(fromStep, preservePreviousStep /*, dataArgs */) {
+        var dataArgs = uship.utils.restParams(defaultEnter, arguments);
+
+        if (!this.util.isInitialized) {
+            this._instanceConstructor.apply(this, dataArgs);
+            this.util.isInitialized = true;
+        } else if (dataArgs.length) {
+            this.update.apply(this, dataArgs);
+        }
+
+        this.eagerLoad();
+        this.util.isActive(true);
+        this.util.isComplete(this.util.isComplete() || false);
+        fromStep && fromStep.util.isActive(false);
+
+        if (!preservePreviousStep) {
+            this.util.previousStep = fromStep;
+        }
+
+        this.util.container.notifySubscribers(fromStep, 'stepleave');
+        this.util.container.notifySubscribers(this, 'stepenter');
+
+        return this;
+    }
+
+    function asStep() {
+        this.enter = this.enter || defaultEnter;
+
+        this.template = this.template || function () {
+            return uship.utils.extend({}, this.util.templateSettings, { data: this });
+        };
+
+        this.getDeepestPath = this.getDeepestPath || function (path) {
+            path = path || [];
+            //TODO: find a more elegant way to handle this
+            if (path.length >= 100) throw new Error('You appear to have a circular reference in your step tree');
+
+            var nextSteps = this.util.validNextSteps;
+            path.push(this.util.stepName);
+            if (!nextSteps.length) return path;
+
+            var children = [];
+            for (var i in nextSteps) {
+                var _path = [].concat(path);
+                var child = this.util.container[nextSteps[i]];
+                if (child) children.push(child.getDeepestPath(_path));
+            }
+            children.sort(function (a, b) {
+                return b.length - a.length;
+            });
+            return children[0];
+        };
+
+        this.getReturnPath = this.getReturnPath || function (until, path) {
+            if (arguments.length === 1 && uship.utils.isArray(until)) {
+                path = until;
+                until = null;
+            }
+            path = path || [];
+            path.push(this.util.stepName);
+            if (!this.util.previousStep || until && this.util.stepName === until) return path;
+            return this.util.previousStep.getReturnPath(until, path);
+        };
+
+        this.getCurrentPath = this.getCurrentPath || function (until) {
+            var ret = this.getReturnPath(until).slice(1).reverse();
+            var deepest = this.getDeepestPath();
+            return ret.concat(deepest);
+        };
+
+        this.eagerLoad = function eagerLoad() {
+            if (!this.util.shouldEagerLoad) return;
+            if (eagerLoad.memoize) return eagerLoad.memoize;
+
+            var loadingPromises = [];
+            this.util.validNextSteps.forEach(function (stepName) {
+                var fetch = this.util.container[stepName]._fetch();
+                if (fetch) loadingPromises.push(fetch);
+            }, this);
+
+            return eagerLoad.memoize = loadingPromises;
+        };
+
+        this._fetch = function () {
+            var template = ko.externalTemplate.fetch(this.util.templateSettings.name, this.template());
+            template && template.load();
+            if (this.fetch) return this.fetch();
+        };
+
+        this.update = this.update || function () {};
+
+        this.completed = this.completed || function () {
+            return false;
+        };
+
+        this.validationRules = [];
+
+        this.validate = this.validate || function () {
+            var self = this;
+            var isValid = jQuery.Deferred();
+
+            if (!this.validationRules.length) return isValid.resolve().promise();
+
+            var results = [];
+            results = this.validationRules.map(function (rule) {
+                return typeof rule === 'function' ? rule.call(self) : rule;
+            });
+
+            jQuery.when.apply(jQuery, results).then(function () /* validationResults */{
+                var validationResults = uship.utils.toArray(arguments);
+                var passed = validationResults.every(function (result) {
+                    return result;
+                });
+                passed ? isValid.resolve() : isValid.reject();
+            });
+
+            return isValid.promise();
+        };
+
+        this.errors = this.errors || function () {
+            return [];
+        };
+
+        this.beforeMove = this.beforeMove || function () {
+            var dfd = jQuery.Deferred();
+
+            if (!this.util.validNextSteps.length) return dfd.reject().promise();
+
+            if (this.util.validNextSteps.length == 1) {
+                var nextStep = this._resolveNext(this.util.validNextSteps[0]);
+                return dfd.resolve(nextStep).promise();
+            }
+
+            throw new Error('The step has multiple possible transitions. Override beforeMove to define transitions');
+        };
+
+        this._resolveNext = function (next) {
+            if (!next) return;
+
+            var nextName = typeof next === 'string' ? next : next.util.stepName;
+
+            var transitionIsValid = this.util.validNextSteps.some(function (validNext) {
+                return nextName === validNext;
+            });
+
+            if (!transitionIsValid) throw new Error(nextName + ' is not a valid transition for ' + this.util.stepName);
+            if (!this.util.container[nextName]) throw new Error(nextName + ' is defined transition, but the transition target does not exist.');
+            return this.util.container[nextName];
+        };
+
+        this.moveNext = this.moveNext || function moveNext() /* dataArgs */{
+            if (this.util.isLoading()) return;
+
+            var dataArgs = uship.utils.restParams(moveNext, arguments);
+
+            this.util.isLoading(true);
+            var dependencies = uship.utils.flattenToArray(this.validate(), this.beforeMove(), this.eagerLoad());
+            var canMove = jQuery.when.apply(this, dependencies);
+
+            canMove.then(function (isValid, beforeMoveResult) {
+                var nextStep = void 0,
+                    args = void 0;
+
+                if (uship.utils.isArray(beforeMoveResult)) {
+                    nextStep = beforeMoveResult.shift();
+                    args = uship.utils.flattenToArray(this, false, beforeMoveResult, dataArgs);
+                } else {
+                    nextStep = beforeMoveResult;
+                    args = uship.utils.flattenToArray(this, false, dataArgs);
+                }
+
+                this.enter.apply(this._resolveNext(nextStep), args);
+                this.util.isComplete(true);
+            }.bind(this));
+
+            canMove.always(function () {
+                this.util.isLoading(false);
+            }.bind(this));
+
+            return canMove.promise();
+        };
+
+        this.movePrevious = this.movePrevious || function () {
+            if (!this.util.previousStep) return;
+            this.util.previousStep.enter(this, true);
+            return this.util.previousStep;
+        };
+
+        return this;
+    }
+
+    function asContainer() {
+
+        this.add = function add(stepName, stepSettings) {
+            var _stepSettings$viewMod = stepSettings.viewModel,
+                viewModel = _stepSettings$viewMod === undefined ? {} : _stepSettings$viewMod;
+
+
+            var stepProperties = {
+                stepName: stepName,
+                container: this,
+                templateSettings: stepSettings.template,
+                validNextSteps: uship.utils.isArray(stepSettings.validNextSteps) ? stepSettings.validNextSteps : [stepSettings.validNextSteps],
+                shouldEagerLoad: stepSettings.shouldEagerLoad || false,
+                isInitialized: false,
+                eagerLoaded: false,
+                isActive: ko.observable(false),
+                isLoading: ko.observable(false),
+                isComplete: ko.observable(false),
+                continueText: stepSettings.shouldEagerLoad || uship.loc('MainContinue')
+            };
+
+            var step = void 0;
+
+            if (typeof viewModel === 'function') {
+                asStep.call(viewModel.prototype);
+                step = Object.create(viewModel.prototype);
+                step._instanceConstructor = viewModel;
+            } else {
+                stepProperties.isInitialized = true;
+                step = asStep.call(viewModel);
+            }
+
+            if (!step.util) step.util = function () {};
+            uship.utils.extend(step.util, stepProperties);
+
+            this[stepName] = step;
+        };
+    }
+
+    var stepContainer = {
+        create: function create(steps, context) {
+            var container = new ko.subscribable();
+            asContainer.call(container);
+
+            container.context = context;
+
+            uship.utils.forEach(steps, function (stepName, stepSettings) {
+                container.add(stepName, stepSettings);
+            });
+
+            return container;
+        }
+    };
+
+    uship.namespace('knockout.step').extend({
+        stepContainer: stepContainer,
+        defaultOperations: {
+            enter: defaultEnter
+        }
+    });
+})(window);

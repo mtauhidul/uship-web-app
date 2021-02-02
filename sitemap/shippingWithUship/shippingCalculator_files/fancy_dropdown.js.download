@@ -1,0 +1,43 @@
+
+
+//TODO: Get rid of this old dropdown. It was used on old home page.
+ddFancy = function (Overlay, ActiveItem, DropdownContent) {
+    var self = this;
+    this.overlay = $(Overlay);
+	this.activeitem = $(ActiveItem);
+    this.dropdownlist = $(DropdownContent);
+    this.dropdownlistitems = $(DropdownContent).childElements();
+    this.dropdownlist.hide();    
+    this.dropdownlist.observe('click', this.handle_dropdownEvent.bind(this));
+    this.activeitem.observe('click', this.handle_SelectedItem.bind(this));	
+    //this.activeitem.observe('blur', this.handle_OverLay.bind(this));	
+    this.activeinneritems =[];
+    this.activeinneritems.push(this.activeitem);
+    this.addChildElements(this.activeinneritems, this.activeitem);
+    this.overlay.observe('click', this.handle_OverLay.bind(this));
+};
+ddFancy.prototype = {
+	addChildElements : function(arr,elem){
+		var childs = elem.childElements();
+		if(childs){
+			for(var i=0;i<childs.length;i++){
+				arr.push(childs[i]);
+				this.addChildElements(arr,childs[i]);		
+			}
+		}
+	},
+	handle_dropdownEvent :function(e){
+    		this.dropdownlist.hide();
+	},
+	handle_SelectedItem :function(e){
+		//If the element is inactive then do nothing.
+	    if (!this.activeitem.hasClassName('fancy_dd_inactive')) {
+    		this.dropdownlist.show();
+		}
+	},
+	handle_OverLay :function(e){
+		if(this.activeinneritems.indexOf(e.target)<0){
+	   		this.dropdownlist.hide();
+		}
+	}
+};

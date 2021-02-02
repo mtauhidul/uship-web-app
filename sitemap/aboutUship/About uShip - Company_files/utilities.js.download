@@ -1,0 +1,604 @@
+jQuery(document).ready(function ($) {
+
+    // If there are query strings present in the URL, append them to any uship domain page links
+    if (window.location.search.length) {
+        $("a[href*='uship.com']").each(function () {
+            var ushipHref = $(this).attr('href');
+
+            if (ushipHref.indexOf('?') !== -1) {
+                ushipHref += '&' + location.search.replace(/^\?/, '');
+            } else {
+                ushipHref += location.search;
+            }
+
+            $(this).attr('href', ushipHref);
+        });
+    }
+    // gtm landing functions:
+    $("#linkButton").click(function(e) {           
+        e.preventDefault();
+        var phone_input = $('#phoneInput').val();    
+        jQuery.ajax({
+            url : twilio_ajax.ajax_url,
+            type : 'post',
+            data : {
+                action : 'send_text',
+                phone_number: phone_input
+            },
+            success : function( response ) {
+                $('#twilio-success').show();
+            }
+        });           
+    });
+     // in-home landing functions
+     if(document.body.classList.contains('page-template-in-home')) {
+        function goToDemo() {
+            let target = document.getElementById('requestDemo');
+            target.scrollIntoView({behavior: 'smooth'});
+        }
+        document.getElementById('heroCTAbtn').addEventListener('click', function(e) {   
+            e.preventDefault();
+            goToDemo();
+        });
+        document.getElementById('stickyLink').addEventListener('click', function(e) {   
+            e.preventDefault();
+            goToDemo();
+        });
+        // load marketo forms
+        MktoForms2.loadForm("//app-sj21.marketo.com", "544-ZAR-489", 1221);
+        MktoForms2.loadForm("//app-sj21.marketo.com", "544-ZAR-489", 1222);
+        MktoForms2.loadForm("//app-sj21.marketo.com", "544-ZAR-489", 1224);
+        // success message functionality 
+        MktoForms2.whenReady(function (form){
+            let whichForm = form.getId();
+            if(whichForm == '1222') {
+                form.onSuccess(function(values, followUpUrl){
+                    form.getFormElem().hide();
+                    document.getElementById('confirmform').style.height = 'auto';
+                    document.getElementById('confirmform').style.visibility = 'visible';
+                    window.open(followUpUrl, '_self');
+                    return false;
+                });
+            }
+            if(whichForm == '1221') {
+                form.onSuccess(function(values, followUpUrl){
+                    form.getFormElem().hide();
+                    document.getElementById('emailFormParent').style.display = 'none';
+                    document.getElementById('confirmformEmail').classList.add('open');
+                    return false;
+                });
+            }
+        });
+        var blogSlider = new Swiper ('.blogSlider', {
+            direction: 'horizontal',
+            loop: true,
+            slidesPerView: 1,
+            loopedSlides: 1,
+            speed: 2000,
+            autoplay: {
+                delay: 5000,
+            },
+            pagination: {
+                el: '.swiper-pagination',
+            },
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+        });
+        document.getElementById('reportToggle').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('collapse').classList.toggle('rotate'); 
+            document.getElementById('freeReportForm').classList.toggle('formShow');
+        })
+        // sticky footer functionality 
+        let formTop = document.getElementById('requestDemo');
+        let stickyCTA = document.getElementById('stickyCTA');
+        function isScrolledIntoView(el) {
+            var rect = el.getBoundingClientRect();
+            var elemTop = rect.top;
+            var elemBottom = rect.bottom;
+            var isVisible = (elemTop >= 0) && (elemTop <= window.innerHeight);
+            return isVisible;
+        }
+        function scrollEventHandler()  {
+            if(isScrolledIntoView(formTop)) {
+                stickyCTA.classList.add('formSlide');
+            } else {
+                if(stickyCTA.classList.contains('formSlide')) {
+                    stickyCTA.classList.remove('formSlide');
+                }
+            }
+        }
+        function unbindScrollEventHandler() {
+            document.removeEventListener('scroll', scrollEventHandler);
+        }
+        document.addEventListener('scroll', scrollEventHandler);
+    }
+    // go to market slider 
+    if(document.getElementById('gtm-slider')) {
+        var highlights = {
+            0: [
+                { 1: {'pos': 'top: 340px; left: -290px; text-align: right;',
+                      'circle':  'top: 327px; left: -40px',
+                      'title': 'Streamlined View',
+                      'text' : 'We’ve condensed the shipment cards so you can quickly see the status of your shipments and update the details.'
+                },
+                  2: { 'pos' : 'top: 92px; right: -272px;',
+                        'circle':  'top: 79px; right: -21px; -webkit-transform: scaleX(-1); -ms-transform: scaleX(-1); transform: scaleX(-1);',
+                        'title': 'New Sort Options',
+                        'text' : 'Quickly reorder your list of shipments based on your preferred parameters.'},
+                }
+            ],
+            1: [
+                { 1: {'pos': 'top: 118px; left: -283px; text-align: right;',
+                        'circle':  'top: 105px; left: -30px',
+                        'title': 'Shipment Watch List',
+                        'text' : 'Quickly toggle between shipments you’re keeping an eye on and shipments you’ve already submitted bids for.'},
+                  2: { 'pos' : 'bottom: 132px; right: -280px;',
+                        'circle':  'bottom: 200px; right: -24px; -webkit-transform: scaleX(-1); -ms-transform: scaleX(-1); transform: scaleX(-1);',
+                        'title': 'Simplified Quote Cards',
+                        'text' : 'See your quote amount, time until expiration, and related questions at a glance.'},
+                }
+            ],
+            2: [
+                { 1: {'pos': 'top: 137px; left: -270px; text-align: right;',
+                        'circle':  'top: 127px; left: -20px',
+                        'title': 'Better Filtering',
+                        'text' : 'Sort and filter with an updated search bar that continues to display your search settings as you scroll through results for easy referencing.'},
+                  2: { 'pos' : 'bottom: 87px; left: -279px; text-align: right;',
+                        'circle': 'bottom: 180px; left: -23px;',
+                        'title': 'Simplified Shipment Cards',
+                        'text' : 'Get a condensed view of the shipment summary information to review more shipments with less scrolling.'},  
+                  3: { 'pos' : 'right: -270px; top: 82px;',
+                        'circle':  'top: 70px; right: -23px;-webkit-transform: scaleX(-1); -ms-transform: scaleX(-1); transform: scaleX(-1);',
+                        'title': 'Quickly search saving',
+                        'text' : 'We’ve condensed the shipment cards so you can quickly see the status of your shipments and update the details.'},  
+                }
+            ],
+            3: [
+                { 1: {'pos': 'top: 142px; left: -270px; text-align: right;',
+                      'circle':  'background-image: url("/wp-content/uploads/long-left-circle.png");top: 127px; left: -16px; width: 205px;',
+                      'title': 'A clear place to ask listing questions',
+                      'text' : 'We’ve separated Listing Questions from Quote Questions to simplify communications between carriers and shippers.'}
+                },
+            ],
+            4: [
+                { 1: {'pos': 'top: 113px; left: -305px; text-align: right;',
+                      'circle':  'top: 101px; left: -45px;',
+                      'title': 'Condensed View',
+                      'text' : 'For shipments without pictures, we’ve reduced the placeholder image size for a more streamlined view.'},
+                  2: {'pos': 'top: 279px; left: -285px; text-align: right;',
+                      'circle':  'top: 266px; left: -15px;',
+                      'title': 'Dedicated Quote Questions',
+                      'text' : 'We’ve split Quote Questions from Listing Questions so you can easily get more information before you accept a shipment.'},
+                  3: { 'pos' : 'right: -294px; top: 125px;',
+                        'circle':  'background-image: url("/wp-content/uploads/long-left-circle.png"); top: 112px; right: -32px; width: 205px; -webkit-transform: scaleX(-1); -ms-transform: scaleX(-1); transform: scaleX(-1);',
+                        'title': 'Specialty Shipments',
+                        'text' : 'Look for this icon to determine whether or not a listing is for a speciality shipment.'},
+                  4: { 'pos' : 'right: -298px; top: 330px;',
+                        'circle':  'right: -43px; bottom: 210px; -webkit-transform: scaleX(-1); -ms-transform: scaleX(-1); transform: scaleX(-1);',
+                        'title': 'Dedicated Listing Questions',
+                        'text' : 'You can now tap this area to view a dedicated log of Listing Questions.'},           
+                    },
+            ],
+        };
+        var phoneSwiper = new Swiper ('.swiper-container.iphone', {
+            direction: 'horizontal',
+            loop: true,
+            slidesPerView: 1,
+            loopedSlides: 1,
+            breakpoints: {
+                678: {
+                    pagination: {
+                        el: '.swiper-pagination',
+                        type: 'bullets',
+                        clickable: true,
+                    },
+                }
+            }
+        });
+        phoneSwiper.on('slideChange', function() {
+            allBlurbs.forEach(function(blurb) {blurb.classList.add('hide')});
+        });
+        phoneSwiper.on('slideChangeTransitionEnd', function() {
+            setCords();
+        });
+        document.getElementById('phone-next').addEventListener('click', function() { 
+            phoneSwiper.slideNext();
+        });
+        document.getElementById('phone-prev').addEventListener('click', function() {
+            phoneSwiper.slidePrev();
+        });
+        let allBlurbs = document.querySelectorAll('.circle-span, .contentSlide');
+        var setCords = function() {
+            allBlurbs.forEach(function(blurb) {blurb.classList.add('hide')});
+            let dataIndex = phoneSwiper.realIndex;
+            let slideObj = highlights[dataIndex];
+            for (var key in slideObj) {
+                let parent = slideObj[key];
+                for (var index in parent) {
+                    let setCircle = document.getElementById('hlCircles').querySelector('[data-id="circle-'+index+'"]');
+                    let setText = document.getElementById('hlCircles').querySelector('[data-id="blurb-'+index+'"]');
+                    setCircle.setAttribute('style', parent[index]['circle']);
+                    setCircle.classList.remove('hide');
+                    setCircle.classList.add('fadeIn');
+                    if(window.innerWidth >= 768) {
+                        setText.setAttribute('style', parent[index]['pos']);
+                    }
+                    setText.querySelector('h2').innerHTML = parent[index]['title'];
+                    setText.querySelector('p').innerHTML = parent[index]['text'];
+                    setText.classList.remove('hide');
+                    setText.classList.add('fadeIn');
+                }
+            }
+        };
+        setCords();
+        const sliderAccordians = document.querySelectorAll('.contentSlide h2');
+            let setClick = false;
+            let removeOpenClass = function() {
+                sliderAccordians.forEach(function(elem) { 
+                    elem.classList.remove('open');
+                    elem.nextSibling.classList.remove('open');
+                });
+            }
+            let toggleOpenClass = function() {
+                let openTxt = this.nextSibling;
+                if(this.classList.contains('open')) {
+                    openTxt.style.height = openTxt.clientHeight + 'px';
+                    this.classList.remove('open');
+                    openTxt.classList.remove('open');
+                    return;
+                }
+                removeOpenClass();
+                this.classList.add('open');
+                openTxt.classList.add('open');
+            }
+            let setMobileAccordians = function() {
+                sliderAccordians.forEach(function(title, index) {
+                    if(index == 0) title.nextSibling.classList.add('open');
+                    if(index == 0) title.classList.add('open');
+                    if(setClick == false) {
+                        title.addEventListener('click', toggleOpenClass.bind(title));
+                    }
+                });
+                setClick = true;
+            };
+        if(window.innerWidth < 768) { 
+            setMobileAccordians();
+            phoneSwiper.on('transitionEnd', function() {
+                removeOpenClass();
+                setMobileAccordians();
+            });
+        }
+        var resizeId;
+        $(window).resize(function() {
+            clearTimeout(resizeId);
+            resizeId = setTimeout(doneResizing, 200);
+        });
+
+        function doneResizing(){
+            setCords();
+            if(window.innerWidth < 768) {
+                $('.contentSlide').removeAttr('style');
+                setMobileAccordians();
+             }
+        }
+
+    }
+    // Save search modal
+    var popUp = '<div class="modal modalForm" id="form-modal" style="display: inline-block; opacity: 1;"><div class="modal-inner"><h3 class="form-intro">Wait! This is important</h3><div class="form-divider"></div><p class="form-text">We’re asking that carriers <a href="https://help.uship.com/hc/en-us/articles/206495377-Creating-a-Saved-Search" target="_blank">save all searches using our website</a>, <strong>even if you’ve already saved these searches using the mobile app.</strong> After February 11th, searches saved using the app will be replaced with all searches you’ve saved using the uShip website.</p><div class="contentWrapper"><a href="#" id="got-it-btn" class="button button--large secondaryButton" aria-label="Ok, got it">Ok, Got it</a><a href="https://help.uship.com/hc/en-us/articles/206495377-Creating-a-Saved-Search" id="start-save-cta" class="button button--large primaryButton" aria-label="Start saving searches">Start Saving Searches</a></div></div><a href="#close-modal" id="closeModalX" class="close-modal">Close</a></div>';
+    //sessionStorage.setItem('modalShown','false');
+    var modalBox = document.getElementById('shownModalBox');
+    if(modalBox){
+        function closeModal() {
+            sessionStorage.setItem('modalShown','true');
+            modalBox.style.display = 'none';
+            modalBox.classList.remove('blocker');
+        }
+        if(sessionStorage.getItem('modalShown') !== 'true') {
+            document.getElementById('shownModalBox').innerHTML = popUp;
+            document.querySelectorAll('#got-it-btn, #closeModalX')
+            .forEach(function(elem) {
+                elem.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    closeModal();
+                });
+            });
+        } else {
+            modalBox.style.display = 'none';
+            modalBox.classList.remove('blocker');
+        }
+    }
+    // valid number for text input
+    if(document.getElementById('phoneInput')) {
+        document.getElementById('phoneInput').addEventListener('keyup', function(e) {
+            var dtRegex = new RegExp(/^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/);
+            let numInput = this.value;
+            let is_valid = dtRegex.test(numInput);
+            document.getElementById('validNumber').style.display = (is_valid) ? 'block' : 'none';
+        });
+    }
+    // Guides 
+    $('.guidesMore').click(function() {
+        console.log('working>>>');
+        var guideID = $(this).data('page');
+        var guideIDPrev = $(this).data('page') + 1;
+        $('.guidesMore').hide();
+        $('.guidesMore[data-page="'+guideIDPrev+'"]').show();
+        $('.forGuides'+guideID).show();
+    });
+    // Blog Show/Hide Post Thumbnails
+    $('.postThumb').hide().each(function (i) {
+        $(this).delay((i++) * 100).fadeTo(300, 1);
+    });
+
+    $('div.postsGroup .postsGroup-container:not(:first-child)').hide();
+
+    // Create Mobile Dropdown Filter
+    $('<select class="sortBy" />').appendTo('.categoryMenu');
+
+    // Convert List Items to Options
+    $('.categoryMenu li a').each(function () {
+        var el = $(this);
+        $('<option />', {
+            'value'   : el.attr('class'),
+            'text'    : el.text()
+        }).appendTo('.categoryMenu select');
+    });
+
+    // Set first option to :selected
+    $('.categoryMenu select option:first').attr('selected', 'selected');
+    // Set active page to 
+    // Blog Category Menu - Desktop
+    $('.categoryMenu-list li a').click(function () {
+
+        var elementClassName = $(this).attr('class');
+
+        $('div.' + elementClassName).show().siblings('div.postsGroup-container').hide();
+
+        $('div.' + elementClassName).children('.postThumb').hide().each(function (i) {
+            $(this).delay((i++) * 100).fadeTo(300, 1);
+        });
+
+        $(this).parent().addClass('categoryMenu-active').siblings().removeClass('categoryMenu-active');
+
+        $('.categoryMenu select option').each(function () {
+            if ($(this).val() == elementClassName) {
+                $(this).attr('selected','selected');
+                $(this).siblings().removeAttr('selected');
+            }
+        });
+    });
+    // Blog Category Menu - Mobile
+    $('.categoryMenu select').change(function () {
+
+        var elementClassName = $(this).attr('value');
+
+        $('div.' + elementClassName).show().siblings('div.postsGroup-container').hide();
+
+        $('div.' + elementClassName).children('.postThumb').hide().each(function (i) {
+            $(this).delay((i++) * 100).fadeTo(300, 1);
+        });
+
+        $('.categoryMenu-list li a').each(function () {
+            if ($(this).hasClass(elementClassName)) {
+                $(this).parent().addClass('categoryMenu-active').siblings().removeClass('categoryMenu-active');
+            }
+        });
+    });
+    // Mobile Dropdown for Guides
+    $('.guidesDropdown').on('change', function() {
+        //$('.guidesDropdown option:selected').removeAttr('selected');
+        var selectedOpt = $(this).find("option:selected" )
+        $(selectedOpt).attr('selected', 'selected');
+        var selectedValue = $(selectedOpt).val();
+        var newUrl = window.location.pathname + selectedValue;
+        //console.log( window.location.pathname);
+        window.location = newUrl;
+        //setTimeout(function () { window.location = newUrl;}, 200)
+    });
+
+    //Navigation Module
+    $('.navigationModuleMobile').on('change', function() {
+        var selectedOpt = $(this).find("option:selected" )
+        $(selectedOpt).attr('selected', 'selected');
+        var selectedValue = $(selectedOpt).val();
+        var newUrl = window.location.pathname + selectedValue;
+        window.location = newUrl;    
+    });
+
+
+    // Video Modal
+    $('a[href="#video-modal"]').click(function (event) {
+        event.preventDefault();
+        $(this).modal({
+            fadeDuration: 100
+        });
+        return false;
+    });
+
+
+
+    // Form Modal
+    $('a[href="#form-modal"]').click(function (event) {
+        event.preventDefault();
+        $(this).modal({
+            fadeDuration: 100
+        });
+        return false;
+    });
+
+
+
+    // Focus elements within modal for tab accessibility
+    $('.hero .modal').on($.modal.OPEN, function (event, modal) {
+        $('form input:first, iframe').focus();
+        $('.pageWrapper').find('a, button, object, input, select, textarea').attr('tabindex', '-1');
+    });
+
+    $('.hero .modal').on($.modal.CLOSE, function (event, modal) {
+        $('.pageWrapper').find('a, button, object, input, select, textarea').removeAttr('tabindex');
+        $('main a:first').focus();
+    });
+
+
+
+    // Give unique id to video modals in order to have multiple on one page
+    $('.thumbnailGrid .modalVideo').each(function (i) {
+        $(this).attr('id', 'video-modal-' + (i + 1));
+    });
+
+    $('.thumbnailGrid-modalButton').each(function (i) {
+        $(this).attr('href', '#video-modal-' + (i + 1));
+    });
+
+
+
+    // Open share icons in new window
+    var socialLink = $('.share-icon');
+
+    socialLink.live('click', function () {
+        newwindow = window.open($(this).attr('href'),'','height=450,width=700');
+        if (window.focus) {newwindow.focus()}
+        return false;
+    });
+
+
+
+    // Delay HIW home page panel hover effects. Remove hover syles for mobile
+    $(window).on('load resize', function () {
+        if ($(window).width() < 769) {
+            $('.splitScreen-panel').removeClass('panelHover');
+        } else {
+            setTimeout(function () {
+                $('.splitScreen-panel').addClass('panelHover');
+            }, 1000);
+        }
+    });
+
+
+
+    // Intro slide module slideshow effects
+    $('.page-template-default .introSlide-slideshow-slide:first-child').show();
+
+    setInterval(function () {
+        $('.page-template-default .introSlide-slideshow').each(function () {
+            if ($(this).find('.introSlide-slideshow-slide').length > 1) {
+                $(this).find('.introSlide-slideshow-slide:first')
+                .fadeOut(500)
+                .next()
+                .fadeIn(500)
+                .end()
+                .appendTo($(this));
+            }
+        });
+    },  3000);
+
+
+
+    // Add .active class to How it Works nav item when on prod and staging Learn sites
+    $(function () {
+        if ((window.location.hostname === 'learn.uship.com') || (window.location.hostname === 'ushiplearn.wpengine.com') || (window.location.hostname === 'ushiplearn.staging.wpengine.com')) {
+            $('.siteNav-link.sel-navLink-HowItWorks .siteNav-linkText').addClass('active');
+        }
+    });
+
+
+
+    // Add class to hero if co-branded strip is present
+    $('.hero').each(function () {
+        if ($(this).children('.cobrandedStrip').length > 0) {
+            $(this).addClass('cobrandedPush');
+        }
+    });
+
+
+
+    // Add class to parent of an iframe embed for responsive styling
+    $('.entry-content iframe').parent().addClass('embed-container');
+
+
+
+    // Add class to .bodyContent if the secondary menu is active in order to adjust jump link positioning
+    if ($('#secondary-menu').length) {
+        $('.bodyContent').addClass('subnavPush');
+    }
+
+
+
+    // VideoJS setup for non tabbed-page-v2 template videos
+    $('.page-template-default .video-js, .tabbedPage .video-js').each(function () {
+        vidId = $(this).attr('id');
+        vidURL = 'https://www.youtube.com/watch?v=' + vidId;
+        var vidPlayer = videojs(vidId, {
+            "techOrder": ["youtube"], "sources": [{ "type": "video/youtube", "src": vidURL}]
+        });
+    });
+
+    // on page load, find the button with ID (whatever that id is)
+    //detect user agent string
+    //change the onClick event based on the User Agent string
+    function getMobileOperatingSystem() {
+        var userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    
+            // Windows Phone must come first because its UA also contains "Android"
+        if (/windows phone/i.test(userAgent)) {
+            return "Windows Phone";
+        }
+    
+        if (/android/i.test(userAgent)) {
+            return "Android";
+        }
+    
+        // iOS detection from: http://stackoverflow.com/a/9039885/177710
+        if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+            return "iOS";
+        }
+    
+        return "unknown";
+    }
+
+    const userAgent = getMobileOperatingSystem();
+    if (userAgent === "iOS")
+     { 
+         $("#downloadNowBtn").attr("href", "https://itunes.apple.com/us/app/uship-for-iphone/id457045275").text("Download Now");
+     } else if (userAgent === "Android") {
+        $("#downloadNowBtn").attr("href", "https://play.google.com/store/apps/details?id=com.unwirednation.notifications.android.ushipnew").text("Download Now");
+
+    } 
+    // Quick and diry fix to make CycleTrader iframed partner page links open in a new tab. Need to add formal acf pro option
+    $('.page-id-5725 a').attr('target', '_blank');
+    
+    //Email Signup Module
+    if(document.getElementById("emailSignUpModule")) {
+        MktoForms2.whenReady(function (form){
+            form.onSuccess(function(values, followUpUrl){
+                console.log('test');
+                form.getFormElem().hide();
+                document.getElementById('emailFormParent').style.display = 'none';
+                document.getElementById('confirmformEmail').classList.add('open');
+                return false;
+            });
+        });
+    }
+    //Blog Slider Module
+    var blogSlider = new Swiper ('.blogSlider', {
+        direction: 'horizontal',
+        loop: true,
+        slidesPerView: 1,
+        loopedSlides: 1,
+        speed: 2000,
+        autoplay: {
+            delay: 5000,
+        },
+        pagination: {
+            el: '.swiper-pagination',
+        },
+        navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+        },
+    });
+})
+

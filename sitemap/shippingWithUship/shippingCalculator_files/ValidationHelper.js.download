@@ -1,0 +1,134 @@
+﻿function validateForm() {
+    var isValid = true;
+
+    postalCodeRegex = /^([0-9]{5})(?:[-\s]*([0-9]{4}))?$/;
+    var CanadianPostalCodeRegex = new RegExp(/^[ABCEGHJKLMNPRSTVXY]\d[ABCEGHJKLMNPRSTVWXYZ]( )?\d[ABCEGHJKLMNPRSTVWXYZ]\d$/i);
+    if(!postalCodeRegex.test(jQuery(destinationInputId).val()) && !CanadianPostalCodeRegex.test(jQuery(destinationInputId).val()))
+    {
+        jQuery(destinationInputId).css('border-color', 'red');
+        jQuery(destinationInputId).css('background', 'pink');
+        jQuery(destinationInputId).css('color', 'red');
+        jQuery(destinationInputId).focus(function () { RemoveInvalidStyling(destinationInputId); });
+        isValid = false;
+    }
+    if (!postalCodeRegex.test(jQuery(originInputId).val()) && !CanadianPostalCodeRegex.test(jQuery(originInputId).val()))
+    {
+        jQuery(originInputId).css('border-color', 'red');
+        jQuery(originInputId).css('background', 'pink');
+        jQuery(originInputId).css('color', 'red');
+        jQuery(originInputId).focus(function () { RemoveInvalidStyling(originInputId); });
+        isValid = false;
+    }
+
+
+    if (jQuery(destinationInputId).val() == "Destination Zip Code") {
+        jQuery(destinationInputId).css('border-color', 'red');
+        jQuery(destinationInputId).css('background', 'pink');
+        jQuery(destinationInputId).css('color', 'red');
+        jQuery(destinationInputId).focus(function () { RemoveInvalidStyling(destinationInputId); });
+        isValid = false;
+    }
+
+    if (jQuery(originInputId).val() == "Origin Zip Code") {
+        jQuery(originInputId).css('border-color', 'red');
+        jQuery(originInputId).css('background', 'pink');
+        jQuery(originInputId).css('color', 'red');
+        jQuery(originInputId).focus(function () { RemoveInvalidStyling(originInputId); });
+        isValid = false;
+    }
+
+    for (var i = 1; i <= controlCount; i++) {
+
+        var controlToValidate;
+        var parent_commoditySelectId = '#commodity_ddl_' + i;
+        var child_commoditySelectId = '#child_commodity_ddl_' + i;
+        var commodityId = jQuery(child_commoditySelectId).val();
+
+
+        if (jQuery(parent_commoditySelectId).val() == "What are you shipping?")
+        {
+            jQuery(parent_commoditySelectId).focus(function () { RemoveInvalidStyling(parent_commoditySelectId); });
+            jQuery(parent_commoditySelectId).css('border-color', 'red');
+            jQuery(parent_commoditySelectId).css('background', 'pink');
+            jQuery(parent_commoditySelectId).css('color', 'red');
+            isValid = false;
+        }
+
+        if (jQuery(child_commoditySelectId).val() == "--- Select One ---") {
+            jQuery(child_commoditySelectId).focus(function () { RemoveInvalidStyling(child_commoditySelectId); });
+            jQuery(child_commoditySelectId).css('border-color', 'red');
+            jQuery(child_commoditySelectId).css('background', 'pink');
+            jQuery(child_commoditySelectId).css('color', 'red');
+            isValid = false;
+        }
+
+        if (commodityId != 77) {
+            controlToValidate = "#variantTxt" + i;
+            var value = jQuery(controlToValidate).val();
+            jQuery(controlToValidate).focus(function () { RemoveInvalidStyling(controlToValidate); });
+            if (value == "Weight (lbs.)") {
+                jQuery(controlToValidate).css('border-color', 'red');
+                jQuery(controlToValidate).css('background', 'pink');
+                jQuery(controlToValidate).css('color', 'red');
+                isValid = false;
+            }
+            else if (value == "Length (ft.)") {
+                jQuery(controlToValidate).css('border-color', 'red');
+                jQuery(controlToValidate).css('background', 'pink');
+                jQuery(controlToValidate).css('color', 'red');
+                isValid = false;
+            }
+            else if (value == "How Many?") {
+                jQuery(controlToValidate).css('border-color', 'red');
+                jQuery(controlToValidate).css('background', 'pink');
+                jQuery(controlToValidate).css('color', 'red');
+                isValid = false;
+            }
+        }
+        else {
+            yearSelect = "#vehicleYear_ddl_" + i;
+            makeSelect = "#vehicleMake_ddl_" + i;
+            modelSelect = "#vehicleModel_ddl_" + i;
+            if (jQuery(yearSelect).val() == "Year")
+            {
+                jQuery(yearSelect).focus(function () { RemoveInvalidStyling(yearSelect); });
+                jQuery(yearSelect).css('border-color', 'red');
+                jQuery(yearSelect).css('background', 'pink');
+                jQuery(yearSelect).css('color', 'red');
+                isValid = false;
+            }
+            if (jQuery(makeSelect).val() == "Make") {
+                jQuery(makeSelect).focus(function () { RemoveInvalidStyling(makeSelect); });
+                jQuery(makeSelect).css('border-color', 'red');
+                jQuery(makeSelect).css('background', 'pink');
+                jQuery(makeSelect).css('color', 'red');
+                isValid = false;
+            }
+            if (jQuery(modelSelect).val() == "Model") {
+                jQuery(modelSelect).focus(function () { RemoveInvalidStyling(modelSelect); });
+                jQuery(modelSelect).css('border-color', 'red');
+                jQuery(modelSelect).css('background', 'pink');
+                jQuery(modelSelect).css('color', 'red');
+                isValid = false;
+            }
+        }
+    }
+
+    if (isValid) {
+        createRequest();
+    }
+
+}
+
+function RemoveInvalidStyling(ctrl)
+{
+    jQuery(ctrl).css('border-color', '');
+    jQuery(ctrl).css('border-color', '');
+    jQuery(ctrl).css('background', '');
+    jQuery(ctrl).css('color', '');
+}
+
+
+
+
+

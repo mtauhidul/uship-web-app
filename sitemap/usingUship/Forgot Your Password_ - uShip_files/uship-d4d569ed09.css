@@ -1,0 +1,91 @@
+.adjacent.north {
+  border-top-right-radius: 0 !important;
+  border-top-left-radius: 0 !important; }
+
+.adjacent.north:not(.with-border):not(.with-top-border) {
+  border-top-width: 0 !important; }
+
+.adjacent.east {
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important; }
+
+.adjacent.east:not(.with-border):not(.with-right-border) {
+  border-right-width: 0 !important; }
+
+.adjacent.south {
+  border-bottom-right-radius: 0 !important;
+  border-bottom-left-radius: 0 !important; }
+
+.adjacent.south:not(.with-border):not(.with-bottom-border) {
+  border-bottom-width: 0 !important; }
+
+.adjacent.west {
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important; }
+
+.adjacent.west:not(.with-border):not(.with-left-border) {
+  border-left-width: 0 !important; }
+
+.transition-slide--base {
+  height: auto;
+  max-height: 0;
+  overflow: hidden;
+  -webkit-transition: max-height 1s cubic-bezier(0, 1, 0.5, 1);
+  transition: max-height 1s cubic-bezier(0, 1, 0.5, 1); }
+
+.transition-slide-template--base {
+  height: auto;
+  max-height: 0;
+  overflow: hidden;
+  -webkit-transition: max-height 1s cubic-bezier(0.15, 0.85, 0.6, 1);
+  transition: max-height 1s cubic-bezier(0.15, 0.85, 0.6, 1); }
+
+.transition-slide--after-toggled--tiny {
+  max-height: 75px;
+  -webkit-transition-duration: 0.5s;
+          transition-duration: 0.5s; }
+
+.transition-slide--after-toggled--small {
+  max-height: 200px; }
+
+.transition-slide--after-toggled--medium {
+  max-height: 500px; }
+
+.transition-slide--after-toggled--large {
+  max-height: 1000px; }
+
+.transition-slide--after-toggled--xlarge {
+  max-height: 3000px;
+  -webkit-transition-duration: 6s;
+          transition-duration: 6s; }
+
+.browserWarning {
+  background: white;
+  border: 2px solid #aaa;
+  position: fixed;
+  left: 50%;
+  margin-left: -300px;
+  padding: 10px;
+  top: 25px;
+  width: 100%;
+  width: 600px;
+  z-index: 400; }
+
+.browserWarning p + p {
+  margin-top: 10px; }
+
+.browserWarning-dismiss {
+  float: right;
+  color: #aaa;
+  margin-left: 10px;
+  cursor: pointer; }
+
+.browserWarning-suggestions {
+  text-align: center;
+  margin-bottom: 0; }
+
+.browserWarning-suggestion {
+  display: inline-block;
+  padding: 5px 7px;
+  background: #f1f1f1;
+  margin-left: 5px; }

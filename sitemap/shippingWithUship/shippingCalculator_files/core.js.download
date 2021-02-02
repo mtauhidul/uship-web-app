@@ -1,0 +1,244 @@
+﻿// PriceEstimator "class" has a dependency for chart.js
+if(window.PE === undefined) { window.PE = {}; }
+
+var PriceEstimator = function(barId, pointsId, avgId, mapId, tableId, avg_price, items) {
+	this.items = items;
+	this.chart = new Chart(barId, pointsId, avgId, avg_price);
+	this.map = new CrappyMap(mapId);
+	this.list = new ShipmentList(tableId);
+
+	items.each(function(item, i) {
+		this.chart.add(item.id, item.marker, item.price);
+		this.map.add(item.id, item.marker, { from: item.from, to: item.to });
+		this.list.add(item.id, $('row' + item.id), $('row' + item.id + '_more'));
+	}.bind(this));
+	this.chart.build();
+	this.map.fit_points();
+
+	this.chart.onmouseover = this.handleChartMouseOver.bind(this);
+	this.chart.onmouseout = this.handleChartMouseOut.bind(this);
+	this.map.onmouseover = this.handleMapMouseOver.bind(this);
+	this.map.onmouseout = this.handleMapMouseOut.bind(this);
+	this.list.onmouseover = this.handleListMouseOver.bind(this);
+	this.list.onmouseout = this.handleListMouseOut.bind(this);
+}
+PriceEstimator.prototype = {
+	handleChartMouseOver: function(generated_id) {
+		this.map.select(generated_id);
+		this.list.highlight(generated_id);
+	},
+	handleChartMouseOut: function(generated_id) {
+		this.map.show_all();
+		this.list.ignore_all();
+	},
+	handleMapMouseOver: function(generated_id) {
+		this.chart.highlight(generated_id);
+		this.list.highlight(generated_id);
+	},
+	handleMapMouseOut: function(generated_id) {
+		this.chart.ignore_all();
+		this.list.ignore_all();
+	},
+	handleListMouseOver: function(generated_id) {
+		this.chart.highlight(generated_id);
+		this.map.select(generated_id);
+	},
+	handleListMouseOut: function(generated_id) {
+		this.chart.ignore_all();
+		this.map.show_all();
+	}
+}
+
+var ShipmentList = function(tableId) {
+	this.table = $(tableId);
+	this.shipment_rows = {};
+	this._enumberable = [];
+}
+ShipmentList.prototype = {
+	add: function(generated_id, row1, row2)	{
+		var shipment_row = new ShipmentRow(row1, row2);
+		shipment_row.onmouseover = this.handleMouseOverRow.bind(this, generated_id);
+		shipment_row.onmouseout = this.handleMouseOutRow.bind(this, generated_id);
+
+		this.shipment_rows[generated_id] = shipment_row;
+		this._enumberable.push(shipment_row);
+		return shipment_row;
+	},
+	highlight: function(generated_id) {
+		this.shipment_rows[generated_id].highlight();
+	},
+	ignore_all: function() {
+		this._enumberable.each(function(shipment_row) {
+			shipment_row.ignore();
+		});
+	},
+	handleMouseOverRow: function(generated_id, shipment_row) {
+		if(this.onmouseover != undefined) {
+			this.onmouseover(generated_id);
+		}
+	},
+	handleMouseOutRow: function(generated_id, shipment_row) {
+		if(this.onmouseout != undefined) {
+			this.onmouseout(generated_id);
+		}
+	}
+}
+
+var ShipmentRow = function(row1, row2) {
+	this.row1 = $(row1);
+	// wire event handlers
+	Event.observe(this.row1, 'mouseover', this.handleMouseOver.bind(this));
+	Event.observe(this.row1, 'mouseout', this.handleMouseOut.bind(this));
+
+	if(row2 != undefined) { // for toggle
+	    this.row2 = $(row2);
+	    this.toggle = this.row1.getElementsByTagName('a')[0];
+
+	    // wire event handlers
+        Event.observe(this.toggle, 'click', this.handleToggle.bind(this));
+	    Event.observe(this.row2, 'mouseover', this.handleMouseOver.bind(this));
+	    Event.observe(this.row2, 'mouseout', this.handleMouseOut.bind(this));
+	}
+}
+ShipmentRow.prototype = {
+	open: function() {
+		this.row1.addClassName('open');
+		//this.row2.addClassName('open');
+	},
+	close: function() {
+		this.row1.removeClassName('open');
+		//this.row2.removeClassName('open');
+	},
+	highlight: function() {
+		this.row1.addClassName(ShipmentRow.HIGHLIGHT_CLASS);
+		//this.row2.addClassName('highlight');
+	},
+	ignore: function() {
+		this.row1.removeClassName(ShipmentRow.HIGHLIGHT_CLASS);
+		//this.row2.removeClassName('highlight');
+	},
+	handleToggle: function(e) {
+		Event.stop(e);
+		if(this.row1.hasClassName('open')) {
+			this.close();
+		}
+		else {
+			this.open();
+		}
+	},
+	handleMouseOver: function(e) {
+		if(this.onmouseover != undefined) {
+			this.onmouseover(this);
+		}
+		this.highlight();
+	},
+	handleMouseOut: function(e) {
+		if(this.onmouseout != undefined) {
+			this.onmouseout(this);
+		}
+		this.ignore();
+	}
+}
+ShipmentRow.HIGHLIGHT_CLASS = 'spe-results-highlight';
+
+var CrappyMap = function(mapId) {
+    this.map = new google.maps.Map($(mapId), uship.maps.map_options({
+        site_id: uship.prefs.i18n.siteid
+    }));
+
+	this.pairs = {};
+	this._enumerable = [];
+}
+CrappyMap.prototype = {
+	add: function(generated_id, letter, point) {
+		var pair = [
+			this.createMarker(point.from, letter, true),
+			this.createMarker(point.to, letter, false)
+		];
+
+		var events = google.maps.event;
+		events.addListener(pair[0], 'mouseover', this.handleMarkerMouseOver.bind(this, generated_id));
+		events.addListener(pair[0], 'mouseout', this.handleMarkerMouseOut.bind(this, generated_id));
+		events.addListener(pair[1], 'mouseover', this.handleMarkerMouseOver.bind(this, generated_id));
+		events.addListener(pair[1], 'mouseout', this.handleMarkerMouseOut.bind(this, generated_id));
+
+		this.pairs[generated_id] = pair;
+		this._enumerable.push(pair);
+
+		pair[0].setMap(this.map);
+		pair[1].setMap(this.map);
+	},
+	fit_points: function() {
+	    // find bounding lat/lng
+	    var bounds = new google.maps.LatLngBounds();
+
+	    this._enumerable.each(function(pair) {
+            pair.each(function(marker, i) {
+                bounds.extend(marker.getPosition());
+            });
+	    });
+
+	    //zoom map to fit points
+	    this.map.fitBounds(bounds);
+	    uship.maps.save_position(this.map);
+	},
+	createMarker: function(point, letter, is_pickup) {
+	    return new google.maps.Marker(uship.maps.marker({
+	        position: new google.maps.LatLng(point.lat, point.lng),
+	        type: 'standard',
+	        style: (is_pickup ? 'green_' : 'red_')+letter.toUpperCase()
+	    }));
+	},
+	select: function(generated_id) {
+		selected_pair = this.pairs[generated_id];
+		this._enumerable.each(function(pair) {
+			if(pair == selected_pair) {
+				pair[0].setVisible(true);
+				pair[1].setVisible(true);
+			}
+			else {
+				pair[0].setVisible(false);
+				pair[1].setVisible(false);
+			}
+		});
+	},
+	show_all: function() {
+		this._enumerable.each(function(pair) {
+			pair[0].setVisible(true);
+			pair[1].setVisible(true);
+		});
+	},
+	handleMarkerMouseOver: function(generated_id) {
+		if(this.onmouseover != undefined) {
+			this.onmouseover(generated_id);
+		}
+		this.select(generated_id);
+	},
+	handleMarkerMouseOut: function(generated_id) {
+		if(this.onmouseout != undefined) {
+			this.onmouseout(generated_id);
+		}
+		this.show_all();
+	}
+}
+
+/* viral actions */
+var print_this_page = function() {
+    window.print();
+}
+var email_to = function() {
+
+}
+var link_to = function() {
+    var container = $('link-to');
+    var input = container.getElementsByTagName('input')[0];
+    container.style.display = 'block';
+    input.select();
+    input.onclick = function() {
+        input.select();
+    };
+
+}
+var link_to_close = function() {
+    $('link-to').style.display = 'none';
+}
