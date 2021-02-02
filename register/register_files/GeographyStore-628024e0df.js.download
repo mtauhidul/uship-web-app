@@ -1,0 +1,170 @@
+'use strict';
+
+(function (_ref) {
+    var uship = _ref.uship,
+        jQuery = _ref.jQuery;
+
+    var routes = uship.namespace('bootstrap.routes');
+
+    var uShipSiteToIsoMap = {
+        'UnitedStates': 'US',
+        'Canada': 'CA',
+        'UnitedKingdom': 'GB',
+        'Australia': 'AU',
+        'India': 'IN',
+        'Germany': 'DE',
+        'France': 'FR',
+        'Netherlands': 'NL',
+        'Spain': 'ES',
+        'Ireland': 'IE',
+        'NewZealand': 'NZ',
+        'Mexico': 'MX',
+        'SouthAfrica': 'ZA',
+        'Philippines': 'PH',
+        'Singapore': 'SG',
+        'Luxembourg': 'LU',
+        'Austria': 'AT',
+        'Portugal': 'PT',
+        'Brazil': 'BR',
+        'Argentina': 'AR',
+        'Chile': 'CL',
+        'Turkey': 'TR',
+        'Italy': 'IT',
+        'Peru': 'PE',
+        'Colombia': 'CO',
+        'Venezuela': 'VE'
+    };
+
+    var utils = uship.utils,
+        DataCache = uship.DataCache,
+        fmt = utils.format;
+
+    function GeographyStore(publisher) {
+        this._publisher = publisher;
+        this._currentCountry = null;
+        this._currentState = null;
+
+        this._cache = DataCache.create({
+            countries: null,
+            continents: {},
+            regionOptionsModels: {},
+            states: {}
+        });
+    }
+
+    uship.utils.extend(GeographyStore.prototype, {
+        _requestData: function _requestData() {
+            return {
+                countryIsoCode: this._currentCountry,
+                stateIsoCode: this._currentState
+            };
+        },
+        _getAsyncAndPublish: function _getAsyncAndPublish(url, cacheKey, successTopic, errTopic) {
+            var publisher = this._publisher;
+            var reqAsync = void 0;
+
+            var cachedItem = this._cache.get(cacheKey);
+
+            if (!cachedItem) {
+                reqAsync = jQuery.get(url, this._requestData());
+
+                reqAsync.fail(function (xhr, status, err) {
+                    publisher.publish(errTopic || 'failedRequest', {
+                        url: url,
+                        xhr: xhr,
+                        status: status,
+                        err: err
+                    });
+                });
+
+                this._cache.set(cacheKey, reqAsync);
+                cachedItem = reqAsync;
+            }
+
+            return cachedItem.done(function (responseData) {
+                publisher.publish(successTopic || 'receivedResponse', responseData);
+            });
+        },
+        _doesRegionOptionsModelRequireState: function _doesRegionOptionsModelRequireState() {
+            return ['CA', 'US'].indexOf(this._currentCountry) > -1;
+        },
+        setCurrentCountry: function setCurrentCountry(countryIsoCode) {
+            if (countryIsoCode == this._currentCountry) return;
+
+            this._currentCountry = countryIsoCode;
+            this._publisher.publish('updatedCountry', { countryIsoCode: countryIsoCode });
+
+            this.getContinentsAsync();
+            this.getStatesInCurrentCountryAsync();
+
+            if (!this._doesRegionOptionsModelRequireState()) {
+                this.getRegionOptionsModelForCurrentCountryAsync();
+            }
+
+            this.setCurrentState(null);
+        },
+        setCurrentState: function setCurrentState(stateIsoCode) {
+            if (stateIsoCode == this._currentState) return;
+
+            this._currentState = stateIsoCode;
+            this._publisher.publish('updatedState', { stateIsoCode: stateIsoCode });
+
+            if (this._doesRegionOptionsModelRequireState() && stateIsoCode) {
+                this.getRegionOptionsModelForCurrentCountryAsync();
+            }
+        },
+        getCurrentCountry: function getCurrentCountry() {
+            return this._currentCountry;
+        },
+        getCurrentState: function getCurrentState() {
+            return this._currentState;
+        },
+        getCountriesAsync: function getCountriesAsync() {
+            return this._getAsyncAndPublish(routes.getCountries, 'countries', 'gotCountries');
+        },
+        getContinentsAsync: function getContinentsAsync() {
+            var currentCountry = this._currentCountry,
+                cacheKey = fmt('continents.{0}', currentCountry);
+
+            return this._getAsyncAndPublish(routes.getRegions, cacheKey, 'gotContinents');
+        },
+        getRegionOptionsModelForCurrentCountryAsync: function getRegionOptionsModelForCurrentCountryAsync() {
+            var currentCountry = this._currentCountry,
+                currentState = this._currentState;
+            var cacheKey = fmt('regionOptionsModels.{0}', currentCountry);
+
+            if (!currentCountry) {
+                return jQuery.Deferred().reject({ err: 'The current country is not set.' }).promise();
+            }
+
+            if (this._doesRegionOptionsModelRequireState()) {
+                if (!currentState) {
+                    return jQuery.Deferred().reject({ err: 'The current state is not set.' }).promise();
+                }
+                cacheKey += fmt('.{0}', currentState);
+            }
+
+            return this._getAsyncAndPublish(routes.getRegionFilters, cacheKey, 'gotRegionOptionsModel');
+        },
+        getStatesInCurrentCountryAsync: function getStatesInCurrentCountryAsync() {
+            var currentCountry = this._currentCountry,
+                cacheKey = fmt('states.{0}', currentCountry);
+
+            if (!currentCountry) {
+                return jQuery.Deferred().reject({ err: 'The current country is not set.' }).promise();
+            }
+
+            return this._getAsyncAndPublish(routes.getProvincesInCurrentCountry, cacheKey, 'gotStates');
+        }
+    });
+
+    GeographyStore.mapuShipSiteToIsoCode = function (uShipSite) {
+        return uShipSiteToIsoMap[uShipSite] || null;
+    };
+
+    GeographyStore.create = uship.utils.cachingFactory.bind(null, GeographyStore);
+
+    uship.namespace('registration').extend({
+        GeographyStore: GeographyStore
+    });
+})(window);

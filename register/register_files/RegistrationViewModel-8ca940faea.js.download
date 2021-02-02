@@ -1,0 +1,463 @@
+'use strict';
+
+// The following globals are dependent on script load order, so they cannot be
+// destructured from the window object when the IIFE first runs.
+/* globals vm: false */
+
+(function (_ref) {
+    var uship = _ref.uship,
+        jQuery = _ref.jQuery,
+        ko = _ref.ko;
+
+    var registration = uship.namespace('registration');
+    var recorder = uship.namespace('recorder');
+
+    var stepContainer = uship.knockout.step.stepContainer;
+
+    // UTILITY FUNCTIONS
+
+    function manageHistory() {
+        var step = window.location.hash.substring(1) || 'beginRegistration';
+        var currentStep = this.currentStep();
+        var currentStepName = currentStep.util.stepName;
+        var previousStep = currentStep.util.previousStep;
+
+        if (currentStepName === step) return;
+
+        if (previousStep && previousStep.util.stepName === step) {
+            currentStep.movePrevious();
+        }
+    }
+
+    function hideErrorMessages() {
+        var currentStep = this.currentStep();
+        var errors = currentStep.errors;
+
+        if (ko.isObservable(errors)) {
+            errors.showAllMessages(false);
+        }
+    }
+
+    //STEP DEFINITIONS
+
+    function defineSteps(parent) {
+        var routes = uship.bootstrap.routes;
+        return {
+            beginRegistration: {
+                validNextSteps: ['selectIdentityProvider', 'shipperIdentityInformation', 'affiliateIdentityInformation', 'carrierIdentityInformation', 'brokerIdentityInformation'],
+                shouldEagerLoad: true,
+                template: {
+                    name: 'begin_registration_template'
+                },
+                viewModel: registration.BeginRegistration
+            },
+
+            selectIdentityProvider: {
+                validNextSteps: ['shipperIdentityInformation', 'affiliateIdentityInformation', 'carrierIdentityInformation', 'brokerIdentityInformation'],
+                shouldEagerLoad: true,
+                template: {
+                    name: 'select_identity_provider_template',
+                    url: routes.select_identity_provider_template
+                },
+                viewModel: registration.SelectIdentityProvider
+            },
+
+            shipperIdentityInformation: {
+                validNextSteps: [],
+                shouldEagerLoad: true,
+                template: {
+                    name: 'shipper_profile_template',
+                    url: routes.shipper_profile_template,
+                    afterRender: parent.afterTemplateRender.bind(parent)
+                },
+                viewModel: registration.ShipperProfileViewModel
+            },
+
+            affiliateIdentityInformation: {
+                validNextSteps: [],
+                shouldEagerLoad: true,
+                template: {
+                    name: 'shipper_profile_template',
+                    url: routes.shipper_profile_template
+                },
+                viewModel: registration.ShipperProfileViewModel
+            },
+
+            carrierIdentityInformation: {
+                validNextSteps: ['carrierCompanyInformation', 'carrierTrailerTypes'],
+                shouldEagerLoad: true,
+                template: {
+                    name: 'carrier_profile_template',
+                    url: routes.carrier_profile_template,
+                    afterRender: parent.afterTemplateRender.bind(parent)
+                },
+                viewModel: registration.CarrierIdentityInformation
+            },
+
+            carrierCompanyInformation: {
+                validNextSteps: ['carrierTrailerTypes'],
+                shouldEagerLoad: true,
+                template: {
+                    name: 'carrier_company_information',
+                    url: routes.carrier_company_information_template
+                },
+                viewModel: registration.CarrierCompanyInformation
+            },
+
+            carrierTrailerTypes: {
+                validNextSteps: ['carrierSelectCommodities'],
+                shouldEagerLoad: true,
+                template: {
+                    name: 'select_trailer_types',
+                    url: routes.carrier_trailer_types_template
+                },
+                viewModel: registration.CarrierTrailerTypes
+            },
+
+            carrierSelectCommodities: {
+                validNextSteps: ['carrierSelectRegions'],
+                shouldEagerLoad: true,
+                template: {
+                    name: 'carrier_commodities',
+                    url: routes.carrier_commodities_template
+                },
+                viewModel: registration.CarrierSelectCommodities
+            },
+
+            carrierSelectRegions: {
+                validNextSteps: ['carrierSelectStates', 'carrierSelectCountries', 'carrierSelectInternational', 'carrierAccountInformation'],
+                shouldEagerLoad: true,
+                template: {
+                    name: 'carrier_regions',
+                    url: routes.carrier_regions_template
+                },
+                viewModel: registration.CarrierSelectRegions
+            },
+
+            carrierSelectStates: {
+                validNextSteps: ['carrierAccountInformation'],
+                shouldEagerLoad: true,
+                template: {
+                    name: 'carrier_states',
+                    url: routes.carrier_states_template
+                },
+                viewModel: registration.CarrierSelectStates
+            },
+
+            carrierSelectCountries: {
+                validNextSteps: ['carrierAccountInformation'],
+                shouldEagerLoad: true,
+                template: {
+                    name: 'carrier_countries',
+                    url: routes.carrier_countries_template
+                },
+                viewModel: registration.CarrierSelectCountries
+            },
+
+            carrierSelectInternational: {
+                validNextSteps: ['carrierAccountInformation'],
+                shouldEagerLoad: true,
+                template: {
+                    name: 'carrier_international',
+                    url: routes.carrier_international_template
+                },
+                viewModel: registration.CarrierSelectInternational
+            },
+
+            carrierAccountInformation: {
+                validNextSteps: [],
+                template: {
+                    name: 'carrier_account_information',
+                    url: routes.carrier_account_information_template
+                },
+                viewModel: registration.CarrierAccountInformation
+            },
+
+            brokerIdentityInformation: {
+                validNextSteps: ['brokerCompanyInformation', 'brokerTrailerTypes'],
+                shouldEagerLoad: true,
+                template: {
+                    name: 'broker_profile_template',
+                    url: routes.broker_profile_template
+                },
+                viewModel: registration.BrokerIdentityInformation
+            },
+
+            brokerCompanyInformation: {
+                validNextSteps: ['brokerTrailerTypes'],
+                shouldEagerLoad: true,
+                template: {
+                    name: 'carrier_company_information',
+                    url: routes.carrier_company_information_template
+                },
+                viewModel: registration.CarrierCompanyInformation
+            },
+
+            brokerTrailerTypes: {
+                validNextSteps: ['brokerSelectCommodities'],
+                shouldEagerLoad: true,
+                template: {
+                    name: 'select_trailer_types',
+                    url: routes.carrier_trailer_types_template
+                },
+                viewModel: registration.CarrierTrailerTypes
+            },
+
+            brokerSelectCommodities: {
+                validNextSteps: ['brokerSelectRegions'],
+                shouldEagerLoad: true,
+                template: {
+                    name: 'carrier_commodities',
+                    url: routes.carrier_commodities_template
+                },
+                viewModel: registration.CarrierSelectCommodities
+            },
+
+            brokerSelectRegions: {
+                validNextSteps: ['brokerSelectStates', 'brokerSelectCountries', 'brokerSelectInternational', 'brokerAccountInformation'],
+                shouldEagerLoad: true,
+                template: {
+                    name: 'carrier_regions',
+                    url: routes.carrier_regions_template
+                },
+                viewModel: registration.BrokerSelectRegions
+            },
+
+            brokerSelectStates: {
+                validNextSteps: ['brokerAccountInformation'],
+                shouldEagerLoad: true,
+                template: {
+                    name: 'carrier_states',
+                    url: routes.carrier_states_template
+                },
+                viewModel: registration.CarrierSelectStates
+            },
+
+            brokerSelectCountries: {
+                validNextSteps: ['brokerAccountInformation'],
+                shouldEagerLoad: true,
+                template: {
+                    name: 'carrier_countries',
+                    url: routes.carrier_countries_template
+                },
+                viewModel: registration.CarrierSelectCountries
+            },
+
+            brokerSelectInternational: {
+                validNextSteps: ['brokerAccountInformation'],
+                shouldEagerLoad: true,
+                template: {
+                    name: 'carrier_international',
+                    url: routes.carrier_international_template
+                },
+                viewModel: registration.CarrierSelectInternational
+            },
+
+            brokerAccountInformation: {
+                validNextSteps: [],
+                template: {
+                    name: 'carrier_account_information',
+                    url: routes.carrier_account_information_template
+                },
+                viewModel: registration.CarrierAccountInformation
+            }
+        };
+    }
+
+    // VIEW MODEL
+
+    function RegistrationViewModel(userContext) {
+        //Data
+        this.user = ko.observable(null);
+        this.commodity = userContext.commodity;
+        this.siteId = ko.observable(userContext.siteId);
+        this.allowUserTypeSelection = ko.observable(userContext.allowUserTypeSelection);
+        this.manageHistory = manageHistory.bind(this);
+        this.hideErrorMessages = hideErrorMessages.bind(this);
+        this.processType = userContext.processType;
+        this.identityProvider = userContext.identityProvider;
+        this.allowIdentityProviderSelection = userContext.allowIdentityProviderSelection;
+        this.subAccountInvitationId = ko.observable(userContext.subAccountInvitationId);
+        this.marketingEmailOptOut = userContext.marketingEmailOptOut;
+        this.showHeader = userContext.showHeader;
+        this.showFooter = userContext.showFooter;
+        this.masterUserName = ko.observable(userContext.masterUserName);
+        this.facebookStatus = ko.observable();
+        this.isFacebookConnected = ko.computed(this.getIsFacebookConnected, this);
+        this.draftUserData = userContext.draftUserData;
+        this.facebookToken = userContext.facebookToken;
+        this.userCreateError = ko.observable(false);
+
+        this.passwordRequirements = uship.loc('passwordRequirements');
+
+        // Remove this in TREX-391 with better client-side validation
+        this.isPasswordRequirementAlwaysVisible = true;
+
+        // prevent double logging of pageview
+        this.pageNames = [];
+
+        //Navigation
+        this.steps = stepContainer.create(defineSteps(this), this);
+        this.currentStep = ko.observable().subscribeTo(this.steps, 'stepenter');
+
+        this.dataCache = {};
+
+        this.enterInitialStep(userContext.userType);
+
+        if (userContext.enableStepEvents === true) {
+            this.steps.subscribe(this.onStepEnter, this, 'stepenter');
+            jQuery(window).on('hashchange', this.manageHistory);
+        }
+    }
+
+    uship.utils.extend(RegistrationViewModel.prototype, {
+        pageViewAlreadyLogged: function pageViewAlreadyLogged(pageName) {
+            for (var i = 0; i < this.pageNames.length; i++) {
+                if (this.pageNames[i] == pageName) {
+                    return true;
+                }
+            }
+            return false;
+        },
+        logPageView: function logPageView(pageName) {
+            if (!this.pageViewAlreadyLogged(pageName)) {
+                recorder.pageView('/register/' + pageName);
+                this.pageNames.push(pageName);
+            }
+        },
+        logGetCookieId: function logGetCookieId() {
+            var sidCookie = jQuery.cookie('_sio') || null;
+            return sidCookie && sidCookie.split('-')[0];
+        },
+        logRegistrationStart: function logRegistrationStart() {
+            recorder.event('Registration.Start', {
+                cookieId: this.logGetCookieId(),
+                siteId: this.siteId()
+            });
+        },
+        logRegistrationResume: function logRegistrationResume() {
+            recorder.event('Registration.Resume', {
+                cookieId: this.logGetCookieId(),
+                siteId: this.siteId(),
+                userType: this.user().analyticsUserType(),
+                currentStep: this.currentStep().template().name,
+                identityType: this.user().identityType(),
+                shipperType: typeof this.user().shipperType === 'undefined' ? 'not a shipper' : this.user().shipperType(),
+                registrationId: jQuery.cookie('registration.draft') || null
+            });
+        },
+        logRegistrationDraft: function logRegistrationDraft(data) {
+            if (typeof vm === 'undefined' || !vm) return;
+            var registrationId = data.registrationId || jQuery.cookie('registration.draft') || null;
+            vm.user().registrationId = registrationId;
+            if (registrationId) {
+                var user = vm.user();
+                recorder.event('Registration.DraftSaved', {
+                    cookieId: vm.logGetCookieId(),
+                    email: user.emailAddress(),
+                    userType: user.analyticsUserType(),
+                    currentStep: vm.currentStep().template().name,
+                    identityType: user.identityType(),
+                    shipperType: typeof user.shipperType === 'undefined' ? 'not a shipper' : user.shipperType(),
+                    registrationId: registrationId
+                });
+            }
+        },
+        logRegistrationComplete: function logRegistrationComplete() {
+            var user = this.user();
+            recorder.event('Registration.Created', {
+                cookieId: this.logGetCookieId(),
+                siteId: user.siteId(),
+                userType: user.analyticsUserType(),
+                identityType: user.identityType(),
+                shipperType: typeof user.shipperType === 'undefined' ? 'not a shipper' : user.shipperType(),
+                registrationId: user.registrationId,
+                email: user.emailAddress()
+            });
+            // Since we're creating a user at this point, no Mixpanel ID exists yet.
+            // Let mixpanel generate one by passing a falsy value
+            recorder.identifyUser(false);
+        },
+        enterInitialStep: function enterInitialStep(userType) {
+            // If we've passed in a user type, set it now
+            this.steps.beginRegistration.setUserType.call({ parent: this }, userType, true);
+
+            // Figure out what step we're starting with
+
+            // This state doesn't make any sense. If you're going to prevent the user
+            // from choosing their own user type, then you have to specify one for them
+            if (!this.allowUserTypeSelection() && !this.user()) {
+                throw new Error('You must either allow user type selection or preselect a user type');
+            }
+
+            // User can choose a user type; enter at beginRegistration
+            if (this.allowUserTypeSelection() && !this.user()) {
+                this.steps.beginRegistration.enter();
+                this.logRegistrationStart();
+                return;
+            }
+
+            // User can't choose a user type, but doesn't have an identity provider; enter at selectIdentityProvider
+            if (!this.identityProvider) {
+                this.steps.selectIdentityProvider.enter();
+                this.logRegistrationResume();
+                return;
+            }
+
+            // User already has a user type, and is resuming a Facebook registration
+            if (this.identityProvider === 'facebook') {
+                this.steps.selectIdentityProvider.enter().chooseFacebook(null, null, this.facebookToken);
+                this.logRegistrationResume();
+                return;
+            }
+
+            //User type and identity provider already determined; enter at profile information
+            var step = this.steps.selectIdentityProvider.beforeMove.call(this);
+            this.steps[step].enter(this.steps.selectIdentityProvider);
+            this.logRegistrationResume();
+        },
+        onStepEnter: function onStepEnter(enteringStep) {
+            // Google Analytics
+            this.logPageView(enteringStep.util.stepName);
+
+            // History
+            window.location.hash = enteringStep.util.stepName;
+
+            // Prevent validation messages from showing immediately
+            this.hideErrorMessages();
+
+            uship.messageBus.publish({
+                channel: 'registration',
+                topic: 'stepEntered'
+            });
+
+            // don't save draft on initial pages, user hasn't entered any information yet
+            var currentStepName = enteringStep.util.stepName;
+            if (currentStepName === 'beginRegistration' || currentStepName === 'selectIdentityProvider') return;
+
+            var errors = this.currentStep().errors();
+            var hasNoErrors = errors && errors.length === 0;
+            if (hasNoErrors) {
+                this.saveDraft();
+            }
+        },
+        saveDraft: function saveDraft() {
+            jQuery.ajax(uship.bootstrap.routes.registrationDraft, {
+                type: 'POST',
+                data: ko.toJSON(this.user),
+                contentType: 'application/json',
+                success: this.logRegistrationDraft
+            });
+        },
+        getIsFacebookConnected: function getIsFacebookConnected() {
+            return this.facebookStatus() === 'connected';
+        },
+        afterTemplateRender: function afterTemplateRender() {
+            uship.unfold.init();
+        }
+    }); // RegistrationViewModel
+
+    uship.namespace('registration').extend({
+        RegistrationViewModel: RegistrationViewModel
+    });
+})(window);

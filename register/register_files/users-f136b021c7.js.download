@@ -1,0 +1,558 @@
+'use strict';
+
+(function (_ref) {
+    var uship = _ref.uship,
+        ko = _ref.ko;
+
+
+    var numericPattern = /[^0-9]/g;
+
+    function UserRegistration(data) {
+        var user = this;
+        data = data || {};
+
+        // Common informational properties
+        this.firstName = ko.observable(data.firstName);
+        this.numberOfShipments = ko.observable(data.numberOfShipments);
+        this.homePhone = ko.observable(data.homePhone);
+        this.lastName = ko.observable(data.lastName);
+        this.emailAddress = ko.observable(data.emailAddress);
+        this.password = ko.observable(data.password);
+        this.siteId = ko.observable(data.siteId);
+        this.subAccountInvitationId = ko.observable(data.subAccountInvitationId);
+        this.marketingEmailOptOut = data.marketingEmailOptOut;
+        this.masterUserName = ko.observable(data.masterUserName);
+        this.identityType = ko.observable(data.identityType);
+        this.facebookStatus = ko.observable(data.facebookStatus);
+        this.facebookData = {};
+        this.shouldConfirmFacebookAccountCreation = ko.observable(false);
+        this.doesAgree = ko.observable(data.doesAgree);
+        this.shouldValidatePassword = ko.computed(function () {
+            return this.identityType() && this.identityType() === 'email' || this.identityType() && this.identityType() === 'facebook' && (!this.facebookStatus() || this.facebookStatus() !== 'connected');
+        }, this);
+
+        this.shouldValidateDoesAgree = ko.computed(function () {
+            return this.identityType() && this.identityType() === 'email';
+        }, this);
+
+        // Validation rules
+        this.identityType.extend({ required: true });
+
+        this.firstName.extend({
+            required: {
+                params: true,
+                message: uship.loc('RegistrationErrorEnterFirstName')
+            },
+            notEmail: true,
+            notURL: true,
+            containOneLetter: true,
+            containsOnlySupportedCharacters: true,
+            maxLength: { params: 30, message: uship.loc('genericMaxLengthError') }
+
+        });
+
+        this.lastName.extend({
+            required: {
+                params: true,
+                message: uship.loc('RegistrationErrorEnterLastName')
+            },
+            notEmail: true,
+            notURL: true,
+            containOneLetter: true,
+            containsOnlySupportedCharacters: true,
+            maxLength: { params: 50, message: uship.loc('genericMaxLengthError') }
+        });
+
+        this.emailAddress.extend({
+            required: {
+                params: true,
+                message: uship.loc('emailFormatValidationError')
+            },
+            email: true,
+            availableEmailAddress: true,
+            containsOnlySupportedCharacters: true,
+            maxLength: { params: 255, message: uship.loc('maxEmailLengthError') }
+        });
+
+        this.password.extend({
+            required: {
+                params: true,
+                message: uship.loc('resetpasswordlenghvalidationfailure'),
+                onlyIf: user.shouldValidatePassword
+            },
+            minLength: {
+                params: 12,
+                message: uship.loc('resetpasswordlenghvalidationfailure'),
+                onlyIf: user.shouldValidatePassword
+            },
+            maxLength: {
+                params: 64,
+                message: uship.loc('maxPasswordLengthError'),
+                onlyIf: user.shouldValidatePassword
+            },
+            containOneLetter: { params: true, message: uship.loc('passwordRequirements') },
+            hasSpecial: { params: true, message: uship.loc('passwordRequirements') },
+            hasDigits: { params: true, message: uship.loc('passwordRequirements') }
+        });
+        this.doesAgree.extend({
+            equal: {
+                params: true,
+                message: uship.loc('RegisterUserAgreementCheckboxError')
+            }
+        });
+    }
+
+    uship.utils.extend(UserRegistration.prototype, {
+        setFacebookData: function setFacebookData(responses) {
+            this.facebookData = responses.connectResponse.authResponse;
+            this.firstName(responses.apiResponse.first_name);
+            this.lastName(responses.apiResponse.last_name);
+            if (responses.apiResponse.email) {
+                this.emailAddress(responses.apiResponse.email);
+            }
+        },
+        isShipper: function isShipper() {
+            return this instanceof ShipperRegistration;
+        },
+        isAffiliate: function isAffiliate() {
+            return this instanceof AffiliateRegistration;
+        },
+        isCarrier: function isCarrier() {
+            return this instanceof CarrierRegistration;
+        },
+        isBroker: function isBroker() {
+            return this instanceof BrokerRegistration;
+        },
+        analyticsUserType: function analyticsUserType() {
+            if (this.isShipper()) return 'shipper';else if (this.isCarrier()) return 'carrier';else if (this.isAffiliate()) return 'affiliate';else if (this.isBroker()) return 'broker';
+            return '';
+        },
+        toJSON: function toJSON() {
+            var data = ko.toJS(this);
+
+            for (var prop in data) {
+                if (data.hasOwnProperty(prop)) {
+                    if (data[prop] === '') {
+                        data[prop] = null;
+                    }
+                }
+            }
+
+            return data;
+        }
+    });
+
+    function ShipperRegistration(data, commodity) {
+        var self = this;
+        data = data || {};
+
+        // Business Information
+        self.userType = 'shipper';
+        self.shipperType = ko.observable(data.shipperType || 'personal');
+        self.companyName = ko.observable(data.companyName);
+
+        self.isShipperAndBusinessCategory = function () {
+            try {
+                if (this.shipperType() === 'business' && this.isShipper() && typeof commodity !== 'undefined' && commodity !== null && commodity !== '' && (commodity === 'NewCommercialGoods' || commodity === 'UsedCommercialGoods' || commodity === 'WineLiquorBeerSpirits')) {
+                    return true;
+                }
+                return false;
+            } catch (e) {
+                return false;
+            }
+        };
+
+        // Information from Base User
+        UserRegistration.call(self, data, commodity);
+        // Validation rules
+        self.shipperType.extend({ required: true }); // Personal || Business
+
+        this.companyName.extend({
+            required: {
+                params: true,
+                onlyIf: function onlyIf() {
+                    return self.isShipperAndBusinessCategory();
+                },
+
+                containsOnlySupportedCharacters: true,
+                message: uship.loc('profile_editShipperEnterCompanyName')
+            },
+            notEmail: true,
+            notURL: true,
+            containOneLetter: true,
+            maxLength: { params: 50, message: uship.loc('genericMaxLengthError') }
+        });
+
+        this.homePhone.extend({
+            required: {
+                params: true,
+                message: uship.loc('primaryPhoneRequiredError')
+            },
+            phoneUS: {
+                params: true,
+                onlyIf: function onlyIf() {
+                    return self.homePhone() && self.siteId() === 'UnitedStates' && !self.isShipperAndBusinessCategory();
+                }
+            },
+            phoneUSFreight: {
+                params: true,
+                onlyIf: function onlyIf() {
+                    return self.homePhone() && self.siteId() === 'UnitedStates' && self.isShipperAndBusinessCategory();
+                },
+
+                message: uship.loc('FreightErrorUsPhoneValid')
+            },
+            phoneGlobal: {
+                params: true,
+                onlyIf: function onlyIf() {
+                    return self.homePhone() && self.siteId() !== 'UnitedStates' && self.isShipperAndBusinessCategory();
+                },
+
+                message: uship.loc('RegistrationErrorPhoneValid')
+            },
+            toFormatted: numericPattern
+        });
+
+        this.numberOfShipments.extend({
+            required: {
+                params: true,
+                onlyIf: function onlyIf() {
+                    return self.isShipperAndBusinessCategory();
+                },
+
+                message: uship.loc('numberOfShipmentsRequiredError')
+            },
+            validNumberOfShipments: {
+                params: true,
+                onlyIf: function onlyIf() {
+                    return self.isShipperAndBusinessCategory();
+                },
+
+                message: uship.loc('numberOfShipmentsError')
+            }
+        });
+    }
+
+    ShipperRegistration.prototype = Object.create(UserRegistration.prototype);
+
+    function AffiliateRegistration(data) {
+        var self = this;
+        data = data || {};
+
+        // Information from Base User
+        UserRegistration.call(self, data);
+
+        // Business Information
+        self.userType = 'affiliate';
+        self.shipperType = ko.observable(data.shipperType || 'business');
+        self.companyName = ko.observable(data.companyName);
+
+        // Validation rules
+        self.shipperType.extend({ required: true }); // Personal || Business
+
+        self.companyName.extend({
+            required: {
+                params: true,
+                onlyIf: function onlyIf() {
+                    return self.shipperType() == 'business';
+                },
+
+                containsOnlySupportedCharacters: true,
+                message: uship.loc('profile_editShipperEnterCompanyName')
+            },
+            notEmail: true,
+            notURL: true,
+            containOneLetter: true,
+            maxLength: 50
+        });
+    }
+
+    AffiliateRegistration.prototype = Object.create(UserRegistration.prototype);
+
+    function asCommercialUser(data) {
+        var self = this;
+        data = data || {};
+
+        this.username = ko.observable(data.username);
+        this.homePhone = ko.observable(data.homePhone);
+        this.mobilePhone = ko.observable(data.mobilePhone);
+        this.mcNumber = ko.observable(data.mcNumber);
+        this.dotNumber = ko.observable(data.dotNumber);
+        this.brokerMcNumber = ko.observable(data.brokerMcNumber);
+        this.companyName = ko.observable(data.companyName);
+        this.companyCountry = ko.observable(data.companyCountry);
+        this.companyCountryCode = ko.observable(data.companyCountryCode);
+        this.companyState = ko.observable(data.companyState);
+        this.companyCity = ko.observable(data.companyCity);
+        this.companyPostalCode = ko.observable(data.companyPostalCode);
+        this.companyStreet = ko.observable(data.companyStreet);
+        this.companyLatitude = ko.observable(data.companyLatitude);
+        this.companyLongitude = ko.observable(data.companyLongitude);
+        this.trailerTypes = ko.observableArray(data.trailerTypes || []);
+        this.commodities = ko.observableArray(data.commodities || []);
+        this.regionFilter = ko.observable(data.regionFilter);
+        this.regions = ko.observableArray(data.regions || []);
+
+        // Validation and formatting rules
+        this.username.extend({
+            required: {
+                params: true, message: uship.loc('CompleteListingErrorUsernameRequired')
+            },
+            availableUsername: true,
+            minLength: 6,
+            maxLength: 50,
+            alphanumeric: true,
+            containOneLetter: true,
+            containsOnlySupportedCharacters: true,
+            notEqual: {
+                params: self.password, message: uship.loc('matchingUsernameAndPasswordError')
+            }
+        });
+
+        this.password.extend({
+            notEqual: {
+                params: self.username, message: uship.loc('matchingUsernameAndPasswordError')
+            }
+        });
+
+        // Basic information validation
+        this.entityType.extend({ required: true });
+
+        this.homePhone.extend({
+            required: {
+                params: true,
+                onlyIf: function onlyIf() {
+                    return !self.mobilePhone();
+                },
+
+                message: uship.loc('primaryPhoneRequiredError')
+            },
+            phoneUS: {
+                params: true,
+                onlyIf: function onlyIf() {
+                    return self.homePhone() && self.siteId() === 'UnitedStates';
+                }
+            },
+            phoneGlobal: {
+                params: true,
+                onlyIf: function onlyIf() {
+                    return self.homePhone() && self.siteId() !== 'UnitedStates';
+                }
+            },
+            toFormatted: numericPattern
+        });
+
+        this.mobilePhone.extend({
+            required: {
+                params: true,
+                onlyIf: function onlyIf() {
+                    return !self.homePhone();
+                },
+
+                message: uship.loc('primaryPhoneRequiredError')
+            },
+            phoneUS: {
+                params: true,
+                onlyIf: function onlyIf() {
+                    // only validate if mobilePhone has a value
+                    return self.mobilePhone() && self.siteId() === 'UnitedStates';
+                }
+            },
+            phoneGlobal: {
+                params: true,
+                onlyIf: function onlyIf() {
+                    return self.mobilePhone() && self.siteId() !== 'UnitedStates';
+                }
+            },
+            toFormatted: numericPattern
+        });
+
+        this.mcNumber.extend({
+            required: {
+                params: true,
+                onlyIf: function onlyIf() {
+                    return false;
+                },
+
+                message: uship.loc('InvalidCarrierMC')
+            },
+            toFormatted: numericPattern
+        });
+
+        this.dotNumber.extend({
+            toFormatted: numericPattern
+        });
+
+        this.companyName.extend({
+            required: {
+                params: true,
+                message: uship.loc('companyNameRequiredError')
+            },
+            notEmail: true,
+            notURL: true,
+            containOneLetter: true,
+            containsOnlySupportedCharacters: true,
+            maxLength: 50
+        });
+
+        this.companyCountryCode.extend({
+            required: {
+                params: true,
+                message: uship.loc('countryRequiredError')
+            }
+        });
+
+        this.companyCity.extend({
+            required: {
+                params: true,
+                message: uship.loc('cityRequiredError')
+            }
+        });
+
+        this.companyState.extend({
+            required: {
+                params: true,
+                message: uship.loc('stateRequiredError'),
+                onlyIf: function onlyIf() {
+                    return ['AU', 'BR', 'CA', 'MX', 'US'].indexOf(self.companyCountryCode()) > -1;
+                }
+            }
+        });
+
+        this.companyStreet.extend({
+            required: {
+                params: true,
+                message: uship.loc('streetRequiredError')
+            }
+        });
+
+        this.companyPostalCode.extend({
+            required: {
+                params: true,
+                message: uship.loc('postalCodeRequiredError')
+            }
+        });
+
+        this.trailerTypes.extend({
+            required: {
+                params: true,
+                message: uship.loc('trailerTypeRequiredError')
+            }
+        });
+
+        this.commodities.extend({
+            required: {
+                params: true,
+                message: uship.loc('commoditiesRequiredError')
+            }
+        });
+
+        this.regions.extend({
+            required: {
+                params: true,
+                message: uship.loc('regionsRequiredError')
+            }
+        });
+    }
+
+    function CarrierRegistration(data) {
+        var self = this;
+        data = data || {};
+
+        UserRegistration.call(this, data);
+
+        // TODO: This is a temporary fix for an incorrect value being set on resumed registrations
+        // The entity type enum is sometimes reserializing as "none" for incomplete registrations
+        var entityType = data.entityType === 'carrier' || data.entityType === 'brokerAndCarrier' ? data.entityType : 'carrier';
+
+        this.entityType = ko.observable(entityType); // Carrier || Carrier & Broker
+        this.userType = ko.computed(this.getUserType, this);
+
+        asCommercialUser.call(this, data);
+
+        this.brokerMcNumber.extend({
+            required: {
+                params: true,
+                onlyIf: function onlyIf() {
+                    var siteId = self.siteId();
+                    return self.entityType() === 'brokerAndCarrier' && (siteId === 'UnitedStates' || siteId === 'Canada' || siteId === 'Mexico');
+                },
+
+                message: uship.loc('brokerMcNumberRequiredError')
+            },
+            toFormatted: numericPattern
+        });
+    }
+
+    CarrierRegistration.prototype = Object.create(UserRegistration.prototype);
+
+    uship.utils.extend(CarrierRegistration.prototype, {
+        getUserType: function getUserType() {
+            return this.entityType() === 'brokerAndCarrier' ? 'broker' : 'serviceProvider';
+        }
+    });
+
+    function BrokerRegistration(data) {
+        var self = this;
+        data = data || {};
+        UserRegistration.call(self, data);
+
+        // TODO: This is a temporary fix for an incorrect value being set on resumed registrations
+        // Similarly, on resumed registrations where a user selected 'carrier' and switches to broker, we need to default/reset
+        var entityType = data.entityType === 'carrier' || data.entityType === 'brokerAndCarrier' ? 'broker' : data.entityType;
+
+        this.entityType = ko.observable(entityType);
+        this.userType = ko.observable('broker');
+        this.ffNumber = ko.observable(data.ffNumber);
+
+        asCommercialUser.call(this, data);
+
+        this.brokerMcNumber.extend({
+            required: {
+                params: true,
+                onlyIf: function onlyIf() {
+                    return self.entityType() !== 'freightForwarder';
+                },
+
+                message: uship.loc('brokerMcNumberRequiredError')
+            },
+            toFormatted: numericPattern
+        });
+
+        this.ffNumber.extend({
+            required: {
+                params: true,
+                onlyIf: function onlyIf() {
+                    return self.entityType() === 'freightForwarder';
+                },
+
+                message: uship.loc('ffNumberRequiredError')
+            },
+            toFormatted: numericPattern
+        });
+    }
+
+    BrokerRegistration.prototype = Object.create(UserRegistration.prototype);
+
+    uship.utils.extend(BrokerRegistration.prototype, {
+        toJSON: function toJSON(replacer, space) {
+            var data = UserRegistration.prototype.toJSON.call(this, replacer, space);
+
+            //UserCreate endpoint expect the freight forwarder number to be passed in the broker MC number field
+            if (ko.unwrap(this.entityType) === 'freightForwarder') {
+                data.brokerMcNumber = data.ffNumber;
+            }
+
+            return data;
+        }
+    });
+
+    // Add User Types to namespace
+    uship.namespace('registration').extend({
+        ShipperRegistration: ShipperRegistration,
+        AffiliateRegistration: AffiliateRegistration,
+        CarrierRegistration: CarrierRegistration,
+        BrokerRegistration: BrokerRegistration,
+        UserRegistration: UserRegistration
+    });
+})(window);

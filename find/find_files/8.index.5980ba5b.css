@@ -1,0 +1,854 @@
+.validationErrorInfoContainer {
+  background-color: #f65f5f;
+  padding: .625rem;
+}
+
+.traingle {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  margin-left: .4375rem;
+  border-width: 0 .4375rem .4375rem .4375rem;
+  border-color: transparent transparent #f65f5f transparent;
+}
+
+.errorIconContainer {
+  max-width: 1.375rem;
+  flex: auto;
+}
+
+.errorIcon {
+  color: white;
+}
+
+.errorHeadingContainer {
+  flex: 1;
+}
+
+.errorHeader {
+  font-size: .875rem;
+  line-height: 1.125rem;
+  letter-spacing: .025rem;
+  font-weight: 700;
+  color: white;
+}
+
+.errorDescription {
+  font-size: .875rem;
+  line-height: 1.125rem;
+  letter-spacing: .025rem;
+  color: white;
+}
+.locationField {
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.locationField-label {
+  color: #fff;
+  font-size: .6875rem;
+  letter-spacing: .06875rem;
+}
+
+.formField-icon {
+  color: #999;
+  transition: color 0.15s ease-in-out;
+}
+
+.textField:focus+.formField-icon {
+  color: #02aaf3;
+}
+
+.locationField .textField:focus::placeholder {
+  color: transparent;
+}
+
+.locationInputContainer {
+  width: 81%;
+  margin-right: .3125rem;
+}
+
+.locationIconContainer {
+  padding: .9375rem;
+  background-color: #fff;
+  min-height: 3.125rem;
+  border-radius: .25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1.375rem;
+  cursor: pointer;
+  color: #b8b8b8;
+  position: relative;
+}
+
+.locationIconContainer:hover {
+  color: #02aaf3;
+}
+
+.popoverContent {
+  min-width: 11.25rem;
+  padding: 1.5625rem .9375rem;
+  left: 4.21875rem;
+  max-width: 11.25rem;
+  display: flex;
+  justify-content: center;
+}
+
+.popoverContent .popover-arrow {
+  left: 5.25rem !important;
+}
+
+.hidePopover {
+  display: none;
+}
+
+.region-count {
+  font-family: "Lato",-apple-system,blinkmacsystemfont,roboto,"Helvetica Neue",helvetica,arial,sans-serif;
+  font-size: .5625rem;
+  font-weight: bold;
+  line-height: 1.125rem;
+  letter-spacing: 0.9px;
+  text-align: left;
+  color: #f4f4f4;
+  vertical-align: top;
+  position: relative;
+  bottom: .1875rem;
+  left: .1875rem;
+}
+
+.regionSection-iconOverlay {
+  background-color: #0083bb;
+  border: solid 2px #f4f4f4;
+  border-radius: 50%;
+  position: absolute;
+  right: .5rem;
+  top: .5rem;
+  width: 1rem;
+  height: 1rem;
+}
+
+.postalCodepopoverText {
+  font-size: 1rem;
+  font-weight: bold;
+  line-height: 1.5rem;
+  letter-spacing: .1rem;
+  color: #262626;
+}
+
+.multilocationpopoverText {
+  font-size: 1rem;
+  font-weight: bold;
+  line-height: 1.5rem;
+  letter-spacing: .1rem;
+  color: #262626;
+  max-width: 9.375rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+@media only screen and (max-width: 767px) {
+  .popoverContent {
+    display: none;
+  }
+}
+
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  .locationInputBoxoriginRegionIcon::-ms-clear {
+    display: none;
+  }
+
+  .locationInputBoxdestinationRegionIcon::-ms-clear {
+    display: none;
+  }
+}
+.locationFilter {
+  width: 100%;
+  padding: .9375rem .9375rem .625rem;
+  background-color: #1c2431;
+  position: relative;
+}
+
+.locationFilter .formField {
+  margin-bottom: 0;
+}
+
+.locationSwap {
+  position: relative;
+  text-align: right;
+}
+
+.locationSwap-icon {
+  color: #fff;
+  cursor: pointer;
+  position: relative;
+  width: 3.125rem;
+  top: .8125rem;
+  height: 1.25rem;
+  outline: none;
+  z-index: 1;
+}
+
+.locationSwap-icon:hover {
+  color: #02aaf3;
+}
+
+@media only screen and (max-width: 767px) {
+  .locationSwap-icon {
+    margin-right: .5rem;
+  }
+}
+.alongTheRouteLocationInputContainer {
+  width: 100%;
+}
+.dropdownWithFooter-wrapper {
+  position: relative;
+  transition: z-index 0ms ease-in-out 150ms;
+  z-index: 0;
+}
+
+.dropdownWithFooter-wrapper.isOpen {
+  z-index: 1;
+  transition: z-index 0ms ease-in-out;
+}
+
+.dropdownWithFooter {
+  border-radius: 3px;
+  width: 100%;
+  background-color: #fff;
+  opacity: 0;
+  position: absolute;
+  margin-top: .3125rem;
+  margin-bottom: .3125rem;
+  visibility: hidden;
+  transition: opacity 0.15s linear, visibility 0s linear 0.15s;
+  max-height: 0;
+  overflow-y: hidden;
+}
+
+.dropdownWithFooter.isOpen {
+  max-height: none;
+  overflow-y: visible;
+  border: 1px solid #ddd;
+  box-shadow: 0 3px 5px 0.2px rgba(0,0,0,0.2);
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.15s linear, visibility 0s linear 0s;
+}
+
+.dropdownWithFooter-dropdown {
+  list-style: none;
+  padding-left: 0;
+  overflow-y: auto;
+  max-height: calc(100vh - 19.6875rem);
+}
+
+.dropdownWithFooter-option {
+  border-bottom: 1px solid #f4f4f4;
+}
+
+.dropdownWithFooter-option:hover {
+  background-color: #f4f4f4;
+  color: #262626;
+}
+
+.dropdownWithFooter-option:active {
+  background-color: #f4f4f4;
+  color: #262626;
+}
+
+.dropdownWithFooter-option:last-child {
+  border-bottom: none;
+}
+
+.dropdownWithFooter-footer {
+  text-align: center;
+  border-top: 1px solid #b8b8b8;
+}
+
+@media (max-width: 1024px) {
+  .dropdownWithFooter-dropdown::-webkit-scrollbar {
+    display: none;
+  }
+}
+.savedSearchContainer {
+  padding: .9375rem;
+}
+
+.saveSearch-heading {
+  margin-bottom: .3125rem;
+  text-transform: uppercase;
+}
+
+.managedSavedSearch-button {
+  outline: none;
+  padding: .9375rem;
+  text-transform: uppercase;
+  letter-spacing: .075rem;
+}
+
+.savedSearchContainer .button-content {
+  overflow: hidden;
+}
+
+.signInButton {
+  outline: none;
+  letter-spacing: 0.0875rem;
+}
+
+.signInButton:hover {
+  color: #0288c2;
+}
+
+.signInButton:active {
+  color: #0177aa;
+}
+
+.dropDownItem {
+  padding: .9375rem;
+  cursor: pointer;
+}
+
+.dropDownItem-text {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: .025rem;
+  text-align: left;
+  color: #262626;
+}
+
+.savedSearch-dropdownIcon {
+  color: #b8b8b8;
+  float: right;
+}
+
+.savedSearch-dropdownIcon--open {
+  color: #02aaf3;
+}
+
+.saveSearchDropDown {
+  max-width: 10rem;
+}
+
+.savedSearch-dropdown {
+  width: 125%;
+}
+
+.savedSearch {
+  padding: .5625rem .9375rem;
+  outline: none;
+  background-color: #fff;
+  color: #b8b8b8;
+  border: 1px solid #ddd;
+  border-radius: .1875rem;
+  cursor: pointer;
+  margin-right: .8125rem;
+}
+
+.savedSearch--open {
+  border-color: #02aaf3;
+}
+
+.savedSearch-sortIcon {
+  color: #b8b8b8;
+  cursor: default;
+}
+
+.savedSearch--disabled {
+  border-color: #ddd;
+  cursor: default;
+}
+
+.savedSearch-selected {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.saveSearch-emptyState {
+  color: #999;
+}
+
+.savedSearch-selected--icon {
+  flex: auto;
+  max-width: 1.5625rem;
+}
+
+.saveButtonContainer {
+  text-align: right;
+}
+
+.saveSearchSaveButton {
+  outline: none;
+}
+
+.saveSearchSaveButton--disabled {
+  pointer-events: none;
+  color: #b8b8b8;
+}
+
+.saveSearchSaveButton--disabled:active,
+.saveSearchSaveButton--disabled:focus,
+.saveSearchSaveButton--disabled:hover {
+  color: #b8b8b8;
+}
+
+.selectedSearch {
+  line-height: 1.125rem;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.selectedSearch--disabled {
+  color: #b8b8b8;
+  letter-spacing: .01875rem;
+}
+.fsExpandingPanel {
+  max-height: 0;
+  transition: max-height 0.2s ease-out;
+  border-bottom: 1px solid #ddd;
+  overflow: hidden;
+}
+
+.fsExpandingPanel--isOpen {
+  max-height: 125rem;
+  transition: max-height 0.8s ease-in;
+}
+
+@media only screen and (max-width: 767px) {
+  .fsExpandingPanel {
+    transition: max-height 0.3s ease-out;
+  }
+
+  .fsExpandingPanel--isOpen {
+    transition: max-height 1s ease-in;
+  }
+}
+.expandingFilterHeader {
+  margin-left: .9375rem;
+  margin-right: .9375rem;
+  padding-top: .9375rem;
+}
+
+.expandingFilterDescription {
+  margin-left: .9375rem;
+  margin-right: .9375rem;
+  margin-bottom: .9375rem;
+}
+
+.expandingFilterDescription font-family,
+.expandingFilterDescription p {
+  margin: 0;
+}
+
+.dropdown-icon {
+  float: right;
+  width: 1.75rem;
+  height: 2.625rem;
+  margin-top: -.75rem;
+  padding: .9375rem 0 .9375rem .9375rem;
+}
+
+.toggleExpand {
+  cursor: pointer;
+  color: #02aaf3;
+}
+
+.toggleExpand:hover {
+  color: #0288c2;
+}
+
+.toggleExpand:active {
+  color: #0177aa;
+}
+
+.expandingFilter .fsExpandingPanel {
+  border-bottom: 1px solid #ddd;
+  margin: 0 0.875rem 0 0.875rem;
+}
+
+.actionButton {
+  font-size: .6875rem;
+  font-weight: 700;
+  line-height: 1.64;
+  letter-spacing: 1.1px;
+  text-align: left;
+}
+
+.expandText {
+  padding-right: .625rem;
+}
+
+.expandingFilterHeader .filterHeading {
+  line-height: 1.125rem;
+  margin-bottom: 5px;
+  letter-spacing: 0.01875rem;
+  user-select: none;
+}
+
+.expandingFilterDescription .filterHeader {
+  letter-spacing: 0.01875rem;
+}
+
+.ellipsisText {
+  max-width: 100%;
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.expandingFilterHeadingContainer {
+  display: flex;
+}
+.fieldSeparator {
+  padding-top: 2.6875rem;
+  text-align: center;
+}
+
+.textFieldContainer {
+  flex: 1;
+}
+
+.fieldSeparatorContainer {
+  min-width: 2.375rem;
+}
+
+.inputRange .textField {
+  padding: .9375rem;
+}
+
+.inputRange .formField-label {
+  margin-bottom: .5rem;
+}
+
+.inputRange .formField {
+  margin-bottom: 1.1875rem;
+}
+.weightFilter legend {
+  display: none;
+}
+
+.applyButtonContainer {
+  text-align: right;
+  height: 2rem;
+}
+
+.applyButton--disabled {
+  pointer-events: none;
+  cursor: default;
+  color: #b8b8b8;
+  outline: none;
+}
+
+.applyButton--disabled:active,
+.applyButton--disabled:focus,
+.applyButton--disabled:hover {
+  color: #b8b8b8;
+}
+
+.weightFilter-kg,
+.weightFilter-lbs {
+  display: inline-flex;
+  margin-right: 1.875rem;
+}
+.listedByFilterContainer {
+  display: grid;
+}
+
+.listedByFilterContainer .checkboxLabel-primary {
+  font-weight: bold;
+}
+
+.listedByFilterContainer .checkbox {
+  margin-bottom: 0;
+}
+
+.listedByFilterContainer .listedByRow {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  min-width: 17.1875rem;
+}
+
+.listedByFilterContainer .listedByIcon {
+  color: #b8b8b8;
+  margin-left: .9375rem;
+}
+
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  .listedByFilterContainer {
+    display: table-caption;
+  }
+}
+
+@supports (-ms-ime-align: auto) {
+  .listedByFilterContainer {
+    display: table-caption;
+  }
+}
+.pricingTypeContainer {
+  display: grid;
+}
+
+.pricingTypeContainer .checkboxLabel-primary {
+  font-weight: bold;
+}
+
+.pricingTypeContainer .checkbox {
+  margin-bottom: 1.25rem;
+}
+
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  .pricingTypeContainer {
+    display: table-caption;
+  }
+}
+
+@supports (-ms-ime-align: auto) {
+  .pricingTypeContainer {
+    display: table-caption;
+  }
+}
+.locationTypeFilterContainer {
+  display: grid;
+}
+
+.locationTypeFilterContainer .checkboxLabel-primary {
+  font-weight: bold;
+}
+
+.locationTypeFilterContainer .checkbox {
+  margin-bottom: 1.25rem;
+}
+
+.locationTypeFilterContainer .checkboxLabel-primary {
+  max-width: 15.625rem;
+  display: inline-block;
+  line-height: 1.5;
+}
+
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  .locationTypeFilterContainer {
+    display: table-caption;
+  }
+}
+
+@supports (-ms-ime-align: auto) {
+  .locationTypeFilterContainer {
+    display: table-caption;
+  }
+}
+.findShipmentsSearchTypeSelection {
+  background-color: #1c2431;
+  color: #fff;
+  padding: 0 1.375rem;
+}
+
+.findShipmentsSearchTypeSelection-heading {
+  line-height: 1.5;
+  letter-spacing: .03125rem;
+  text-align: center;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 400;
+  padding: .875rem 0;
+}
+
+.findShipmentsSearchTypeSelection-buttons {
+  display: flex;
+  flex-direction: row;
+  border: 1px solid #979797;
+  border-radius: .1875rem;
+  min-height: 2.5rem;
+}
+
+.findShipmentsSearchTypeSelection-button {
+  font-size: .6875rem;
+  line-height: 1.64;
+  letter-spacing: .06875rem;
+  font-weight: 700;
+  color: #fff;
+  transition: color 0.15s ease-in-out;
+}
+
+.findShipmentsSearchTypeSelection-button:hover {
+  color: #02aaf3;
+}
+
+.findShipmentsSearchTypeSelection-button--active:hover {
+  color: #fff;
+}
+
+.findShipmentsSearchTypeSelection-button+.findShipmentsSearchTypeSelection-button {
+  border-left: 1px solid #979797;
+}
+
+.findShipmentsSearchTypeSelection-button--active {
+  background-color: #02aaf3;
+}
+
+.findShipmentsSearchTypeSelection-text {
+  display: inline;
+  color: inherit;
+  line-height: inherit;
+  vertical-align: middle;
+}
+
+.findShipmentsSearchTypeSelection-location {
+  flex: 1 1 auto;
+}
+
+.findShipmentsSearchTypeSelection-pinIcon {
+  width: 1.375rem;
+  height: 1.5625rem;
+  margin-right: .5rem;
+  vertical-align: middle;
+}
+
+.findShipmentsSearchTypeSelection-alongRoute {
+  flex: 1 1.1 auto;
+}
+
+.findShipmentsSearchTypeSelection-alongRouteIcon {
+  width: 1.375rem;
+  height: 1.5625rem;
+  margin-right: .5rem;
+  vertical-align: middle;
+}
+.exclusiveLoadsFilter {
+  border-bottom: 1px solid #ddd;
+  padding: 1rem .875rem 1rem .875rem;
+  align-self: flex-start;
+  align-items: flex-start;
+  flex-wrap: nowrap;
+}
+
+.exclusiveLoadsFilter-toggleFlexItem {
+  flex: 0 0 auto;
+  padding-right: .75rem;
+}
+
+.exclusiveLoadsFilter-toggleFlexItem .toggleLabel {
+  display: none;
+}
+
+.exclusiveLoadsFilter-toggleFlexItem .switch {
+  vertical-align: middle;
+}
+
+.exclusiveLoadsFilter-label,
+.exclusiveLoadsFilter-networksIcon {
+  margin-right: .75rem;
+}
+
+.exclusiveLoadsFilter-label {
+  line-height: 1.4;
+  letter-spacing: .01875rem;
+  display: inline;
+}
+
+.exclusiveLoadsFilter-partnershipNetworksIcon {
+  color: #6d4092;
+  margin-right: .75rem;
+  vertical-align: middle;
+}
+
+.toggleButtonContainer {
+  display: inline-block;
+}
+
+.exclusiveLoadsToolTip-target {
+  color: #02aaf3;
+  vertical-align: middle;
+}
+
+.exclusiveLoads-popoverContent {
+  text-align: center;
+}
+
+.exclusiveLoads-popoverContent--exclusive:not(.is-visible) {
+  display: none;
+}
+
+.exclusiveLoads-popoverContent--exclusive {
+  text-align: center;
+  min-width: 16.65625rem;
+  padding-top: .9375rem;
+}
+
+.exclusiveLoads-popoverContent-header {
+  text-align: center;
+  margin-top: .3125rem;
+  margin-bottom: .3125rem;
+}
+
+.exclusiveLoads-popoverContent-header--exclusive {
+  margin-top: .75rem;
+  margin-bottom: .8125rem;
+}
+
+.exclusiveLoads-popoverContent-body {
+  text-align: center;
+}
+
+.exclusiveLoads-popoverContent-body--exclusive {
+  margin-bottom: .625rem;
+}
+
+.exclusiveLoads-popoverContent-learnMore {
+  margin-bottom: 1.875rem;
+}
+.switchToggle-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 4.5rem;
+  font-size: .6875rem;
+  letter-spacing: .06875rem;
+  line-height: 1.125rem;
+  font-weight: bold;
+  color: #262626;
+  word-break: break-word;
+  text-transform: uppercase;
+}
+
+.switchToggle-label .dlsSwitchToggle-container {
+  padding-left: .6875rem;
+}
+.filterList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  position: absolute;
+  -webkit-font-smoothing: touch;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+  overflow-y: auto;
+  top: 4.0625rem;
+  height: calc(100% - 4.0625rem);
+}
+
+.filterList-filters {
+  margin-bottom: 13.75rem;
+}
+
+.filterList-filters li:last-child .fsExpandingPanel {
+  border-bottom: none;
+}
+
+.filterList::-webkit-scrollbar {
+  display: none;
+}
+
+@media only screen and (min-width: 1025px) {
+  .filterList {
+    top: 0;
+    height: 100%;
+  }
+}
+
+/*# sourceMappingURL=8.index.5980ba5b.css.map*/

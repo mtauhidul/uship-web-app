@@ -1,0 +1,1440 @@
+'use strict';
+
+(function (_ref) {
+    var uship = _ref.uship,
+        jQuery = _ref.jQuery,
+        ko = _ref.ko,
+        logging = _ref.logging;
+
+
+    var registration = uship.namespace('registration');
+    var bootstrap = uship.namespace('bootstrap');
+
+    var extend = uship.utils.extend,
+        routes = bootstrap.routes,
+        viewData = bootstrap.viewData,
+        geographyChannel = uship.messageBus('GEOGRAPHY'),
+        geographyStore = registration.GeographyStore.create(geographyChannel);
+
+    //MIXINS
+
+    //Mixin for most common validation scheme -- the viewmodel observables are registered as a validation group
+    function withGroupValidation() {
+        this.groupValidation = function () {
+            var self = this;
+
+            var waitingOnAsync = jQuery.Deferred(function (dfd) {
+                if (!self.isValidating()) {
+                    dfd.resolve();
+                    return;
+                }
+
+                var subscription = self.isValidating.subscribe(function () {
+                    dfd.resolve();
+                    subscription.dispose();
+                });
+            });
+
+            return waitingOnAsync.then(function () {
+                var isValid = self.isValid(),
+                    resolved = jQuery.Deferred().resolve(isValid).promise();
+
+                if (!isValid) {
+                    self.errors.showAllMessages();
+                    uship.helpers.alert.error('<b>Validation errors:</b><br />' + self.errors().join(',<br/>'));
+                }
+
+                return resolved;
+            });
+        };
+
+        return this;
+    }
+
+    withGroupValidation.initialize = function () {
+        ko.validation.group(this, { deep: false });
+        this.validationRules.push(this.groupValidation);
+    };
+
+    //Mixin for all steps which allow the user type selection to be changed. Specific methods are overridden on instances
+    function asTypeSelector() {
+
+        this.chooseShipperAndMove = function () {
+            this.setUserType('Shipper');
+            this.move();
+        };
+
+        this.chooseCarrierAndMove = function () {
+            this.setUserType('ServiceProvider');
+            this.move();
+        };
+
+        this.chooseBrokerAndMove = function () {
+            this.setUserType('Broker');
+            this.move();
+        };
+
+        this.chooseAffiliateAndMove = function () {
+            this.setUserType('Affiliate');
+            this.move();
+        };
+
+        this.setUserType = function (userType, suppressLogging) {
+            if (!userType) return;
+
+            var constructors = {
+                Shipper: registration.ShipperRegistration,
+                ServiceProvider: registration.CarrierRegistration,
+                Broker: registration.BrokerRegistration,
+                Affiliate: registration.AffiliateRegistration
+            };
+
+            if (!(userType in constructors)) {
+                logging.softErr('Tried to set an invalid user type "' + userType + '".', 'uship.registration.js');
+                return;
+            }
+
+            var user = void 0;
+            if (!(userType in this.parent)) {
+                user = new constructors[userType](this.parent.draftUserData, this.parent.commodity);
+
+                if (this.parent.identityProvider) {
+                    user.identityType(this.parent.identityProvider);
+                }
+
+                user.siteId(this.parent.siteId());
+                user.masterUserName(this.parent.masterUserName());
+                user.subAccountInvitationId(this.parent.subAccountInvitationId());
+                user.marketingEmailOptOut = this.parent.marketingEmailOptOut;
+
+                if (!suppressLogging && !this.parent.identityProvider) {
+                    this.logUserTypeSelection(userType);
+                }
+            } else {
+                // We already have the right instance in memory
+                user = this.parent[userType];
+            }
+
+            var previousUserType = this.parent.user();
+            if (previousUserType) {
+                user.identityType(previousUserType.identityType());
+            }
+
+            this.parent[userType] = user;
+            this.parent.user(user);
+        };
+
+        this.move = function () {
+            this.parent.userCreateError(false);
+            this.moveNext && this.moveNext();
+        };
+
+        this.showBroker = function () {
+            return this.parent.siteId() === 'UnitedStates' && this.parent.processType !== 'mobile';
+        };
+
+        this.showFacebook = function () {
+            return false;
+        };
+
+        this.showSubAccountInfo = function () {
+            return this.parent.subAccountInvitationId && this.parent.masterUserName;
+        };
+
+        this.logUserTypeSelection = function (userType) {
+            var ev = {};
+            ev[userType + 'RegistrationStart'] = '1';
+            logging.pageView({ step: 'registration:selectUserAccountType', events: ev });
+        };
+
+        return this;
+    }
+
+    // Mixin for all the 'first page' steps for a user to connect with facebook
+    function asFacebookConnect() {
+
+        this.facebookMessage = function () {
+            var status = this.parent.facebookStatus();
+            if (!status) return null;
+
+            uship.messageBus.publish({
+                channel: 'shipperFlowTracking',
+                topic: 'authenticationResult',
+                data: {
+                    type: 'Facebook',
+                    action: 'Register',
+                    didSucceed: status === 'connected',
+                    httpResponse: 'N/A'
+                }
+            });
+
+            return status === 'connected' ? uship.loc('facebookConnectSuccessful') : uship.loc('facebookConnectFailed');
+        };
+
+        this.chooseFacebook = function (target, ev, token) {
+            this.dismissFacebookMessage();
+            this.parent.user().identityType('facebook');
+
+            var connect = uship.facebook.loadFacebookAsync().then(this.facebookLogin.bind(this, token)).then(this.ensureAccountIsNew.bind(this)).then(this.getFacebookUserInformation.bind(this)).then(this.fbAccountMeetsRegCriteria.bind(this)).then(this.facebookConnected.bind(this));
+
+            return connect.then(this.afterFacebookConnect.bind(this), this.failFacebookConnect.bind(this));
+        };
+
+        this.facebookLogin = function (authResponse) {
+            // No token, go straight to Facebook Connect
+            if (!authResponse) return uship.facebook.connectRequestPromise();
+
+            // Presence of a token indicates user has already done Facebook Connect
+            // Resuming a registration or getting the token from the mobile app
+
+            var alreadyLoggedIn = jQuery.Deferred();
+
+            alreadyLoggedIn.resolve({
+                authResponse: authResponse,
+                status: 'connected'
+            });
+
+            return alreadyLoggedIn.promise();
+        };
+
+        this.ensureAccountIsNew = function (connectResponse) {
+            var noMatchinguShipAccount = jQuery.Deferred();
+
+            // Check existing uShip accounts for email addresses which match this FB user
+            var accountReq = jQuery.ajax({
+                url: routes.checkFacebookUser,
+                type: 'POST',
+                data: JSON.stringify(connectResponse.authResponse),
+                contentType: 'application/json',
+                headers: {
+                    'x-registration-process-type': this.parent.processType
+                }
+            });
+
+            // If an existing account has been linked to this Facebook user,
+            // short-circuit to the returned redirect without resolving
+
+            accountReq.done(this.existingAccountLinked);
+
+            // If request returned HTTP failure, propagate the FB Connect
+            // authorization data and continue the promise chain
+
+            accountReq.fail(function () {
+                noMatchinguShipAccount.resolve(connectResponse);
+            });
+
+            return noMatchinguShipAccount.promise();
+        };
+
+        this.getFacebookUserInformation = function (connectResponse) {
+            var getInfo = jQuery.Deferred();
+
+            var apiReq = uship.facebook.apiUserRequestPromise({
+                // eslint-disable-next-line camelcase
+                params: { access_token: connectResponse.authResponse.accessToken }
+            });
+
+            var self = this;
+            apiReq.then(function (apiResponse) {
+                if (!apiResponse.email) {
+                    self.parent.user().shouldConfirmFacebookAccountCreation(false);
+                }
+                getInfo.resolve({
+                    connectResponse: connectResponse,
+                    apiResponse: apiResponse
+                });
+            }, function (apiResponse) {
+                getInfo.reject(apiResponse);
+            });
+
+            return getInfo.promise();
+        };
+
+        this.existingAccountLinked = function (uShipAccountData) {
+            setTimeout(function () {
+                uship.messageBus.publish({
+                    channel: 'registration',
+                    topic: 'existingAccountLinked',
+                    data: {
+                        redirectUrl: uShipAccountData.redirectUrl,
+                        firstName: uShipAccountData.firstName
+                    }
+                });
+                uship.messageBus.publish({
+                    channel: 'shipperFlowTracking',
+                    topic: 'authenticationResult',
+                    data: {
+                        type: 'Facebook',
+                        action: 'Sign In',
+                        didSucceed: true,
+                        httpResponse: 'N/A'
+                    }
+                });
+            }, 10);
+        };
+
+        this.fbAccountMeetsRegCriteria = function (responses) {
+            var apiResultCheck = jQuery.Deferred();
+
+            // Currently, the only criteria for registering with a Facebook
+            // account is that the FB account has an email address.
+            // However, we will still 'connect' and prompt for further information.
+
+            if (!responses || !responses.apiResponse) {
+                apiResultCheck.reject(responses);
+            } else {
+                apiResultCheck.resolve(responses);
+            }
+
+            return apiResultCheck.promise();
+        };
+
+        this.failFacebookConnect = function () {
+            this.parent.facebookStatus('failed');
+            this.parent.user().facebookStatus('failed');
+            this.fallbackToEmailFromFacebook();
+            this.afterFacebookConnect();
+        };
+
+        this.fallbackToEmailFromFacebook = function () {
+            if (this.chooseEmail) {
+                this.chooseEmail();
+                uship.messageBus.publish({
+                    channel: 'registration',
+                    topic: 'fallbackToEmailFromFacebook'
+                });
+            } else {
+                this.parent.user().identityType('email');
+            }
+        };
+
+        this.facebookConnected = function (responses) {
+            var connected = jQuery.Deferred();
+
+            this.parent.facebookStatus(responses.connectResponse.status);
+            this.parent.user().facebookStatus(responses.connectResponse.status);
+            this.parent.user().setFacebookData(responses);
+
+            var needAdditionalInfo = !responses.apiResponse.email;
+            if (needAdditionalInfo) {
+                this.fallbackToEmailFromFacebook();
+            }
+
+            var user = this.parent.user();
+
+            var isSimpleUserAccount = !user.shouldConfirmFacebookAccountCreation() && (user.isShipper() || user.isAffiliate());
+
+            if (isSimpleUserAccount && !needAdditionalInfo) {
+
+                // If a user account has been created, short-circuit to the
+                // returned redirect without resolving. This prevents next
+                // steps from showing during user creation interval
+
+                this.createUserAccount().done(this.userCreated.bind(this));
+            } else {
+                connected.resolve(responses);
+            }
+
+            return connected.promise();
+        };
+
+        this.afterFacebookConnect = function () {
+            return;
+        };
+
+        this.dismissFacebookMessage = function () {
+            this.parent.facebookStatus(null);
+            this.parent.user().facebookStatus(null);
+        };
+    }
+
+    //Mixin for user creation steps for Shipper, Carrier and Broker
+    function asUserCreator() {
+        this.createUserAccount = function () {
+
+            // Cleanup number of shipments before persisting
+            if (typeof this.parent !== 'undefined' && typeof this.parent.user() !== 'undefined' && typeof this.parent.user().numberOfShipments() !== 'undefined') {
+                var maxInt = 2147483647;
+                var number = (this.parent.user().numberOfShipments() || '').replace(/[^\d]/g, '');
+                if (number <= maxInt) {
+                    this.parent.user().numberOfShipments(number);
+                } else {
+                    this.parent.user().numberOfShipments(maxInt);
+                }
+            }
+
+            var newUser = ko.toJSON(this.parent.user);
+            var req = jQuery.ajax({
+                url: routes.createUser,
+                type: 'POST',
+                data: newUser,
+                contentType: 'application/json',
+                headers: {
+                    'x-registration-process-type': this.parent.processType,
+                    'uShip-ClientId': viewData.clientId
+                }
+            }).success(function () {
+                uship.messageBus.publish({
+                    channel: 'shipperFlowTracking',
+                    topic: 'authenticationResult',
+                    data: {
+                        type: 'uShip',
+                        action: 'Register',
+                        didSucceed: true,
+                        httpResponse: 'N/A'
+                    }
+                });
+            }).fail(this.userCreateFailed.bind(this));
+
+            uship.helpers.alert.log('Creating User...');
+
+            return req;
+        };
+
+        this.logUserCreated = function (data) {
+            var analyticsUserType = this.parent.user().analyticsUserType();
+
+            this.parent.logPageView(analyticsUserType + '/completeRegistration');
+
+            this.parent.logRegistrationComplete();
+
+            uship.messageBus.publish({
+                channel: 'registration',
+                topic: 'registered',
+                data: { firstName: data.firstName }
+            });
+        };
+
+        this.userCreated = function (data) {
+            this.logUserCreated(data);
+            uship.helpers.alert.success('User Created!');
+            setTimeout(function () {
+                uship.messageBus.publish({
+                    channel: 'registration',
+                    topic: 'userCreated',
+                    data: {
+                        redirectUrl: data.redirectUrl,
+                        firstName: data.firstName
+                    }
+                });
+            }, 10);
+        };
+
+        this.userCreateFailed = function (jqXhr) {
+            var data = void 0;
+            try {
+                data = JSON.parse(jqXhr.responseText);
+            } catch (e) {
+                data = {};
+            }
+
+            if (data.userName) {
+                this.userCreated(data);
+            } else {
+                uship.messageBus.publish({
+                    channel: 'shipperFlowTracking',
+                    topic: 'authenticationResult',
+                    data: {
+                        type: 'uShip',
+                        action: 'Register',
+                        didSucceed: false,
+                        httpResponse: jqXhr.status + ' ' + jqXhr.statusText
+                    }
+                });
+                if (data.Errors && data.Errors.length > 0 && data.Errors.some(function (x) {
+                    return x.Code === 40700;
+                })) {
+                    this.emailAddress.setError('Email address is already registered. Try signing in or resetting your password.');
+                    this.emailAddress.isModified(true);
+                } else {
+                    this.parent.userCreateError(true);
+                }
+            }
+
+            this.util.isLoading(false);
+            uship.helpers.alert.error('User Create Failed' + jqXhr.responseText);
+        };
+    }
+
+    //Mixin for checking the validity of MC number, FF number and DOT number
+    function asOperatingNumberValidator() {
+        this.operatingNumbers = [{ kind: 'mc' }, { kind: 'ff' }, { kind: 'dot' }];
+
+        this.getOperatingNumber = function (kind) {
+            return this.operatingNumbers.filter(function (item) {
+                return item.kind === kind;
+            })[0];
+        };
+
+        this.checkOperatingNumber = function (kind, val) {
+            if (typeof val == 'undefined' || val === null) return;
+
+            var self = this,
+                dfd = jQuery.Deferred();
+
+            var operatingNumber = this.getOperatingNumber(kind);
+
+            if (val === '') {
+                this.failedCheck(operatingNumber);
+                return;
+            }
+
+            var req = jQuery.ajax({
+                url: '/mvc/register/checkoperatingnumber',
+                type: 'GET',
+                data: { operatingNumber: kind + val }
+            });
+
+            req.then(function (data) {
+                self.passedCheck(data, operatingNumber);
+            }, function () {
+                self.failedCheck(operatingNumber);
+            });
+
+            req.always(dfd.resolve);
+
+            operatingNumber.check = dfd.promise();
+        };
+
+        this.passedCheck = function (data, operatingNumber) {
+            operatingNumber.companyData = data;
+
+            for (var i = 0, j = this.operatingNumbers.length; i < j; i++) {
+                if (this.operatingNumbers[i].kind === operatingNumber.kind) break;
+                if (this.operatingNumbers[i].companyData) return;
+            }
+
+            this.util.passedOperatingNumberCheck = true;
+            this.updateCompanyInformation(data);
+        };
+
+        this.failedCheck = function (operatingNumber) {
+            if (!operatingNumber.companyData) return;
+
+            delete operatingNumber.companyData;
+
+            for (var i = 0, j = this.operatingNumbers.length; i < j; i++) {
+                var item = this.operatingNumbers[i];
+                if (item.companyData) {
+                    this.updateCompanyInformation(item.companyData);
+                    return;
+                }
+            }
+
+            this.util.passedOperatingNumberCheck = false;
+            this.updateCompanyInformation({});
+        };
+
+        this.updateCompanyInformation = function (data) {
+            this.parent.user().companyName(data.companyName || '');
+            this.parent.user().companyCity(data.companyCity || '');
+            this.parent.user().companyCountry(data.companyCountry || '');
+            this.parent.user().companyCountryCode(data.companyCountryCode || '');
+            this.parent.user().companyState(data.companyState || '');
+            this.parent.user().companyPostalCode(data.companyPostalCode || '');
+
+            if (data.companyCountryCode) {
+                geographyStore.setCurrentCountry(data.companyCountryCode);
+            }
+
+            if (data.companyState) {
+                geographyStore.setCurrentState(data.companyState);
+            }
+        };
+
+        this.beforeMove = function () {
+            var self = this;
+
+            var operatingNumberChecks = this.operatingNumbers.filter(function (item) {
+                return !!item.check;
+            }).map(function (item) {
+                return item.check;
+            });
+
+            return jQuery.when.apply(jQuery, operatingNumberChecks).then(function () {
+                var isCarrier = self.parent.user().isCarrier();
+                var trailerTypesStep = isCarrier ? 'carrierTrailerTypes' : 'brokerTrailerTypes';
+                var companyInfoStep = isCarrier ? 'carrierCompanyInformation' : 'brokerCompanyInformation';
+
+                return self.util.passedOperatingNumberCheck ? trailerTypesStep : companyInfoStep;
+            });
+        };
+    }
+
+    function withContinueButton(text) {
+        this.continueButton = function () {};
+        this.continueButton.defaultText = text;
+
+        this.continueButton.text = ko.computed(withContinueButton.getText, this);
+        this.continueButton.cssClass = ko.computed(withContinueButton.getCssClass, this);
+    }
+
+    withContinueButton.getText = function () {
+        return this.util.isLoading() ? uship.loc('MainLoading') : this.continueButton.defaultText;
+    };
+
+    withContinueButton.getCssClass = function () {
+        return this.util.isLoading() ? 'disabled uship-button-loading' : '';
+    };
+
+    function headerText() {
+        if (this.parent.user() && this.parent.user().shouldConfirmFacebookAccountCreation()) {
+            return uship.loc('RegistrationConfirmationAlmostThere');
+        }
+        if (this.parent.processType === 'inprocess') {
+            return uship.loc('QuoteRegister_CreateAccount');
+        }
+        return uship.loc('headerJoinuShip');
+    }
+
+    //VIEW MODELS
+
+    function BeginRegistration() {
+        this.parent = this.util.container.context;
+        this.user = ko.referencedObservable('user', this.parent);
+        this.headerText = ko.computed(headerText, this);
+    }
+
+    asTypeSelector.call(BeginRegistration.prototype);
+    asFacebookConnect.call(BeginRegistration.prototype);
+    asUserCreator.call(BeginRegistration.prototype);
+
+    extend(BeginRegistration.prototype, {
+        beforeMove: function beforeMove() {
+            this.parent.logRegistrationStart();
+
+            var beforeMove = jQuery.Deferred();
+
+            // default to email
+            this.user().identityType('email');
+
+            var getNext = function () {
+                if (!this.user().identityType()) return 'selectIdentityProvider';
+                return this.parent.steps.selectIdentityProvider.beforeMove.call(this);
+            }.bind(this);
+
+            // User hits page with a Facebook Connect token already in place,
+            // e.g. coming from mobile app
+            if (this.parent.user() && this.parent.facebookToken) {
+                this.chooseFacebook(null, null, { accessToken: this.parent.facebookToken }).always(function () {
+                    beforeMove.resolve(getNext());
+                });
+            } else {
+                beforeMove.resolve(getNext());
+            }
+
+            return beforeMove.promise();
+        },
+        afterFacebookConnect: function afterFacebookConnect() {
+            this.moveNext();
+        }
+    }); // beginRegistration
+
+
+    function SelectIdentityProvider() {
+
+        uship.messageBus.subscribe({
+            channel: 'registration',
+            topic: 'emailViewRequested',
+            handler: this.chooseEmail.bind(this)
+        });
+
+        uship.messageBus.subscribe({
+            channel: 'registration',
+            topic: 'facebookAccessTokenAvailable',
+            handler: this.prefillFacebookData.bind(this)
+        });
+
+        uship.messageBus.subscribe({
+            channel: 'registration',
+            topic: 'facebookConnectRequested',
+            handler: this.handleFacebookConnectRequested.bind(this)
+        });
+
+        this.parent = this.util.container.context;
+
+        uship.messageBus.subscribe({
+            channel: 'registration',
+            topic: 'emailViewRequested',
+            handler: this.chooseEmail.bind(this)
+        });
+
+        this.user = ko.referencedObservable('user', this.parent);
+        this.identityType = ko.referencedObservable('identityType', this.parent.user);
+        this.siteId = ko.referencedObservable('siteId', this.parent.user);
+        this.headerText = ko.computed(headerText, this);
+    }
+
+    asTypeSelector.call(SelectIdentityProvider.prototype);
+    asUserCreator.call(SelectIdentityProvider.prototype);
+    asFacebookConnect.call(SelectIdentityProvider.prototype);
+
+    extend(SelectIdentityProvider.prototype, {
+        prefillFacebookData: function prefillFacebookData(authResponse) {
+            this.parent.facebookToken = authResponse.accessToken;
+            this.parent.user().shouldConfirmFacebookAccountCreation(true);
+            this.chooseFacebook(null, null, authResponse);
+        },
+        handleFacebookConnectRequested: function handleFacebookConnectRequested(authResponse) {
+            this.chooseFacebook(null, null, authResponse);
+        },
+        afterFacebookConnect: function afterFacebookConnect() {
+            this.moveNext();
+        },
+        showFacebook: function showFacebook() {
+            return false;
+        },
+        move: function move() {
+            if (this.user().identityType()) this.moveNext();
+            return;
+        },
+        chooseEmail: function chooseEmail() {
+            this.identityType('email');
+            this.moveNext();
+        },
+        beforeMove: function beforeMove() {
+            if (this.user().isShipper()) return 'shipperIdentityInformation';
+            if (this.user().isAffiliate()) return 'affiliateIdentityInformation';
+            if (this.user().isCarrier()) return 'carrierIdentityInformation';
+            if (this.user().isBroker()) return 'brokerIdentityInformation';
+        }
+    }); //SelectIdentityProvider
+
+
+    function ShipperProfileViewModel() {
+        this.parent = this.util.container.context;
+
+        this.siteId = ko.referencedObservable('siteId', this.parent.user);
+        this.identityType = ko.referencedObservable('identityType', this.parent.user);
+        this.firstName = ko.referencedObservable('firstName', this.parent.user);
+        this.lastName = ko.referencedObservable('lastName', this.parent.user);
+        this.numberOfShipments = ko.referencedObservable('numberOfShipments', this.parent.user);
+        this.homePhone = ko.referencedObservable('homePhone', this.parent.user);
+        this.companyName = ko.referencedObservable('companyName', this.parent.user);
+        this.emailAddress = ko.referencedObservable('emailAddress', this.parent.user);
+        this.shipperType = ko.referencedObservable('shipperType', this.parent.user);
+        this.password = ko.referencedObservable('password', this.parent.user);
+        this.doesAgree = ko.referencedObservable('doesAgree', this.parent.user);
+        this.passwordVisible = ko.observable(false, this);
+
+        this.headerText = ko.computed(headerText, this);
+        var defaultContinue = this.parent.processType === 'inprocess' ? uship.loc('MainContinue') : uship.loc('headerJoinuShip');
+        withContinueButton.call(this, defaultContinue);
+        withGroupValidation.initialize.call(this);
+
+        uship.messageBus.subscribe({
+            channel: 'authentication',
+            topic: 'registrationActionRequested',
+            handler: this.validateShipperProfile.bind(this)
+        });
+    }
+
+    asTypeSelector.call(ShipperProfileViewModel.prototype);
+    withGroupValidation.call(ShipperProfileViewModel.prototype);
+    asUserCreator.call(ShipperProfileViewModel.prototype);
+    asFacebookConnect.call(ShipperProfileViewModel.prototype);
+
+    ko.utils.extend(ShipperProfileViewModel.prototype, {
+        chooseShipperType: function chooseShipperType() {
+            return;
+        },
+        move: function move() {
+            this.movePrevious().move();
+        },
+        choosePersonal: function choosePersonal() {
+            this.companyName('');
+            this.homePhone.formatted('');
+            this.numberOfShipments('');
+            this.shipperType('personal');
+        },
+        chooseBusiness: function chooseBusiness() {
+            this.shipperType('business');
+        },
+        showShipperType: function showShipperType() {
+            if (this.parent.user().isShipper() && this.isBusinessCategory()) {
+                this.chooseBusiness();
+            }
+            return this.parent.user().isShipper();
+        },
+        showMarketingBlurb: function showMarketingBlurb() {
+            return this.isShipperAndBusinessCategory();
+        },
+        getMarketingBlurbImageUrl: function getMarketingBlurbImageUrl() {
+            return routes.registrationMarketingBlurbBusinessCategoryImage;
+        },
+        showPhone: function showPhone() {
+            return true;
+        },
+        showNumberOfShipments: function showNumberOfShipments() {
+            return this.shipperType() === 'business' && this.isShipperAndBusinessCategory();
+        },
+        showFacebookConnectOption: function showFacebookConnectOption() {
+            return true; // returning true until we decide to hide FB registration in a later phase with: !this.isShipperAndBusinessCategory();
+        },
+        isShipperAndBusinessCategory: function isShipperAndBusinessCategory() {
+            if (this.parent.user().isShipper() && this.isBusinessCategory()) {
+                return true;
+            }
+            return false;
+        },
+
+
+        /* Ideally we would import our commodity constant file here */
+        isBusinessCategory: function isBusinessCategory() {
+            try {
+                var commodity = this.parent.commodity;
+
+                if (commodity === 'NewCommercialGoods' || commodity === 'UsedCommercialGoods' || commodity === 'WineLiquorBeerSpirits') {
+                    return true;
+                }
+                return false;
+            } catch (e) {
+                return false;
+            }
+        },
+        showBasicInfoFields: function showBasicInfoFields() {
+            if (this.parent.user().shouldConfirmFacebookAccountCreation()) {
+                return true;
+            }
+            return this.identityType() === 'email' || this.identityType() === 'facebook' && !this.parent.isFacebookConnected();
+        },
+        validateShipperProfile: function validateShipperProfile() {
+            if (this.util.isLoading()) return;
+            var self = this;
+
+            this.util.isLoading(true);
+            var validationPromise = this.validate();
+
+            validationPromise.then(function () {
+                return self.createUserAccount().then(self.userCreated.bind(self));
+            });
+
+            validationPromise.fail(function () {
+                self.util.isLoading(false);
+            });
+        },
+        getUserAgreementCheckboxLabel: function getUserAgreementCheckboxLabel() {
+            return 'I agree to the terms of <a target="_blank" href="/user_agreement.aspx">uShip\'s User Agreement</a> and <a target="_blank" href="/privacy.aspx">Privacy Policy</a>.';
+        },
+        getUserAgreementErrorMessage: function getUserAgreementErrorMessage() {
+            return 'You must agree to the terms of uShip\'s User Agreement and Privacy Policy to continue.';
+        },
+        getUserAgreementText: function getUserAgreementText() {
+            if (this.parent.processType === 'inprocess') {
+                return uship.loc('clickContinueUserAgreement');
+            }
+            return uship.loc('clickJoinAcceptUserAgreement');
+        },
+        togglePasswordVisibility: function togglePasswordVisibility() {
+            this.passwordVisible(!this.passwordVisible());
+        }
+    }); // ShipperProfileViewModel
+
+
+    function CarrierIdentityInformation() {
+        this.parent = this.util.container.context;
+
+        this.identityType = ko.referencedObservable('identityType', this.parent.user);
+        this.entityType = ko.referencedObservable('entityType', this.parent.user);
+        this.firstName = ko.referencedObservable('firstName', this.parent.user);
+        this.lastName = ko.referencedObservable('lastName', this.parent.user);
+        this.emailAddress = ko.referencedObservable('emailAddress', this.parent.user);
+        this.homePhone = ko.referencedObservable('homePhone', this.parent.user);
+        this.mobilePhone = ko.referencedObservable('mobilePhone', this.parent.user); // only used if primary is not a mobile
+        this.doesAgree = ko.referencedObservable('doesAgree', this.parent.user);
+
+        this.mcNumber = ko.referencedObservable('mcNumber', this.parent.user);
+        this.dotNumber = ko.referencedObservable('dotNumber', this.parent.user);
+        this.brokerMcNumber = ko.referencedObservable('brokerMcNumber', this.parent.user);
+
+        this.siteId = ko.referencedObservable('siteId', this.parent.user);
+        this.isPrimaryMobile = ko.observable(true);
+        this.headerText = ko.computed(headerText, this);
+
+        this.mcNumber.subscribe(function (val) {
+            this.checkOperatingNumber('mc', val);
+        }, this);
+
+        this.dotNumber.subscribe(function (val) {
+            this.checkOperatingNumber('dot', val);
+        }, this);
+
+        if (this.mcNumber()) this.checkOperatingNumber('mc', this.mcNumber());
+        if (this.dotNumber()) this.checkOperatingNumber('dot', this.dotNumber());
+
+        withContinueButton.call(this, uship.loc('MainContinue'));
+        withGroupValidation.initialize.call(this);
+    }
+
+    asTypeSelector.call(CarrierIdentityInformation.prototype);
+    withGroupValidation.call(CarrierIdentityInformation.prototype);
+    asOperatingNumberValidator.call(CarrierIdentityInformation.prototype);
+    asFacebookConnect.call(CarrierIdentityInformation.prototype);
+
+    extend(CarrierIdentityInformation.prototype, {
+        chooseCarrierType: function chooseCarrierType() {
+            return;
+        },
+        move: function move() {
+            this.movePrevious().move();
+        },
+        chooseCarrier: function chooseCarrier() {
+            this.entityType('carrier');
+        },
+        chooseCarrierAndBroker: function chooseCarrierAndBroker() {
+            this.entityType('brokerAndCarrier');
+        },
+        choosePrimaryIsMobile: function choosePrimaryIsMobile() {
+            this.isPrimaryMobile(true);
+        },
+        choosePrimaryIsNotMobile: function choosePrimaryIsNotMobile() {
+            this.isPrimaryMobile(false);
+        },
+        showBasicInfoFields: function showBasicInfoFields() {
+            return this.identityType() === 'email' || this.identityType() === 'facebook' && !this.parent.isFacebookConnected();
+        },
+        showDotNumber: function showDotNumber() {
+            return this.siteId() === 'UnitedStates';
+        },
+        showMcNumber: function showMcNumber() {
+            var siteId = this.siteId();
+            return siteId === 'UnitedStates' || siteId === 'Canada';
+        },
+        showBrokerMcNumber: function showBrokerMcNumber() {
+            return this.showMcNumber() && this.entityType() === 'brokerAndCarrier';
+        },
+        getMcOptionalText: function getMcOptionalText() {
+            var mcLabel = uship.loc('profile_spMcNumber');
+            mcLabel += ' ' + uship.loc('MainOptional');
+            return mcLabel;
+        }
+    }); //CarrierIdentityInformation
+
+    function CarrierCompanyInformation() {
+        this.parent = this.util.container.context;
+
+        this.siteId = ko.referencedObservable('siteId', this.parent.user);
+        this.companyName = ko.referencedObservable('companyName', this.parent.user);
+        this.companyStreet = ko.referencedObservable('companyStreet', this.parent.user);
+        this.companyCity = ko.referencedObservable('companyCity', this.parent.user);
+        this.companyState = ko.referencedObservable('companyState', this.parent.user);
+        this.companyCountry = ko.referencedObservable('companyCountry', this.parent.user);
+        this.companyCountryCode = ko.referencedObservable('companyCountryCode', this.parent.user);
+        this.companyLatitude = ko.referencedObservable('companyLatitude', this.parent.user);
+        this.companyLongitude = ko.referencedObservable('companyLongitude', this.parent.user);
+        this.companyPostalCode = ko.referencedObservable('companyPostalCode', this.parent.user);
+
+        this.stateOptions = ko.observableArray();
+        this.stateOptionsCaption = ko.computed(this.getStateOptionsCaptionKey, this);
+        this.shouldDisplayStateOptions = ko.computed(this.displaysStateOptions, this);
+        this.countryOptions = ko.observableArray();
+        this.userAddressQuery = ko.observable(this.getFormattedAddress());
+        this.util.addressTemplate = ko.observable('address_form_template');
+
+        withContinueButton.call(this, uship.loc('MainContinue'));
+        withGroupValidation.initialize.call(this);
+
+        this.initializeCountryCodes = function (countriesList) {
+            this.countryOptions(countriesList);
+            // Initialize companyCountryCode with best guess based on user's site
+            if (!this.companyCountryCode()) {
+                this.companyCountryCode(geographyStore.getCurrentCountry());
+                this.companyCountryCode.isModified(false);
+            }
+        };
+
+        this.initializeStateCodes = function (statesList) {
+            this.stateOptions(statesList);
+
+            if (this.companyState()) {
+                geographyStore.setCurrentState(this.companyState());
+            }
+            //as soon as we set CountryId, companyState will be validated. Since, this is
+            //initialization, we suppress validation.
+            this.companyState.isModified(false);
+        };
+
+        this.handleCountryStateSubscriptions = function () {
+            this.companyCountryCode.subscribe(function (newIsoCode) {
+                geographyStore.setCurrentCountry(newIsoCode);
+                this.companyState(undefined);
+                this.companyState.isModified(false);
+            }, this);
+
+            this.companyState.subscribe(function (newStateCode) {
+                geographyStore.setCurrentState(newStateCode);
+            });
+
+            this.stateOptions.subscribeToMessageBus(geographyChannel, 'gotStates');
+        };
+
+        geographyStore.getCountriesAsync().done(this.initializeCountryCodes.bind(this)).then(function () {
+            if (this.shouldDisplayStateOptions()) {
+                geographyStore.getStatesInCurrentCountryAsync().done(this.initializeStateCodes.bind(this)).then(this.handleCountryStateSubscriptions.bind(this));
+            } else {
+                this.handleCountryStateSubscriptions();
+            }
+        }.bind(this));
+    }
+
+    withGroupValidation.call(CarrierCompanyInformation.prototype);
+
+    extend(CarrierCompanyInformation.prototype, {
+        fetch: function fetch() {
+            // Before collecting carrier's company address, prefill their country based on uShip Site
+            var ctx = this.util.container.context,
+                uShipSite = ctx.siteId(),
+                selectedCountry = ctx.user().companyCountryCode(),
+                bestGuessCountry = selectedCountry || registration.GeographyStore.mapuShipSiteToIsoCode(uShipSite);
+
+            geographyStore.setCurrentCountry(bestGuessCountry);
+        },
+        getFormattedAddress: function getFormattedAddress() {
+            var city = this.companyCity();
+            var country = this.companyCountry();
+            var street = this.companyStreet();
+
+            if (!city && !country) return undefined;
+
+            return [street, city, country].join(', ');
+        },
+        onBeforeMove: function onBeforeMove() {
+            var self = this;
+            var moveNextPromise = jQuery.Deferred().always(function () {
+                self.moveNext();
+            });
+
+            if (this.isValid()) return moveNextPromise.resolve();
+
+            return moveNextPromise.reject();
+        },
+        displaysStateOptions: function displaysStateOptions() {
+            return ['AU', 'BR', 'CA', 'MX', 'US'].indexOf(this.companyCountryCode()) > -1;
+        },
+        getStateOptionsCaptionKey: function getStateOptionsCaptionKey() {
+            return this.companyCountryCode() === 'CA' ? uship.loc('SelectAProvince') : uship.loc('SelectAState');
+        }
+    }); //CarrierCompanyInformation
+
+
+    function CarrierTrailerTypes() {
+        this.parent = this.util.container.context;
+
+        this.companyName = ko.referencedObservable('companyName', this.parent.user);
+        this.trailerTypes = ko.observableArray();
+        this.userTrailerTypes = this.parent.user().trailerTypes;
+
+        withContinueButton.call(this, uship.loc('MainContinue'));
+        withGroupValidation.initialize.call(this);
+
+        this.fetch().then(this.trailerTypes);
+    }
+
+    withGroupValidation.call(CarrierTrailerTypes.prototype);
+
+    extend(CarrierTrailerTypes.prototype, {
+        fetch: function fetch() {
+            var parent = this.util.container.context;
+            return parent.dataCache.trailerTypes || (parent.dataCache.trailerTypes = jQuery.get(routes.getTrailerTypes));
+        }
+    }); //CarrierTrailerTypes
+
+
+    function CarrierSelectCommodities() {
+        this.parent = this.util.container.context;
+
+        this.commodities = ko.observableArray();
+        this.userCommodities = this.parent.user().commodities;
+
+        withContinueButton.call(this, uship.loc('MainContinue'));
+        withGroupValidation.initialize.call(this);
+
+        this.fetch().then(function (data) {
+            this.commodities(data);
+            //Make sure that the error message isn't showing before the user takes action
+            this.userCommodities.isModified(false);
+        }.bind(this));
+    }
+
+    withGroupValidation.call(CarrierSelectCommodities.prototype);
+
+    extend(CarrierSelectCommodities.prototype, {
+        fetch: function fetch() {
+            var parent = this.util.container.context;
+            return parent.dataCache.commodities || (parent.dataCache.commodities = jQuery.get(routes.getCommodities));
+        }
+    }); //CarrierSelectCommodities
+
+
+    function CarrierSelectRegions() {
+        this.parent = this.util.container.context;
+
+        this.regionFilters = ko.observableArray();
+        this.selectedRegionFilter = ko.referencedObservable('regionFilter', this.parent.user);
+        this.companyState = ko.referencedObservable('companyState', this.parent.user);
+        this.companyCountry = ko.referencedObservable('companyCountry', this.parent.user);
+        this.companyCountryCode = ko.referencedObservable('companyCountryCode', this.parent.user);
+        this.optionsText = 'Label';
+        this.optionsValue = 'Value';
+
+        withContinueButton.call(this, uship.loc('MainContinue'));
+        withGroupValidation.initialize.call(this);
+
+        this.regionFilters.subscribeToMessageBus(geographyChannel, 'gotRegionOptionsModel');
+        this.regionFilters.subscribe(this.setSelectedRegion, this);
+
+        this.fetch();
+    }
+
+    withGroupValidation.call(CarrierSelectRegions.prototype);
+
+    extend(CarrierSelectRegions.prototype, {
+        setSelectedRegion: function setSelectedRegion(regionOptionsModel) {
+            if (!this.selectedRegionFilter()) {
+                var state = this.companyState(),
+                    country = this.companyCountry();
+                var selectedOption = void 0;
+
+                if (country === 'United States' && (state === 'AK' || state === 'HI')) {
+                    selectedOption = regionOptionsModel[2][this.optionsValue];
+                } else {
+                    selectedOption = regionOptionsModel[0][this.optionsValue];
+                }
+
+                this.selectedRegionFilter(selectedOption);
+            }
+        },
+        fetch: function fetch() {
+            return geographyStore.getRegionOptionsModelForCurrentCountryAsync();
+        },
+        beforeMove: function beforeMove() {
+            var filter = this.selectedRegionFilter();
+
+            switch (filter) {
+                case 'states':
+                case 'provinces':
+                    return 'carrierSelectStates';
+                case 'countries':
+                    return 'carrierSelectCountries';
+                case 'international':
+                    return 'carrierSelectInternational';
+                case 'local':
+                    //this.parent.user().regions(['local']);
+                    return 'carrierAccountInformation';
+                default:
+                    {
+                        var userRegions = filter ? filter.split(',') : [];
+                        this.parent.user().regions(userRegions);
+                        return 'carrierAccountInformation';
+                    }
+            }
+        }
+    }); //CarrierSelectRegions
+
+    function CarrierSelectStates() {
+        this.parent = this.util.container.context;
+
+        this.companyCountry = ko.referencedObservable('companyCountry', this.parent.user);
+        this.states = ko.observableArray();
+        this.userRegions = this.parent.user().regions;
+
+        this.optionsText = 'l'; //l is shorthand for Label
+        this.optionsValue = 'v'; //v is shorthand for Value
+
+        withContinueButton.call(this, uship.loc('MainContinue'));
+        withGroupValidation.initialize.call(this);
+
+        this.states.subscribeToMessageBus(geographyChannel, 'gotStates');
+        this.states.subscribe(this.setSelectedState, this);
+
+        this.fetch();
+    } // CarrierSelectStates
+
+    withGroupValidation.call(CarrierSelectStates.prototype);
+
+    extend(CarrierSelectStates.prototype, {
+        getHeaderMessage: function getHeaderMessage() {
+            return this.companyCountry() === 'Canada' ? uship.loc('whatProvincesWillYouServe') : uship.loc('whatStatesWillYouServe');
+        },
+        getAllStatesMessage: function getAllStatesMessage() {
+            return this.companyCountry() === 'Canada' ? uship.loc('registerAllProvinces') : uship.loc('registerAllStates');
+        },
+        setSelectedState: function setSelectedState(states) {
+            var userState = geographyStore.getCurrentState(),
+                optionsValue = this.optionsValue;
+
+            if (this.userRegions() && this.userRegions().length > 0) return;
+
+            states.forEach(function (state) {
+                if (state[optionsValue].slice(-2) === userState) {
+                    this.userRegions([state[optionsValue]]);
+                }
+            }.bind(this));
+        },
+        fetch: function fetch() {
+            return geographyStore.getStatesInCurrentCountryAsync();
+        }
+    });
+
+    function CarrierSelectCountries() {
+        this.parent = this.util.container.context;
+
+        this.companyCountry = ko.referencedObservable('companyCountry', this.parent.user);
+        this.countries = ko.observableArray();
+        this.userRegions = this.parent.user().regions;
+
+        this.optionsText = 'l';
+        this.optionsValue = 'v';
+
+        withContinueButton.call(this, uship.loc('MainContinue'));
+        withGroupValidation.initialize.call(this);
+
+        geographyChannel.subscribe('gotContinents', this.setCountries, this);
+
+        this.fetch();
+    } // CarrierSelectCountries
+
+    withGroupValidation.call(CarrierSelectCountries.prototype);
+
+    extend(CarrierSelectCountries.prototype, {
+        setCountries: function setCountries(regionData) {
+            var continent = regionData.continents.filter(function (c) {
+                return c.v === regionData.selectedContinent;
+            });
+
+            if ((!this.userRegions() || !this.userRegions().length) && regionData.selectedNation) {
+                this.userRegions([regionData.selectedNation]);
+            }
+            if (continent.length) this.countries(continent[0].children);
+        },
+        fetch: function fetch() {
+            return geographyStore.getContinentsAsync();
+        }
+    });
+
+    function CarrierSelectInternational() {
+        this.parent = this.util.container.context;
+
+        this.regions = ko.observableArray();
+        this.onlyBetweenCountries = ko.observable();
+        this.userRegions = this.parent.user().regions;
+
+        this.optionsText = 'l';
+        this.optionsValue = 'v';
+
+        withGroupValidation.initialize.call(this);
+
+        geographyChannel.subscribe('gotContinents', this.setContinents, this);
+
+        this.fetch();
+    }
+
+    withGroupValidation.call(CarrierSelectInternational.prototype);
+
+    extend(CarrierSelectInternational.prototype, {
+        setContinents: function setContinents(regionData) {
+            if ((!this.userRegions() || !this.userRegions().length) && regionData.selectedContinent) {
+                this.userRegions([regionData.selectedContinent]);
+            }
+            this.regions(regionData.continents);
+        },
+        fetch: function fetch() {
+            return geographyStore.getContinentsAsync();
+        }
+    });
+
+    function CarrierAccountInformation() {
+        var _this = this;
+
+        this.parent = this.util.container.context;
+
+        this.username = ko.referencedObservable('username', this.parent.user);
+        this.password = ko.referencedObservable('password', this.parent.user);
+        this.passwordVisible = ko.observable(false);
+        this.togglePasswordText = ko.computed(function () {
+            return _this.passwordVisible() ? uship.loc('mainHide') : uship.loc('fsShow');
+        });
+
+        this.togglePasswordVisibility = function () {
+            this.passwordVisible(!this.passwordVisible());
+        };
+
+        withContinueButton.call(this, uship.loc('headerJoinuShip'));
+
+        withGroupValidation.initialize.call(this);
+    }
+
+    withGroupValidation.call(CarrierAccountInformation.prototype);
+    asUserCreator.call(CarrierAccountInformation.prototype);
+
+    extend(CarrierAccountInformation.prototype, {
+        validateUserProfile: function validateUserProfile() {
+            if (this.util.isLoading()) return;
+            var self = this;
+
+            this.util.isLoading(true);
+            var validationPromise = this.validate();
+
+            validationPromise.then(function () {
+                return self.createUserAccount().then(self.userCreated.bind(self));
+            });
+
+            validationPromise.fail(function () {
+                self.util.isLoading(false);
+            });
+        },
+        userCreated: function userCreated(data) {
+            this.logUserCreated(data);
+
+            if (typeof optimizely != 'undefined') {
+                window.optimizely = window.optimizely || [];
+                window.optimizely.push(['trackEvent', 'TSPRegistered']);
+            }
+
+            uship.helpers.alert.success('User Created!');
+
+            //Wait until after the conversion tracking loads to redirect
+            uship.messageBus.publish({
+                channel: 'registration',
+                topic: 'userCreated',
+                data: {
+                    redirectUrl: data.redirectUrl
+                }
+            });
+        }
+    }); //CarrierAccountInformation
+
+
+    function BrokerIdentityInformation() {
+        this.parent = this.util.container.context;
+
+        this.siteId = ko.referencedObservable('siteId', this.parent.user);
+        this.identityType = ko.referencedObservable('identityType', this.parent.user);
+        this.entityType = ko.referencedObservable('entityType', this.parent.user);
+        this.firstName = ko.referencedObservable('firstName', this.parent.user);
+        this.lastName = ko.referencedObservable('lastName', this.parent.user);
+        this.emailAddress = ko.referencedObservable('emailAddress', this.parent.user);
+        this.homePhone = ko.referencedObservable('homePhone', this.parent.user);
+        this.mobilePhone = ko.referencedObservable('mobilePhone', this.parent.user); // only used if primary is not a mobile
+        this.headerText = ko.computed(headerText, this);
+        this.doesAgree = ko.referencedObservable('doesAgree', this.parent.user);
+
+        this.brokerMcNumber = ko.referencedObservable('brokerMcNumber', this.parent.user);
+        this.ffNumber = ko.referencedObservable('ffNumber', this.parent.user);
+        this.dotNumber = ko.referencedObservable('dotNumber', this.parent.user);
+        this.mcNumber = ko.referencedObservable('mcNumber', this.parent.user);
+
+        this.isPrimaryMobile = ko.observable(true);
+
+        withContinueButton.call(this, uship.loc('MainContinue'));
+        withGroupValidation.initialize.call(this);
+
+        this.ffNumber.subscribe(function (val) {
+            this.checkOperatingNumber('ff', val);
+        }, this);
+
+        this.mcNumber.subscribe(function (val) {
+            this.checkOperatingNumber('mc', val);
+        }, this);
+
+        this.dotNumber.subscribe(function (val) {
+            this.checkOperatingNumber('dot', val);
+        }, this);
+
+        // If the user switches between broker types, clear operating number
+        // information for mutually exclusive operating number types
+        this.entityType.subscribe(function (val) {
+            if (val !== 'brokerAndCarrier') {
+                this.failedCheck(this.getOperatingNumber('mc'));
+                this.failedCheck(this.getOperatingNumber('dot'));
+            }
+
+            if (val !== 'freightForwarder') {
+                this.failedCheck(this.getOperatingNumber('ff'));
+            }
+        }, this);
+
+        this.entityTypes = [{ label: uship.loc('Broker'), value: 'broker' }, { label: uship.loc('db_SafterSys_Registrant'), value: 'freightForwarder' }, { label: uship.loc('db_SafterSys_Freight_Forwarder'), value: 'brokerAgent' }, { label: uship.loc('BrokerAndCarrier'), value: 'brokerAndCarrier' }, { label: uship.loc('ThreePL'), value: 'threePL' }];
+
+        var step = this;
+
+        this.showBrokerProfileFields = ko.computed(function () {
+            return !!step.entityType();
+        });
+    }
+
+    asTypeSelector.call(BrokerIdentityInformation.prototype);
+    withGroupValidation.call(BrokerIdentityInformation.prototype);
+    asOperatingNumberValidator.call(BrokerIdentityInformation.prototype);
+    asFacebookConnect.call(BrokerIdentityInformation.prototype);
+
+    extend(BrokerIdentityInformation.prototype, {
+        chooseBrokerType: function chooseBrokerType() {
+            return;
+        },
+        move: function move() {
+            this.movePrevious().move();
+        },
+        choosePrimaryIsMobile: function choosePrimaryIsMobile() {
+            this.isPrimaryMobile(true);
+        },
+        choosePrimaryIsNotMobile: function choosePrimaryIsNotMobile() {
+            this.isPrimaryMobile(false);
+        },
+        showBasicInfoFields: function showBasicInfoFields() {
+            return this.identityType() === 'email' || this.identityType() === 'facebook' && !this.parent.isFacebookConnected();
+        },
+        afterRenderBroker: function afterRenderBroker() {
+            uship.unfold.init();
+        }
+    }); //BrokerIdentityInformation
+
+    function BrokerSelectRegions() {
+        CarrierSelectRegions.call(this);
+    }
+
+    BrokerSelectRegions.prototype = Object.create(CarrierSelectRegions.prototype);
+
+    extend(BrokerSelectRegions.prototype, {
+        beforeMove: function beforeMove() {
+            var filter = this.selectedRegionFilter();
+
+            switch (filter) {
+                case 'states':
+                case 'provinces':
+                    return 'brokerSelectStates';
+                case 'countries':
+                    return 'brokerSelectCountries';
+                case 'international':
+                    return 'brokerSelectInternational';
+                case 'local':
+                    //this.parent.user().regions(['local']);
+                    return 'brokerAccountInformation';
+                default:
+                    {
+                        var userRegions = filter && filter.indexOf(',') > -1 ? filter.split(',') : filter;
+                        this.parent.user().regions(userRegions);
+                        return 'brokerAccountInformation';
+                    }
+            }
+        }
+    });
+
+    registration.extend({
+        asTypeSelector: asTypeSelector,
+        BeginRegistration: BeginRegistration,
+        SelectIdentityProvider: SelectIdentityProvider,
+        ShipperProfileViewModel: ShipperProfileViewModel,
+        CarrierIdentityInformation: CarrierIdentityInformation,
+        CarrierCompanyInformation: CarrierCompanyInformation,
+        CarrierTrailerTypes: CarrierTrailerTypes,
+        CarrierSelectCommodities: CarrierSelectCommodities,
+        CarrierSelectRegions: CarrierSelectRegions,
+        CarrierSelectStates: CarrierSelectStates,
+        CarrierSelectCountries: CarrierSelectCountries,
+        CarrierSelectInternational: CarrierSelectInternational,
+        CarrierAccountInformation: CarrierAccountInformation,
+        BrokerIdentityInformation: BrokerIdentityInformation,
+        BrokerSelectRegions: BrokerSelectRegions
+    });
+})(window);

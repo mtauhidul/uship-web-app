@@ -1,0 +1,24 @@
+'use strict';
+
+(function (_ref) {
+    var uship = _ref.uship;
+
+    var Globalize = uship.namespace('Globalize');
+    var localizationData = uship.namespace('bootstrap.globalization');
+
+    function init() {
+        Globalize.addCultureInfo(localizationData.UserCulture, {
+            messages: localizationData.Messages,
+            isMetric: localizationData.IsMetric,
+            useMiles: localizationData.UsesMiles
+        });
+
+        Globalize.culture(localizationData.UserCulture);
+        Globalize.culture().numberFormat.currency.symbol = localizationData.CurrencySymbol;
+        Globalize.site = localizationData.UserSite;
+    }
+
+    Globalize.sites = { UnitedStates: 'UnitedStates', Canada: 'Canada', UnitedKingdom: 'UnitedKingdom', EuropeanUnion: 'EuropeanUnion', Australia: 'Australia', India: 'India', GlobalSite: 'GlobalSite', Germany: 'Germany', France: 'France', Netherlands: 'Netherlands', Spain: 'Spain', Ireland: 'Ireland', NewZealand: 'NewZealand', Mexico: 'Mexico', SouthAfrica: 'SouthAfrica', Philippines: 'Philippines', Singapore: 'Singapore', Luxembourg: 'Luxembourg', Austria: 'Austria', Portugal: 'Portugal', Brazil: 'Brazil', Argentina: 'Argentina', Chile: 'Chile', Turkey: 'Turkey', Italy: 'Italy', Peru: 'Peru', Colombia: 'Colombia', Venezuela: 'Venezuela' };
+    init();
+    Globalize.init = init;
+})(window);

@@ -1,0 +1,34 @@
+'use strict';
+
+(function (_ref) {
+    var uship = _ref.uship;
+
+
+    function userCreatedRedirectHandler(data) {
+        window.location = data.redirectUrl;
+    }
+
+    function existingAccountLinkedRedirectHandler(data) {
+        window.location = data.redirectUrl.replace('&rs=1', '');
+    }
+
+    uship.messageBus.subscribe({
+        channel: 'registration',
+        topic: 'userCreated',
+        handler: userCreatedRedirectHandler
+    });
+
+    uship.messageBus.subscribe({
+        channel: 'registration',
+        topic: 'existingAccountLinked',
+        handler: existingAccountLinkedRedirectHandler
+    });
+
+    uship.messageBus.subscribe({
+        channel: 'registration',
+        topic: 'stepEntered',
+        handler: function handler() {
+            window.scrollTo(0, 0);
+        }
+    });
+})(window);

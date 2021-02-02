@@ -1,0 +1,77 @@
+'use strict';
+
+// eslint-disable-next-line no-extra-semi
+;(function (root, clientErrorLogger) {
+
+    var errSeverity = {
+        WARNING: 'warning',
+        ERROR: 'error',
+        INFO: 'info'
+    };
+
+    var msgSeverity = {
+        DEBUG: 'debug',
+        INFO: 'info',
+        WARN: 'warn',
+        ERROR: 'error'
+    };
+
+    root.logging = {
+
+        endpoints: {
+            messages: '/mvc/utilities/logging/message',
+            pageviews: '/mvc/utilities/logging/pageview'
+        },
+
+        errSeverity: errSeverity,
+        msgSeverity: msgSeverity,
+
+        queue: [],
+
+        err: function err(errOrErrName, errNameOrErrMessage, metaData) {
+            var severity = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : errSeverity.ERROR;
+
+
+            // The first argment determines whether this is a custom notification
+            // or an actual Error object
+            if (typeof errOrErrName === 'string') {
+                clientErrorLogger.notify(errOrErrName, errNameOrErrMessage, metaData, severity);
+            } else {
+                clientErrorLogger.notifyException(errOrErrName, errNameOrErrMessage, metaData, severity);
+            }
+        },
+        softErr: function softErr(msg) {
+            var scriptName = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'Unknown';
+
+            root.logging.err('SoftError', scriptName + ': ' + msg, null, errSeverity.WARNING);
+        },
+        logMessage: function logMessage(messageData) {
+            root.logging.logInternally(root.logging.endpoints.messages, messageData);
+        },
+        pageView: function pageView(pageViewData) {
+            root.logging.logInternally(root.logging.endpoints.pageviews, pageViewData);
+        },
+        logInternally: function logInternally(endpoint, message) {
+            if (!root.jQuery) {
+                root.logging.queue.push(message);
+                return;
+            }
+
+            root.jQuery.ajax({
+                url: endpoint,
+                type: 'POST',
+                data: JSON.stringify(message),
+                contentType: 'application/json'
+            });
+        },
+        logQueue: function logQueue() {
+            var queue = root.logging.queue;
+            var len = queue.length;
+            for (var i = 0; i < len; i++) {
+                root.logging.logInternally(queue[i]);
+            }
+
+            root.logging.queue = [];
+        }
+    };
+})(window, window.Bugsnag);

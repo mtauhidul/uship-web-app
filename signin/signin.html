@@ -1,0 +1,709 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<!-- saved from url=(0688)https://login.uship.com/oauth2/default/v1/authorize?client_id=0oaf080j7d3LzqCiF4x6&response_type=code&scope=openid+offline_access&redirect_uri=https:%2f%2fwww.uship.com%2fmvc%2fauthorization-code%2fcallback&state=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJsb2NhbGUiOiJlbi1HQiIsImV4cCI6MTYxMjI2Nzk2MCwiaXNzIjoidXNoaXAuY29tIiwiYXVkIjoidXNoaXAuY29tIn0.OUctmQwso-61_q68n8uo7tGEMdtM-uqWRJ0PieZZQSOCXBUAg375nkTtrKDZy9eHvIUcSMsxcEm9AhN1DcfFX0Xqd-l-guMFzWDEOGf4uxlEaOsJk5tFhtRjFWetoYA4GfWsVR-bnyvj34gifTTs6o9btoLklUNEXlJfnvNMVjzv8_UGem5TU939w04Gf0Q91gbYn_bTp9us2auHUsy68uqEM_OIWyC-M5lLoN60Sn340pgj0Q3p27jY04T78SMvGJYtejucbMF2HeoTcnlvoB4AoaSr5qRQ_AdAOsgaA8BDSP-umV3GElwS13_IdgiP96I-AK8ilOmIN7hM5a4yoQ -->
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <script type="text/javascript">
+    (function () {
+      var container = document.querySelector('#_tcx-l0g6dky7ofj');
+      if (!container) {
+        return;
+      }
+
+      function addToContainer(url, text) {
+        const wrapper = document.createElement('div');
+        wrapper.setAttribute('data-tcx-url', url);
+        wrapper.innerText = text;
+        container.appendChild(wrapper);
+      }
+
+      const fetch = window.fetch
+      window.fetch = function () {
+        return Promise.resolve(fetch.apply(window, arguments))
+          .then(async response => {
+            if (response.ok) {
+              try {
+                const clone = response.clone();
+                const json = await clone.json();
+                addToContainer(clone.url, JSON.stringify(json));
+              } catch (err) {}
+            }
+            return response;
+          });
+      };
+
+      var XHR = XMLHttpRequest.prototype;
+      var send = XHR.send;
+      var open = XHR.open;
+      XHR.open = function (method, url) {
+        this.url = url;
+        return open.apply(this, arguments);
+      };
+      XHR.send = function () {
+        this.addEventListener('load', function () {
+          try {
+            const response = this.response;
+            if (response && response.length) {
+              const firstChar = response[0];
+              if (firstChar === '[' || firstChar === '{') {
+                addToContainer(this.url, response);
+              }
+            }
+          } catch (err) {
+            // No-op.
+          }
+        });
+        return send.apply(this, arguments);
+      };
+    })();
+  </script>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="none">
+
+  <title data-uship-i18n="uship.title">Sign In | uShip</title>
+  <!-- Core widget js and css -->
+  <script type="text/javascript" src="./signin_files/okta-sign-in.min.js.download"></script>
+  <link rel="stylesheet" type="text/css" href="./signin_files/okta-sign-in.min.css">
+
+  <!-- Customizable css theme options. Link your own stylesheet or override styles inline. -->
+  <link rel="stylesheet" type="text/css"
+    href="https://login.uship.com/oauth2/default/v1/authorize?client_id=0oaf080j7d3LzqCiF4x6&amp;response_type=code&amp;scope=openid+offline_access&amp;redirect_uri=https:%2f%2fwww.uship.com%2fmvc%2fauthorization-code%2fcallback&amp;state=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJsb2NhbGUiOiJlbi1HQiIsImV4cCI6MTYxMjI2Nzk2MCwiaXNzIjoidXNoaXAuY29tIiwiYXVkIjoidXNoaXAuY29tIn0.OUctmQwso-61_q68n8uo7tGEMdtM-uqWRJ0PieZZQSOCXBUAg375nkTtrKDZy9eHvIUcSMsxcEm9AhN1DcfFX0Xqd-l-guMFzWDEOGf4uxlEaOsJk5tFhtRjFWetoYA4GfWsVR-bnyvj34gifTTs6o9btoLklUNEXlJfnvNMVjzv8_UGem5TU939w04Gf0Q91gbYn_bTp9us2auHUsy68uqEM_OIWyC-M5lLoN60Sn340pgj0Q3p27jY04T78SMvGJYtejucbMF2HeoTcnlvoB4AoaSr5qRQ_AdAOsgaA8BDSP-umV3GElwS13_IdgiP96I-AK8ilOmIN7hM5a4yoQ">
+
+  <!-- styles for custom sign in -->
+  <link rel="stylesheet" type="text/css" href="./signin_files/custom-signin.bb8f4ce4363dd17160adb27f2ab5f478.css">
+
+  <script>
+    (function (s, t, a, n) {
+      s[t] || (s[t] = a, n = s[a] = function () {
+          n.q.push(arguments)
+        },
+        n.q = [], n.v = 2, n.l = 1 * new Date)
+    })(window, "InstanaEumObject", "ineum");
+
+    ineum('reportingUrl', 'https://eum-red-saas.instana.io');
+    ineum('key', 'o3_Qd6QpRFCbYb1I_oI1JQ');
+    ineum('trackSessions');
+  </script>
+  <script defer="" crossorigin="anonymous" src="./signin_files/eum.min.js.download"></script>
+
+  <link rel="icon" type="image/png"
+    href="https://t.ushipcdn.com/dist/images/favicons/uship-favicon-32x32.6c807c55c5.png" sizes="32x32">
+  <link rel="icon" type="image/png"
+    href="https://t.ushipcdn.com/dist/images/favicons/uship-favicon-16x16.d23c6e0075.png" sizes="16x16">
+  <link rel="shortcut icon" href="https://t.ushipcdn.com/dist/images/favicons/uship-favicon.b36a7c4f1a.ico">
+  <link rel="stylesheet" href="./signin_files/index.css">
+  <link rel="stylesheet" href="./signin_files/okta-widget-e7fdf9da57.css">
+
+  <style>
+    #okta-sign-in .link.help {
+      display: none;
+    }
+  </style>
+  <script src="./signin_files/initLoginPage.pack.bb0aa11a63d230e8b135b92ba459ee7e.js.download"></script>
+</head>
+
+<body data-new-gr-c-s-check-loaded="14.993.0" data-gr-ext-installed="">
+  <div class="pageLayout">
+    <div id="headerRoot">
+      <header style="height: 5rem; position: relative; z-index: 500;">
+        <nav
+          style="background-color: #ffffff; display: flex; flex-wrap: wrap; position: fixed; width: 100%; height: inherit;">
+          <div
+            style="position: relative; border-bottom: 2px solid #dddddd; box-shadow: none; display: flex; align-items: stretch; width: 100%;">
+            <a id="logoNav" aria-label="uShip Home" href="https://www.uship.com/"
+              style="background: unset; height: 5rem; padding: 0 1.875rem; display: flex; justify-content: center; align-items: center;">
+              <svg viewBox="0 0 533.4 269.7" style="width: 5rem; height: 2.5rem; margin-bottom: 0.25rem; fill: #0083bb">
+                <g>
+                  <path
+                    d="M 315.4 149.9 h -39.9 v -34.7 h -35.6 v 115.5 h 35.6 v -45.2 h 39.9 v 45.2 H 351 V 115 h -35.6 z">
+                  </path>
+                  <path
+                    d="M 253.7 55 l 30.9 11.2 L 253.8 0.6 l -65.5 30.7 l 28.2 10.2 l -0.2 0.5 c -2.2 5.6 -4.1 9.8 -4.9 10.7 c -1.1 1.3 -2.6 3.1 -11.2 3.7 c -2.1 0.1 -3.8 0.2 -5.5 0.2 h -3.8 c -2.9 0 -6.2 0.2 -12.5 1.1 c -12.2 1.8 -21.5 5.9 -29.9 13.2 c -7.1 6.1 -14.1 14 -17.8 30.4 c -2.6 11.6 -0.9 23.1 5.1 34.2 c 3.8 6.9 12.3 17.7 31.8 29.6 c 8.8 5.3 14.8 9.5 17.7 13.6 c 1.9 2.8 2.7 5.9 2.2 8.4 c -0.2 1.1 -0.8 2.5 -2.2 3.5 c -2.2 1.5 -6.6 2.7 -11.3 3.9 l -0.3 0.1 c -7.1 2 -15.9 4.4 -23 9 c -10.8 7 -14 12.5 -23.4 54.2 l -0.6 2.5 l 35.4 10.1 l 0.7 -2.7 c 3.3 -13.5 6 -21.4 7.9 -23.5 c 2.1 -2.4 3.3 -3.4 8.7 -5.1 c 1.1 -0.4 2.2 -0.7 3.3 -1 l 1.4 -0.4 c 6.8 -2 13.3 -3.9 22.9 -8.7 c 13.4 -6.5 22.9 -22.7 24.7 -42.1 c 2 -20.6 -5.5 -31.8 -13.8 -40.9 c -5.7 -6.2 -30.7 -22.3 -34.3 -24.4 c -4.4 -2.6 -9.6 -7 -9.2 -13.4 c 0.3 -5 5.7 -7.2 7.1 -7.5 c 1.1 -0.2 2.9 -0.4 5.9 -0.7 h 0.3 c 4.1 -0.4 10.2 -1 18.9 -2.2 c 16.7 -2.5 25.7 -10.5 28.8 -13.9 c 10.6 -11.5 15.9 -22.7 18.1 -28.4 l 0.2 -0.5 z m 108.6 60.1 h 35.6 v 115.7 h -35.6 z m 17.9 -46.8 c -11.7 0 -20.8 9.1 -20.8 20.8 c 0 11.5 9.3 20.8 20.8 20.8 S 401 100.6 401 89.1 s -9.3 -20.8 -20.8 -20.8 z m 87.6 50.1 c -7.8 0 -15.2 1.5 -22.1 4.6 l -0.7 0.3 v -8.1 h -36.4 v 140.1 H 445 v -29 l 0.7 0.3 c 6.8 3 14.3 4.6 22.1 4.6 c 31.2 0 56.5 -25.3 56.5 -56.5 c 0 -31.1 -25.4 -56.3 -56.5 -56.3 z m 0 79.1 c -12.4 0 -22.8 -10.4 -22.8 -22.8 c 0 -12.1 10.7 -22.8 22.8 -22.8 c 12.1 0 22.8 10.6 22.8 22.8 c 0 12.1 -10.7 22.8 -22.8 22.8 z M 84.5 171.6 c 0 13.1 -11.2 24.1 -24.4 24.1 c -13.3 0 -24.5 -11 -24.5 -24.1 v -56.3 H 0 V 171.6 c 0 32.7 26.9 59.2 60 59.2 s 60 -26.6 60 -59.2 v -56.3 H 84.5 V 171.6 z">
+                  </path>
+                </g>
+              </svg>
+            </a>
+          </div>
+        </nav>
+      </header>
+    </div>
+
+    <div class="login-bg-image" style="background-image: none"></div>
+    <div id="okta-login-container">
+      <main data-se="auth-container" tabindex="-1" id="okta-sign-in" class="auth-container main-container no-beacon">
+        <div class="okta-sign-in-header auth-header"><img src="./signin_files/fs02ixkfpF0DNibyO4x6"
+            class="auth-org-logo" alt="ushipapp logo logo" aria-label="ushipapp logo logo">
+          <div data-type="beacon-container" class="beacon-container" style="transform: scale(0, 0); text-indent: 0px;">
+          </div>
+        </div>
+        <div class="auth-content">
+          <div class="auth-content-inner">
+            <div class="primary-auth">
+              <form novalidate="novalidate" method="POST" action="https://login.uship.com/oauth2/default/v1/authorize"
+                data-se="o-form" slot="content" id="form2" class="primary-auth-form o-form o-form-edit-mode">
+                <div data-se="o-form-content" class="o-form-content o-form-theme clearfix">
+                  <h2 data-se="o-form-head" class="okta-form-title o-form-head">Sign In</h2>
+                  <div class="o-form-error-container" data-se="o-form-error-container"></div>
+                  <div class="register-section">Don't have an account?<a class="signin-registerlink link"
+                      href="https://www.uship.com/register/">Join uShip</a></div>
+                  <div class="o-form-fieldset-container" data-se="o-form-fieldset-container">
+                    <div data-se="o-form-fieldset" class="o-form-fieldset o-form-label-top margin-btm-5">
+                      <div data-se="o-form-label" class="okta-form-label o-form-label"><label
+                          for="okta-signin-username">Email&nbsp;</label></div>
+                      <div data-se="o-form-input-container" class="o-form-input"><span data-se="o-form-input-username"
+                          class="o-form-input-name-username o-form-control okta-form-input-field input-fix"><input
+                            type="text" placeholder="" name="username" id="okta-signin-username"
+                            value="peterlee101820@gmail.com" aria-label="" autocomplete="off" required=""></span></div>
+                    </div>
+                    <div data-se="o-form-fieldset" class="o-form-fieldset o-form-label-top margin-btm-30">
+                      <div data-se="o-form-label" class="okta-form-label o-form-label"><label
+                          for="okta-signin-password">Password&nbsp;</label></div>
+                      <div data-se="o-form-input-container" class="o-form-input"><span data-se="o-form-input-password"
+                          class="o-form-input-name-password o-form-control okta-form-input-field input-fix"><input
+                            type="password" placeholder="" name="password" id="okta-signin-password" value=""
+                            aria-label="" autocomplete="off" class="password-with-toggle" required=""><span
+                            class="password-toggle"><span class="eyeicon visibility-16 button-show"></span><span
+                              class="eyeicon visibility-off-16 button-hide"></span></span></span></div>
+                    </div>
+                    <div data-se="o-form-fieldset" class="o-form-fieldset o-form-label-top margin-btm-0">
+                      <div data-se="o-form-input-container" class="o-form-input"><span data-se="o-form-input-remember"
+                          class="o-form-input-name-remember">
+                          <div class="custom-checkbox"><input type="checkbox" name="remember" id="input8"><label
+                              for="input8" data-se-for-name="remember" class="checked">Remember me</label></div>
+                        </span></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="o-form-button-bar"><input class="button button-primary" type="submit" value="Sign In"
+                    id="okta-signin-submit" data-type="save"></div>
+              </form>
+              <div class="auth-footer"><a
+                  href="https://login.uship.com/oauth2/default/v1/authorize?client_id=0oaf080j7d3LzqCiF4x6&amp;response_type=code&amp;scope=openid+offline_access&amp;redirect_uri=https:%2f%2fwww.uship.com%2fmvc%2fauthorization-code%2fcallback&amp;state=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJsb2NhbGUiOiJlbi1HQiIsImV4cCI6MTYxMjI2Nzk2MCwiaXNzIjoidXNoaXAuY29tIiwiYXVkIjoidXNoaXAuY29tIn0.OUctmQwso-61_q68n8uo7tGEMdtM-uqWRJ0PieZZQSOCXBUAg375nkTtrKDZy9eHvIUcSMsxcEm9AhN1DcfFX0Xqd-l-guMFzWDEOGf4uxlEaOsJk5tFhtRjFWetoYA4GfWsVR-bnyvj34gifTTs6o9btoLklUNEXlJfnvNMVjzv8_UGem5TU939w04Gf0Q91gbYn_bTp9us2auHUsy68uqEM_OIWyC-M5lLoN60Sn340pgj0Q3p27jY04T78SMvGJYtejucbMF2HeoTcnlvoB4AoaSr5qRQ_AdAOsgaA8BDSP-umV3GElwS13_IdgiP96I-AK8ilOmIN7hM5a4yoQ#"
+                  data-se="needhelp" aria-expanded="false" aria-controls="help-links-container"
+                  class="link help js-help">Need help signing in?</a>
+                <ul class="help-links js-help-links" id="help-links-container" style="">
+                  <li><a
+                      href="https://login.uship.com/oauth2/default/v1/authorize?client_id=0oaf080j7d3LzqCiF4x6&amp;response_type=code&amp;scope=openid+offline_access&amp;redirect_uri=https:%2f%2fwww.uship.com%2fmvc%2fauthorization-code%2fcallback&amp;state=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJsb2NhbGUiOiJlbi1HQiIsImV4cCI6MTYxMjI2Nzk2MCwiaXNzIjoidXNoaXAuY29tIiwiYXVkIjoidXNoaXAuY29tIn0.OUctmQwso-61_q68n8uo7tGEMdtM-uqWRJ0PieZZQSOCXBUAg375nkTtrKDZy9eHvIUcSMsxcEm9AhN1DcfFX0Xqd-l-guMFzWDEOGf4uxlEaOsJk5tFhtRjFWetoYA4GfWsVR-bnyvj34gifTTs6o9btoLklUNEXlJfnvNMVjzv8_UGem5TU939w04Gf0Q91gbYn_bTp9us2auHUsy68uqEM_OIWyC-M5lLoN60Sn340pgj0Q3p27jY04T78SMvGJYtejucbMF2HeoTcnlvoB4AoaSr5qRQ_AdAOsgaA8BDSP-umV3GElwS13_IdgiP96I-AK8ilOmIN7hM5a4yoQ#"
+                      data-se="forgot-password" class="link js-forgot-password">Forgot password?</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="footerRoot">
+      <footer style="background-color: #ffffff; display: flex; flex-direction: column;">
+        <div
+          style="display: flex; flex-wrap: nowrap; border-top: 1px solid #dddddd; padding: 1.25rem 1.875rem; align-items: center;">
+          <div>
+            <p data-uship-i18n="uship.footer.copyright"
+              style="font-size: 0.875rem; color: #999999; margin-block-start: 0; margin-block-end: 0; margin: 0;">
+              Copyright © 2020, uShip Inc. and its licensors. All rights reserved.</p>
+            <div style="display: flex; flex-wrap: wrap; align-items: center;">
+              <style>
+                .footer-menuItem--inline.blue {
+                  color: #02aaf3;
+                  margin-top: 0.4375rem;
+                  margin-right: 1.875rem;
+                  display: flex;
+                  color: #02aaf3;
+                  font-size: 0.875rem;
+                  text-decoration: none;
+                  transition: color 0.15s ease-in-out;
+                }
+              </style>
+              <a class="footer-menuItem--inline blue help-link"
+                href="https://help.uship.com/hc/articles/360008771433-user-agreement/"><span
+                  data-uship-i18n="uship.footer.useragreement">uShip User Agreement</span></a>
+              <a class="footer-menuItem--inline blue help-link"
+                href="https://help.uship.com/hc/articles/360009056894-privacy-policy/"><span
+                  data-uship-i18n="uship.footer.privacypolicy">Privacy Policy</span></a>
+              <a class="footer-menuItem--inline blue" href="https://www.uship.com/sitemap.aspx"><span
+                  data-uship-i18n="uship.footer.sitemap">Site Map</span></a>
+              <a class="footer-menuItem--inline blue help-link"
+                href="https://help.uship.com/hc/articles/360003016434"><span
+                  data-uship-i18n="uship.footer.cookiepolicy">Cookie Policy</span></a>
+              <a class="footer-menuItem--inline blue help-link" href="https://help.uship.com/hc/en-us"><span
+                  data-uship-i18n="uship.footer.help">Help</span></a>
+            </div>
+          </div>
+          <div></div>
+        </div>
+      </footer>
+    </div>
+  </div> <!-- pageLayout -->
+
+  <!--
+        "OktaUtil" defines a global OktaUtil object
+        that contains methods used to complete the Okta login flow.
+     -->
+
+
+  <script type="text/javascript">
+    var signInSuccessCallBackFunction;
+    var oktaData = {
+      "redirectUri": "https\x3A\x2F\x2Flogin.uship.com\x2Foauth2\x2Fv1\x2Fauthorize\x2Fredirect\x3Fokta_key\x3DZtqK5MWbbkht76SUWpnvMLxGnkxZDX6yPFGDYgJNQMg",
+      "isMobileSso": false,
+      "fromUri": "\x2Foauth2\x2Fv1\x2Fauthorize\x2Fredirect\x3Fokta_key\x3DZtqK5MWbbkht76SUWpnvMLxGnkxZDX6yPFGDYgJNQMg",
+      "isMobileClientLogin": false,
+      "requestContext": {
+        "target": {
+          "clientId": "0oaf080j7d3LzqCiF4x6",
+          "name": "oidc_client",
+          "links": {},
+          "label": "uShip Web App",
+          "type": {}
+        },
+        "authentication": {
+          "request": {
+            "scope": "openid offline_access",
+            "response_type": "code",
+            "state": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJsb2NhbGUiOiJlbi1HQiIsImV4cCI6MTYxMjI2Nzk2MCwiaXNzIjoidXNoaXAuY29tIiwiYXVkIjoidXNoaXAuY29tIn0.OUctmQwso\x2D61_q68n8uo7tGEMdtM\x2DuqWRJ0PieZZQSOCXBUAg375nkTtrKDZy9eHvIUcSMsxcEm9AhN1DcfFX0Xqd\x2Dl\x2DguMFzWDEOGf4uxlEaOsJk5tFhtRjFWetoYA4GfWsVR\x2Dbnyvj34gifTTs6o9btoLklUNEXlJfnvNMVjzv8_UGem5TU939w04Gf0Q91gbYn_bTp9us2auHUsy68uqEM_OIWyC\x2DM5lLoN60Sn340pgj0Q3p27jY04T78SMvGJYtejucbMF2HeoTcnlvoB4AoaSr5qRQ_AdAOsgaA8BDSP\x2DumV3GElwS13_IdgiP96I\x2DAK8ilOmIN7hM5a4yoQ",
+            "redirect_uri": "https://www.uship.com/mvc/authorization-code/callback",
+            "response_mode": "query"
+          },
+          "protocol": {},
+          "amr": [],
+          "client": {
+            "name": "uShip Web App",
+            "links": {},
+            "id": "0oaf080j7d3LzqCiF4x6"
+          },
+          "issuer": {
+            "name": "default",
+            "id": "aus14zhowCRRBWFTl4x6",
+            "uri": "https://login.uship.com/oauth2/default"
+          }
+        }
+      },
+      "signIn": {
+        "logoText": "ushipapp\x20logo",
+        "language": "en",
+        "consent": {
+          "cancel": function () {
+            window.location.href =
+              'https\x3A\x2F\x2Flogin.uship.com\x2Flogin\x2Fstep\x2Dup\x2Fredirect\x3FstateToken\x3D00SmmASl8Tre8tim2ESSTSMdz0krLV5DmFGJA092uQ';
+          }
+        },
+        "i18n": {
+          "en": {
+            "mfa.challenge.password.placeholder": "Password",
+            "help": "Help",
+            "password.forgot.email.or.username.tooltip": "Email\x20or\x20Username",
+            "needhelp": "Need\x20help\x20signing\x20in\x3F",
+            "primaryauth.username.placeholder": "Username",
+            "password.forgot.email.or.username.placeholder": "Email\x20or\x20Username",
+            "account.unlock.email.or.username.tooltip": "Email\x20or\x20Username",
+            "unlockaccount": "Unlock\x20account\x3F",
+            "account.unlock.email.or.username.placeholder": "Email\x20or\x20Username",
+            "primaryauth.password.placeholder": "Password",
+            "primaryauth.title": "Sign\x20In",
+            "forgotpassword": "Forgot\x20password\x3F"
+          }
+        },
+        "relayState": "\x2Foauth2\x2Fv1\x2Fauthorize\x2Fredirect\x3Fokta_key\x3DZtqK5MWbbkht76SUWpnvMLxGnkxZDX6yPFGDYgJNQMg",
+        "features": {
+          "emailRecovery": true,
+          "restrictRedirectToForeground": true,
+          "deviceFingerprinting": true,
+          "consent": true,
+          "useDeviceFingerprintForSecurityImage": false,
+          "customExpiredPassword": true,
+          "router": true,
+          "showPasswordToggleOnSignInPage": false,
+          "securityImage": true,
+          "autoPush": true,
+          "smsRecovery": false,
+          "idpDiscovery": false,
+          "selfServiceUnlock": true,
+          "webauthn": true,
+          "showPasswordRequirementsAsHtmlList": true,
+          "registration": false,
+          "rememberMe": true,
+          "callRecovery": false,
+          "multiOptionalFactorEnroll": true
+        },
+        "baseUrl": "https\x3A\x2F\x2Flogin.uship.com",
+        "assets": {
+          "baseUrl": "https\x3A\x2F\x2Fok11static.oktacdn.com\x2Fassets\x2Fjs\x2Fsdk\x2Fokta\x2Dsignin\x2Dwidget\x2F5.2.1"
+        },
+        "customButtons": [],
+        "idpDiscovery": {
+          "requestContext": "\x2Foauth2\x2Fv1\x2Fauthorize\x2Fredirect\x3Fokta_key\x3DZtqK5MWbbkht76SUWpnvMLxGnkxZDX6yPFGDYgJNQMg"
+        },
+        "logo": "https\x3A\x2F\x2Fok11static.oktacdn.com\x2Ffs\x2Fbco\x2F1\x2Ffs02ixkfpF0DNibyO4x6",
+        "stateToken": "00SmmASl8Tre8tim2ESSTSMdz0krLV5DmFGJA092uQ",
+        "helpLinks": {
+          "help": "",
+          "forgotPassword": "https\x3A\x2F\x2Fwww.uship.com\x2Fusers\x2Fforgotpassword",
+          "unlock": "",
+          "custom": []
+        },
+        "piv": {}
+      },
+      "accountChooserDiscoveryUrl": "https\x3A\x2F\x2Flogin.okta.com\x2Fdiscovery\x2Fiframe.html",
+      "preventBrowserFromSavingOktaPassword": true
+    };
+
+    var runLoginPage = function (fn) {
+      var mainScript = document.createElement('script');
+      mainScript.src =
+        "https://ok11static.oktacdn.com/assets/js/mvc/loginpage/initLoginPage.pack.bb0aa11a63d230e8b135b92ba459ee7e.js";
+      document.getElementsByTagName('head')[0].appendChild(mainScript);
+      fn && mainScript.addEventListener('load', function () {
+        setTimeout(fn, 1)
+      });
+    };
+
+    var OktaUtil = {
+      _addClass: function (el, className) {
+        if (el) {
+          var elementClasses = el.className.split(" ");
+          if (elementClasses.indexOf(className) == -1) {
+            el.className += " " + className;
+          }
+        }
+      },
+
+      _removeElement: function (el) {
+        if (el) {
+          el.parentNode.removeChild(el);
+        }
+      },
+
+      _hideElement: function (el) {
+        if (el) {
+          el.style.display = 'none';
+        }
+      },
+
+      addLoginContainerClass: function () {
+        this._addClass(document.getElementById('okta-login-container'), 'login-container');
+      },
+
+      showUnsupportedCookieWarning: function () {
+        document.getElementById('okta-sign-in').removeAttribute('style');
+        document.getElementById('unsupported-cookie').removeAttribute('style');
+      },
+
+      removeUnsupportedCookieWarning: function () {
+        this._removeElement(document.getElementById('okta-sign-in'));
+      },
+
+      hideOktaLoginContainer: function () {
+        this._hideElement(document.getElementById('okta-login-container'));
+      },
+
+      isChromeOs: function () {
+        return /\bCrOS\b/.test(navigator.userAgent);
+      },
+
+      addChromeOSScript: function () {
+        var chromeOSScript = document.createElement('script');
+        chromeOSScript.src = "/js/google/users-1.0.js";
+        document.getElementsByTagName('head')[0].appendChild(chromeOSScript);
+      },
+
+      getSignInWidgetConfig: function () {
+        return oktaData.signIn;
+      },
+
+      completeLogin: function (res) {
+        signInSuccessCallBackFunction(res);
+      },
+
+      getRequestContext: function () {
+        return oktaData.requestContext;
+      },
+
+      setRedirectUri: function (uri) {
+        oktaData.redirectUri = uri;
+      },
+
+      init: function () {
+        if (!navigator.cookieEnabled) {
+          this.showUnsupportedCookieWarning();
+          this.hideOktaLoginContainer();
+        } else {
+          this.removeUnsupportedCookieWarning();
+
+          // add class if app login banner is present
+          if (oktaData.isAppBannerVisible) {
+            this.addLoginContainerClass();
+          }
+
+          oktaData.isCustomSignIn = true;
+          oktaData.hasChromeOSFeature = this.isChromeOs();
+          if (oktaData.hasChromeOSFeature) {
+            this.addChromeOSScript();
+          }
+          runLoginPage(function () {
+            var res = OktaLogin.initLoginPage(oktaData);
+            oktaData.signIn = res.signIn;
+            signInSuccessCallBackFunction = res.signInSuccessCallbackFn;
+
+          });
+        }
+      }
+    };
+    OktaUtil.init();
+    //# sourceURL=OktaUtil.js
+  </script>
+
+
+  <script type="text/javascript">
+    // By default, logo nav is www.uship.com. If we're on a lower domain, use that instead.
+    var siteOrigin = window.location.origin.replace('login.', 'www.');
+    document.getElementById('logoNav').href = siteOrigin + "/";
+
+    function mergeRecursive(obj1, obj2) {
+      var keys = Object.keys(obj2);
+      for (var i = 0; i < keys.length; i++) {
+        var p = keys[i];
+        try {
+          if (obj2[p].constructor == Object) {
+            obj1[p] = MergeRecursive(obj1[p], obj2[p]);
+          } else {
+            obj1[p] = obj2[p];
+          }
+        } catch (e) {
+          obj1[p] = obj2[p];
+        }
+      }
+      return obj1;
+    }
+
+    // "config" object contains default widget configuration
+    // with any custom overrides defined in your admin settings.
+    var config = OktaUtil.getSignInWidgetConfig();
+    var context = OktaUtil.getRequestContext();
+    if (!context) {
+      console.warn(
+        'No context found. User must have navigated directly to this page rather than have been redirected.');
+      if (!location.pathname.includes('preview')) {
+        location.replace(siteOrigin + '/signin.aspx');
+      }
+    }
+
+    var locale = context ? getLocale(context) : 'en';
+    var app = context ? context.authentication.client.app : 'uShip Web App';
+    config = mergeRecursive(config, {
+      features: {
+        // Only show the consent screen for non-core apps
+        consent: !/^uShip (Mobile|Web) App$/.test(app),
+        registration: false,
+        securityImage: false,
+        showPasswordToggleOnSignInPage: true
+      },
+      language: locale,
+      i18n: {
+        en: {
+          "primaryauth.username.placeholder": "Email", // ListingEmail
+          "primaryauth.username.tooltip": "Email",
+          "password.forgot.email.or.username.tooltip": "Email",
+          "password.forgot.email.or.username.placeholder": "Email",
+          "account.unlock.email.or.username.placeholder": "Email",
+          "account.unlock.email.or.username.tooltip": "Email",
+          "error.username.required": "Please enter an email address", // MainEnterEmail
+          "uship.title": "Sign In | uShip", // browser tab title
+          "uship.footer.copyright": "Copyright © 2020, uShip Inc. and its licensors. All rights reserved.", // legal
+          "uship.footer.useragreement": "uShip User Agreement", // useragreementuser
+          "uship.footer.privacypolicy": "Privacy Policy", // headerFooterPrivacyPolicy
+          "uship.footer.sitemap": "Site Map", // headerFooterSiteMap
+          "uship.footer.cookiepolicy": "Cookie Policy", // CookiePolicy
+          "uship.footer.help": "Help", // headerFooterHelp
+          "uship.primaryauth.register.text": "Don't have an account?", // DontHaveAccount
+          "uship.primaryauth.register.linktext": "Join uShip", // headerJoinuShip
+          "errors.E0000004": "Unable to sign in. Invalid email or password.",
+          "errors.E0000119": "Account is locked. Try again in 30 minutes.",
+          "error.auth.lockedOut": "Account is locked. Try again in 30 minutes.",
+        },
+        de: {
+          "primaryauth.username.placeholder": "Email",
+          "primaryauth.username.tooltip": "Email",
+          "password.forgot.email.or.username.tooltip": "Email",
+          "password.forgot.email.or.username.placeholder": "Email",
+          "account.unlock.email.or.username.placeholder": "Email",
+          "account.unlock.email.or.username.tooltip": "Email",
+          "error.username.required": "Bitte eine Email-Adresse eingeben",
+          "uship.title": "Anmelden | uShip",
+          "uship.footer.copyright": "Copyright © 2020, uShip Inc. und Lizenzgeber. Alle Rechte vorbehalten.",
+          "uship.footer.useragreement": "uShip's Allgemeine Geschäftsbedingungen",
+          "uship.footer.privacypolicy": "Datenschutzrichtlinien",
+          "uship.footer.sitemap": "Sitemap",
+          "uship.footer.cookiepolicy": "Cookie Richtlinien",
+          "uship.footer.help": "Hilfe",
+          "uship.primaryauth.register.text": "Sie haben noch kein Benutzerkonto?",
+          "uship.primaryauth.register.linktext": "Jetzt registrieren",
+          "errors.E0000004": "Anmelden nicht m\u00F6glich. E-Mail oder Passwort ist ungültig.",
+          "errors.E0000119": "Konto ist gesperrt. Versuchen Sie es in 30 Minuten erneut.",
+          "error.auth.lockedOut": "Konto ist gesperrt. Versuchen Sie es in 30 Minuten erneut.",
+        },
+        fr: {
+          "primaryauth.username.placeholder": "Email",
+          "primaryauth.username.tooltip": "Email",
+          "password.forgot.email.or.username.tooltip": "Email",
+          "password.forgot.email.or.username.placeholder": "Email",
+          "account.unlock.email.or.username.placeholder": "Email",
+          "account.unlock.email.or.username.tooltip": "Email",
+          "error.username.required": "Veuillez indiquer une adresse e-mail",
+          "uship.title": "Connexion | uShip",
+          "uship.footer.copyright": "Copyright © 2020, uShip Inc. et ses concédants. Tous droits réservés.",
+          "uship.footer.useragreement": "Contrat d'Utilisateur uShip",
+          "uship.footer.privacypolicy": "Politique de confidentialité",
+          "uship.footer.sitemap": "Plan du site",
+          "uship.footer.cookiepolicy": "Politique des cookies",
+          "uship.footer.help": "Aide",
+          "uship.primaryauth.register.text": "Vous n'avez pas de compte?",
+          "uship.primaryauth.register.linktext": "Rejoindre uShip",
+          "errors.E0000004": "Connexion impossible. Email ou mot de passe invalide.",
+          "errors.E0000119": "Votre compte est bloqué. Veuillez réessayer dans 30 minutes.",
+          "error.auth.lockedOut": "Votre compte est bloqué. Veuillez réessayer dans 30 minutes.",
+        },
+        es: {
+          "primaryauth.username.placeholder": "Email",
+          "primaryauth.username.tooltip": "Email",
+          "password.forgot.email.or.username.tooltip": "Email",
+          "password.forgot.email.or.username.placeholder": "Email",
+          "account.unlock.email.or.username.placeholder": "Email",
+          "account.unlock.email.or.username.tooltip": "Email",
+          "error.username.required": "Por favor ingrese un correo electrónico",
+          "uship.title": "Inicia sesión | uShip",
+          "uship.footer.copyright": "Copyright © 2020, uShip Inc. y sus licencias. Todos los derechos reservados.",
+          "uship.footer.useragreement": "Acuerdo de usuario de uShip",
+          "uship.footer.privacypolicy": "Política de Privacidad",
+          "uship.footer.sitemap": "Mapa Web",
+          "uship.footer.cookiepolicy": "Política de cookies",
+          "uship.footer.help": "Ayuda",
+          "uship.primaryauth.register.text": "¿No tiene una cuenta?",
+          "uship.primaryauth.register.linktext": "Registrar con uShip",
+          "errors.E0000004": "No se puede iniciar sesi\u00F3n. Email o contraseña inválidos.",
+          "errors.E0000119": "Su cuenta está bloqueada. Vuelva a intentar en 30 minutos.",
+          "error.auth.lockedOut": "Su cuenta está bloqueada. Vuelva a intentar en 30 minutos.",
+        }
+      }
+    });
+
+    // localize the footer
+    var els = document.querySelectorAll('[data-uship-i18n]');
+    var lang = config.language;
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i];
+      var key = el.getAttribute('data-uship-i18n');
+      if (config.i18n[lang] && config.i18n[lang][key]) {
+        el.textContent = config.i18n[lang][key];
+      }
+    }
+
+    // Render the Okta Sign-In Widget
+    var oktaSignIn = new OktaSignIn(config);
+    oktaSignIn.renderEl({
+        el: '#okta-login-container'
+      },
+      OktaUtil.completeLogin,
+      function (error) {
+        ineum('reportError', error);
+      }
+    );
+
+    // Overriding the "Need help" click action
+    oktaSignIn.on('afterRender', function (context) {
+      renderUShipLinks(context.controller);
+      ineum('page', context.controller);
+    });
+
+    oktaSignIn.on('afterError', function (context, controller) {
+      ineum('reportError', error, {
+        meta: {
+          controller: context.controller
+        }
+      });
+    });
+
+    function renderUShipLinks(controller) {
+      var widget = document.getElementById('okta-login-container');
+      if (controller === 'primary-auth') {
+        var helpLinks = document.querySelector('#help-links-container');
+        if (helpLinks) {
+          helpLinks.style = "";
+          // remove "Help" link
+          helpLinks.children[1].remove();
+        }
+        // add register link under SIGN IN header
+        var formContent = widget.querySelector('form .o-form-content');
+        var fieldsContainer = widget.querySelector('form .o-form-fieldset-container');
+        if (formContent && fieldsContainer) {
+          /*
+            <div class="register-section">
+                Don't have an account?<a class="signin-registerlink button inlineButton" causesvalidation="false" href="/register/">Join uShip</a>    
+            </div>
+          */
+          const t = config.i18n[locale] || config.i18n['en'];
+
+          var registerSection = document.createElement('div');
+          registerSection.className = 'register-section';
+          registerSection.innerText = t['uship.primaryauth.register.text'] || config.i18n['en'][
+            'uship.primaryauth.register.text'
+          ];
+
+          var link = document.createElement('a');
+          link.className = 'signin-registerlink link';
+          link.href = siteOrigin + '/register/';
+          link.innerText = t['uship.primaryauth.register.linktext'] || config.i18n['en'][
+            'uship.primaryauth.register.text'
+          ];
+          registerSection.appendChild(link);
+          formContent.insertBefore(registerSection, fieldsContainer);
+        }
+      } else {
+        var registerSection = widget.querySelector('.register-section');
+        if (registerSection) {
+          registerSection.parentElement.removeChild(registerSection);
+        }
+      }
+    }
+
+    function getLocale(context) {
+      var redirectLang = "en";
+      try {
+        var redirectState = context.authentication.request.state;
+        var jwtState = parseJwt(redirectState);
+        var locale = jwtState["locale"];
+
+        if (locale) {
+          if (locale.length > 2) {
+            var localeParts = locale.split("-");
+            var langCode = localeParts[0];
+            redirectLang = langCode;
+          } else {
+            redirectLang = locale;
+          }
+        }
+      } catch (e) {
+        console.error("Failed to get redirect state.", e, context);
+        ineum('reportError', e);
+      }
+      return redirectLang;
+    }
+
+    function parseJwt(token) {
+      var base64Url = token.split('.')[1];
+      var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      var jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+
+      return JSON.parse(jsonPayload);
+    };
+  </script>
+
+
+
+  <iframe data-se="account-chooser" src="./signin_files/iframe.html" style="display:none"></iframe>
+</body>
+
+</html>

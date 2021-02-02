@@ -1,0 +1,275 @@
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+(function (root) {
+    var jQuery = root.jQuery,
+        uship = root.uship;
+
+
+    var $window = jQuery(root),
+        $doc = jQuery(document),
+        $body = jQuery('body'),
+        modalDataAttr = 'umodal-id',
+        triggerDataAttr = '[data-' + modalDataAttr + ']',
+        modalContentClassName = '.umodal-content',
+        modalFooterClassName = '.umodal-footer',
+        modalHeaderClassName = '.umodal-header',
+        overlayClassName = '.overlay-umodal',
+        scrollClassName = 'scroll-content',
+        showClassName = 'show',
+        showClassNameBody = 'umodal-show',
+        closeModalClassName = '.close-modal';
+
+    var viewPort = uship.utils.viewPortDimensions();
+
+    var recorder = uship.recorder.withSettings({
+        methodSinks: {
+            event: [uship.recorder.sinks.mixpanel, uship.recorder.sinks.console]
+        }
+    });
+
+    function positionModal($modal) {
+        var $modalContent = jQuery($modal.find(modalContentClassName)[0]);
+        $body.removeClass('fixed');
+        $body.css('top', 'auto');
+        $modalContent.css('max-height', 'none');
+        $modalContent.removeClass(scrollClassName);
+        $modal.css('top', 0);
+        $modal.css('left', 0);
+        var vPort = viewPort();
+        var modalHeight = $modal.outerHeight(true),
+            modalWidth = $modal.outerWidth(true);
+
+        if (vPort.width > 767) {
+            if (modalHeight <= vPort.innerHeight) {
+                $modal.css('top', (vPort.innerHeight - modalHeight) / 2 + $doc.scrollTop() + 'px');
+            } else {
+                $modal.css('top', jQuery(window).scrollTop());
+            }
+
+            var left = (vPort.innerWidth - modalWidth) / 2 - $modal.offset().left;
+            $modal.css('left', left + 'px');
+        } else {
+            var footerHeight = vPort.height < 321 ? 0 : $modal.find(modalFooterClassName).outerHeight(true) || 0;
+            var headerHeight = $modal.find(modalHeaderClassName).outerHeight(true) || 0;
+            $modalContent.css('max-height', vPort.innerHeight - footerHeight - headerHeight + 'px').addClass(scrollClassName);
+            $body.addClass('fixed').css('top', $modal.scrollPosition * -1);
+        }
+        if (/Android/.test(window.navigator.appVersion)) {
+            document.activeElement.scrollIntoViewIfNeeded();
+        }
+    }
+
+    //make sure there is an overlay on page
+    if (!document.getElementsByClassName(overlayClassName)[0]) {
+        var overlay = document.createElement('div');
+        overlay.className = overlayClassName.replace('.', '');
+        $body.append(overlay);
+    }
+
+    var $overlay = jQuery(overlayClassName);
+
+    var Unfold = function () {
+        function Unfold(elementId, closeAllFn) {
+            _classCallCheck(this, Unfold);
+
+            this.closeAll = closeAllFn;
+            this.$modal = jQuery(elementId);
+            this.$modal.scrollPosition = 0;
+            this.identifier = elementId;
+            this.eventIdentifier = 'unfold_' + uship.utils.createGuid();
+            this.reset();
+        }
+
+        _createClass(Unfold, [{
+            key: 'reset',
+            value: function reset() {
+                if (!this._dismissalDisallowed) {
+                    this.$modal.find(closeModalClassName).on('click.' + this.eventIdentifier, { resetTriggered: true }, this.close.bind(this));
+                }
+            }
+        }, {
+            key: 'close',
+            value: function close(ev) {
+                if (!this.isOpen()) {
+                    return;
+                }
+
+                var overlayClicked = false;
+                var resetTriggered = false;
+
+                if (typeof ev !== 'undefined' && typeof ev.data !== 'undefined') {
+                    overlayClicked = typeof ev.data.overlayClicked !== 'undefined' && ev.data.overlayClicked === true;
+                    resetTriggered = typeof ev.data.resetTriggered !== 'undefined' && ev.data.resetTriggered === true;
+                }
+
+                if (overlayClicked) {
+                    recorder.event('unfoldModalClosedByClickingOutside');
+                } else if (resetTriggered) {
+                    recorder.event('unfoldModalClosedWithXIcon');
+                } else {
+                    recorder.event('unfoldModalClosed');
+                }
+
+                $overlay.off('click.' + this.eventIdentifier);
+                $overlay.removeClass(showClassName);
+                $body.removeClass(showClassNameBody);
+                this.$modal.removeClass(showClassName);
+                //this should remove both top and left when modal is closed
+                this.$modal.css({
+                    top: '',
+                    left: ''
+                });
+                $body.removeClass('fixed').css('top', 'auto');
+                jQuery('body, html').animate({
+                    scrollTop: this.$modal.scrollPosition
+                }, 0);
+                $window.off('resize.' + this.eventIdentifier);
+                uship.utils.asCallable(this._callback)(ev);
+            }
+        }, {
+            key: 'open',
+            value: function open() {
+                var _this = this;
+
+                this.closeAll(function (m) {
+                    return m !== _this;
+                });
+                this.$modal.scrollPosition = $doc.scrollTop();
+                $overlay.addClass(showClassName);
+                $body.addClass(showClassNameBody);
+                this.$modal.addClass(showClassName);
+                var _t = void 0;
+                $window.on('resize.' + this.eventIdentifier, function () {
+                    if (_t) clearTimeout(_t);
+                    _t = setTimeout(function () {
+                        positionModal(_this.$modal);
+                    }, 200);
+                });
+
+                positionModal(this.$modal);
+
+                if (!this._dismissalDisallowed) {
+                    setTimeout(function () {
+                        $overlay.on('click.' + _this.eventIdentifier, { overlayClicked: true }, _this.close.bind(_this));
+                    }, 1);
+                }
+            }
+        }, {
+            key: 'onClose',
+            value: function onClose(callback) {
+                this._callback = callback;
+            }
+        }, {
+            key: 'isOpen',
+            value: function isOpen() {
+                return this.$modal.hasClass(showClassName);
+            }
+        }, {
+            key: 'destroy',
+            value: function destroy() {
+                this.close();
+                $window.off(this.eventIdentifier);
+                $overlay.off(this.eventIdentifier);
+            }
+        }, {
+            key: 'disallowDismissal',
+            value: function disallowDismissal() {
+                this._dismissalDisallowed = true;
+                return this;
+            }
+        }]);
+
+        return Unfold;
+    }();
+
+    var unfoldFactory = {
+        modals: [],
+        _triggerModalMap: {},
+
+        get: function get(elemId) {
+            return this.modals.filter(function (m) {
+                return m.identifier === elemId;
+            })[0];
+        },
+        create: function create(elemId) {
+            var _this2 = this;
+
+            var dismissalDisallowed = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+            var modal = this.get(elemId);
+
+            if (!this._triggerModalMap[elemId]) this._triggerModalMap[elemId] = [];
+
+            if (!modal) {
+                modal = new Unfold(elemId, this.closeAll.bind(this));
+
+                if (dismissalDisallowed) {
+                    modal = modal.disallowDismissal();
+                }
+
+                this.modals.push(modal);
+            }
+
+            for (var _len = arguments.length, triggers = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
+                triggers[_key - 2] = arguments[_key];
+            }
+
+            triggers && triggers.filter(function (t) {
+                return _this2._triggerModalMap[elemId].indexOf(t) === -1;
+            }).forEach(function (trigger) {
+                jQuery(trigger).on('click.' + modal.eventIdentifier, modal.open.bind(modal));
+                _this2._triggerModalMap[elemId].push(trigger);
+            });
+
+            return modal;
+        },
+        init: function init() {
+            var _this3 = this;
+
+            //make sure this event is added to the loop.
+            setTimeout(function () {
+                var triggers = [].slice.apply(jQuery(triggerDataAttr));
+                triggers.forEach(function (trigger) {
+                    _this3.create('#' + jQuery(trigger).data(modalDataAttr), trigger);
+                });
+            }, 1);
+        },
+        destroy: function destroy() {
+            var _this4 = this;
+
+            this.modals.forEach(function (modal) {
+                _this4._triggerModalMap[modal.identifier].forEach(function (trigger) {
+                    return jQuery(trigger).off('click.' + modal.eventIdentifier);
+                });
+                modal.destroy();
+            });
+
+            // Stale DOM reference when switching views on single page app
+            $overlay = jQuery(overlayClassName);
+            $overlay.removeClass(showClassName);
+            $body.removeClass(showClassNameBody);
+            this.modals = [];
+            this._triggerModalMap = {};
+        },
+        closeAll: function closeAll(except) {
+            var exceptFn = uship.utils.isFunction(except) ? except : function () {
+                return true;
+            };
+            this.modals.filter(exceptFn).forEach(function (modal) {
+                return modal.close();
+            });
+        },
+
+
+        positionModal: positionModal
+    };
+
+    //initialize all the existing modals that have triggers.
+    //lets do on doc ready
+    jQuery(unfoldFactory.init.bind(unfoldFactory));
+    uship.unfold = unfoldFactory;
+})(window);
