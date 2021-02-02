@@ -1,0 +1,289 @@
+/*global $, moment */
+/*** jQuery v1.9.1 included ***/
+'use strict';
+
+// Hide default form
+
+$(document).ready(function() {
+$('#request_issue_type_selectoption[value="46296"]').remove();
+$('.nesty-panel').on('DOMNodeInserted', function(e) {
+$(this).children('ul').children().remove('#46296');
+});
+});
+
+// Hide the option to upload attachments on the new request page
+
+$(document).ready(function() {
+$('.form-field label:contains("Attachments")').hide();
+$('#upload-dropzone').hide();
+});
+
+/******************************************************************************* GLOBAL FUNCTIONS */
+
+function escapeHtml(string) {
+    var entityMap = {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': '&quot;',
+        "'": '&#39;',
+        "/": '&#x2F;'
+    };
+
+    return String(string).replace(/[&<>"'\/]/g, function (s) {
+        return entityMap[s];
+    });
+}
+
+function getPageLanguage() {
+    return window.location.pathname.split('/')[2];
+}
+
+function isMobile() {
+    return window.innerWidth <= 810;
+}
+
+
+
+
+/******************************************************************************* "STATIC" OBJECTS */
+
+var TimeFormat = {
+    apply : function() {
+        // Fetch elements necessary to extract the source date string
+        var $articleElement = this.getArticleElement(),
+            $timeElement = this.getArticleTimeElement($articleElement),
+            sourceDateString = this.getSourceDateString($timeElement),
+
+            // Convert the source date string to the desired format
+            convertedDateString = this.convert(sourceDateString);
+
+        // Apply the converted date string
+        this.setElementText(
+            $articleElement.find('.formatted-date'),
+            convertedDateString
+        );
+    },
+    convert : function(sourceDateString) {
+        return moment(sourceDateString).locale(getPageLanguage()).format('LL');
+    },
+    getArticleElement : function() {
+        return $('article');
+    },
+    getArticleTimeElement : function($articleElement) {
+        return $articleElement.find('time');
+    },
+    getSourceDateString : function($timeElement) {
+        return $timeElement.attr('datetime');
+    },
+    setElementText : function($targetElement, convertedDateString) {
+        $targetElement.text(convertedDateString);
+    }
+};
+
+
+
+/******************************************************************************** EVENT LISTENERS */
+
+$(document).ready(function() {
+    var articleID,
+        articlePageRegex,
+        linkText,
+        pageLanguage = getPageLanguage(),
+        pagePath = window.location.pathname,
+        pathComponents,
+        placeholderText,
+        sectionID,
+        sectionPageRegex,
+        $linkElement,
+        $logoElement;
+
+
+    /********************************************************************************** ALL PAGES */
+		// Remove "SEARCH" text from search box submit button
+    $('#query + input[type="submit"]').attr('value', '');
+    // Replace the logo image's link destination with the uShip homepage
+    $logoElement = $('.logo');
+    $logoElement.children('a').attr('href', 'https://www.uship.com/');
+
+    // Set the correct locale for the logo text link so the user navigates back to the locale's
+    // homepage rather than the default, US site
+    $linkElement = $logoElement.find('label > a');
+    linkText = $linkElement.attr('href');
+    $linkElement.attr('href', linkText + pageLanguage);
+
+    // Search box placeholder text
+  $(window).on("resize", function () {
+    
+    if (isMobile() && $('.hero').length) {
+        placeholderText = $('.js-searchPlaceholderMobile').text();
+    } else if (window.innerWidth <= 1030 && $('.search-box.small').length) {
+        placeholderText = $('.js-searchPlaceholderMobile').text();
+    } else {
+        placeholderText = $('.js-searchPlaceholderDefault').text();
+    }
+    $('#query').attr('placeholder', placeholderText);
+	}).resize();
+
+    
+
+
+
+
+    /********************************************************************************** HOME PAGE */
+
+    // Path should end with the locale string or the locale string followed by only a slash
+    pathComponents = pagePath.split('/');
+    if(pathComponents.length <= 3 || (pathComponents.length === 4 && pathComponents[3] === '')) {
+        // Set the "Getting Started" links to the correct locale
+        $('.link-box').each(function(index, element) {
+            var $element = $(element),
+                linkHref = $element.attr('href');
+
+            $element.attr('href', linkHref.replace('[[locale]]', pageLanguage));
+        });
+    }
+
+
+
+
+    /***************************************************************************** CATEGORY PAGES */
+
+    if(pagePath.match(/\/categories\//) !== null) {
+        // Remove trailing whitespace from the "see all" link text so it can have an ellipsis
+        // appended
+        $('.article-list + .see-all-articles').each(function(index, element) {
+            var $element = $(element);
+            $element.text($.trim($element.text()));
+        });
+    }
+
+
+
+
+    /****************************************************************************** SECTION PAGES */
+	$('.search-box.small input[type=search]').on('focus', function() {
+		$('.search-box.small input[type=submit]').addClass('active');
+	}).on('blur', function(){
+		$('.search-box.small input[type=submit]').removeClass('active');
+	});
+
+    sectionPageRegex = /\/sections\/(\d+)/;
+    if(pagePath.match(sectionPageRegex) !== null) {
+        /*** Fetch the sections list and current category from the API ***/
+
+        // Extract the section ID from the current path
+        sectionID = parseInt(
+            pagePath.match(sectionPageRegex)[1],
+            10
+        );
+
+        // Fetch category and section data from the API
+        // NOTE: a master category is a category defined in the default locale. In the case of
+        //       uShip, our default locale is "en-us" so the master category is the "en-us" version
+        //       of the currently-displayed category.
+        $.get('https://www.uship.zendesk.com/api/v2/help_center/' + pageLanguage + '/sections.json?include=categories,translations').
+            done(function(responseData) {
+                var masterCategory = {},
+                    sectionListElement,
+                    translatedCategory;
+
+                // Get the current category ID by finding the current section in the list of
+                // sections
+                responseData.sections.some(function(section) {
+                    if(section.id === sectionID) {
+                        masterCategory.id = section.category_id;
+
+                        // Stop looping once we've made a match
+                        return true;
+                    }
+                });
+
+                // Get the current translated category's details
+                responseData.categories.some(function(category) {
+                    if(category.id === masterCategory.id) {
+                        masterCategory = category;
+                        translatedCategory = category.translations.filter(function(transCat) {
+                            return transCat.locale === pageLanguage;
+                        })[0];
+
+                        // Stop looping once we've made a match
+                        return true;
+                    }
+                });
+
+                // Add the category name to the DOM
+                $('.search-box > .inner > label, nav.sections > label').
+                    text(translatedCategory.title).
+                    removeClass('hidden');
+
+                // Add all sibling sections to the menu by finding all sections with the current
+                // category ID
+                sectionListElement = $('nav.sections > .section-list');
+                responseData.sections.forEach(function(section) {
+                    var sectionClass;
+
+                    // Add sections to the menu
+                    if(section.category_id === masterCategory.id) {
+                        // Build the HTML element class attribute to mark the current section as
+                        // active
+                        if(section.id === sectionID) {
+                            sectionClass = ' class="active"';
+                        } else {
+                            sectionClass = '';
+                        }
+
+                        // Add this section to the DOM
+                        sectionListElement.append(
+                            '<li' + sectionClass + '><a href="' + section.html_url + '">' +
+                            escapeHtml(section.name) + '</a></li>'
+                        );
+                    }
+                });
+
+                // Show the menu
+                $('nav.sections').removeClass('hidden');
+            }).
+            fail(function() {
+                console.log(
+                    'An error occurred when fetching sections and categories data from the API'
+                );
+            });
+    }
+
+
+
+
+    /****************************************************************************** ARTICLE PAGES */
+
+    articlePageRegex = /\/articles\/(\d+)/;
+    if(pagePath.match(articlePageRegex) !== null) {
+        // Convert the Help Center-provided date value to the desired format
+        TimeFormat.apply();
+
+
+
+        /*** Fetch the article's details then extract its category name to add to the DOM ***/
+
+        // Extract the article ID from the current path
+        articleID = pagePath.match(articlePageRegex)[1];
+
+        // Fetch article and category data from the API
+        // NOTE: no categories data comes back if sections data is not also side-loaded; the latter
+        //       is not used
+        $.get('https://www.uship.zendesk.com/api/v2/help_center/' + pageLanguage + '/articles/' + articleID + '.json?include=sections,categories,translations').
+            done(function(responseData) {
+                var translatedCategory = responseData.categories[0].translations.filter(function(value) {
+                    return value.locale === pageLanguage;
+                })[0];
+                $('.search-box > .inner > label').
+                    text(translatedCategory.title).
+                    removeClass('hidden');
+            }).
+            fail(function() {
+                console.log(
+                    'An error occurred when fetching article and category data from the API'
+                );
+            });
+    }
+});
