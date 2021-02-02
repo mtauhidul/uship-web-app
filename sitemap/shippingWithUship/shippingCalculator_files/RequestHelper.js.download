@@ -1,0 +1,427 @@
+﻿var originCity;
+var originState;
+var destinationCity;
+var destinationState;
+var mileage;
+var price = 0;
+var total = 0.00;
+var variant;
+
+function getEstimate(commodityId, destinationCountryCode, destinationPostalCode, originCountryCode, originPostalCode, numberOfItems, variant , commodityName, controlId) {
+
+    jQuery("#InstructionsBlock").hide();
+    jQuery("#EstimateItemOutputBlock").show();
+    //jQuery("#EstimateItemOutputBlock").css("opacity", "0.4");
+    jQuery("#EstimateItemOutputBlock").append('<div id="EstimateOverlay" class="loadingOverlay"></div>');
+
+    jQuery.ajax({
+        type: "POST",
+        url: "/shipping-calculator/calc.aspx/GetEstimate",
+        data: JSON.stringify({CommodityID: commodityId, DestinationcountryCode:destinationCountryCode,DestinationpostalCode: destinationPostalCode ,OrigincountryCode: originCountryCode ,OriginpostalCode: originPostalCode , NumberOfItems: numberOfItems , Variant: variant }),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (estimateResult) {
+            var obj = jQuery.parseJSON(estimateResult.d);
+            if (!obj.success || obj.result.price.amount == 0) {
+                estimateError(controlId, commodityName);
+                return;
+            }
+            var route = obj.result.route;
+            originCity = route.originAddress.city;
+            originState = route.originAddress.administrativeDivision;
+            destinationCity = route.destinationAddress.city;
+            destinationState = route.destinationAddress.administrativeDivision;
+            mileage = route.mileage;
+            price = applyCoefficients(obj.result.price.amount, commodityId);
+            price = Math.round(price);
+            jQuery("#destination").html((destinationCity ? destinationCity + ", " : "") + destinationState);
+            jQuery("#distance").html(mileage);
+
+            total = total + price;
+            jQuery("#priceLabel").html(formatCurrency(total));
+
+            switch (commodityId) {
+                case '95':
+                    commodityName = 'Watercraft';
+                    break;
+                case '35':
+                    commodityName = 'Industrial Goods';
+                    break;
+                case '24':
+                    commodityName = 'Dry Bulk';
+                    break;
+                case '22':
+                    commodityName = 'Equipment';
+                    break;
+                case '25':
+                    commodityName = 'Freight';
+                    break;
+                case '21':
+                    commodityName = 'Chemicals';
+                    break;
+                case '32':
+                    commodityName = 'Industrial Products';
+                    break;
+                case '28':
+                    commodityName = 'Pharmaceuticals';
+                    break;
+                case '23':
+                    commodityName = 'Raw Materials';
+                    break;
+                case '33':
+                    commodityName = 'Equipment';
+                    break;
+                case '20':
+                    commodityName = 'Wood Products';
+                    break;
+                case '101':
+                    commodityName = 'Ag & Farm Supplies';
+                    break;
+                case '108':
+                    commodityName = 'Alcohol';
+                    break;
+                case '105':
+                    commodityName = 'Animal Products';
+                    break;
+                case '103':
+                    commodityName = 'Cereal Grains';
+                    break;
+                case '109':
+                    commodityName = 'Fats and Oils';
+                    break;
+                case '111':
+                    commodityName = 'Food & Ag';
+                    break;
+                case '102':
+                    commodityName = 'Feed';
+                    break;
+                case '100':
+                    commodityName = 'Food & Ag';
+                    break;
+                case '106':
+                    commodityName = 'Grain';
+                    break;
+                case '110':
+                    commodityName = 'Tobacco';
+                    break;
+                case '150':
+                    commodityName = 'Full Truckloads';
+                    break;
+                case '137':
+                    commodityName = 'Containers';
+                    break;
+                case '391':
+                    commodityName = 'Heavy Equipment';
+                    break;
+                case '67':
+                    commodityName = 'Apartment';
+                    break;
+                case '69':
+                    commodityName = 'Apartment';
+                    break;
+                case '70':
+                    commodityName = 'Apartment';
+                    break;
+                case '78':
+                    commodityName = 'Items';
+                    break;
+                case '76':
+                    commodityName = 'Equipment';
+                    break;
+                case '19':
+                    commodityName = 'Househhold Goods';
+                    break;
+                case '16':
+                    commodityName = 'Equipment';
+                    break;
+                case '18':
+                    commodityName = 'Plants';
+                    break;
+                case '123':
+                    commodityName = 'Junk';
+                    break;
+                case '122':
+                    commodityName = 'Waste & Scrap';
+                    break;
+                case '86':
+                    commodityName = 'ATV';
+                    break;
+                case '89':
+                    commodityName = 'Go Carts';
+                    break;
+                case '80':
+                    commodityName = 'Motorcycles';
+                    break;
+                case '147':
+                    commodityName = 'Vehicles';
+                    break;
+                case '118':
+                    commodityName = 'Ride';
+                    break;
+                case '119':
+                    commodityName = 'Ride';
+                    break;
+                case '120':
+                    commodityName = 'Ride';
+                    break;
+                case '131':
+                    commodityName = 'Pets & Livestock';
+                    break;
+                case '415':
+                    commodityName = 'Package';
+                    break;
+                case '114':
+                    commodityName = 'Breakables';
+                    break;
+                case '117':
+                    commodityName = 'Special Care Items';
+                    break;
+                case '79':
+                    commodityName = 'Car or Truck';
+                    break;
+                case '88':
+                    commodityName = 'Construction Vehicles';
+                    break;
+                case '81':
+                    commodityName = 'RV';
+                    break;
+                case '91':
+                    commodityName = 'Ag Equipment';
+                    break;
+                case '92':
+                    commodityName = 'Vehicles';
+                    break;
+            }
+
+            var itemizedMarkup = "<div id='rightPanelItem"+controlId+"' class='rightPanelItem'><div class='commodityNameBlock'>" + commodityName + "</div><div class='priceBlock' id='priceBlock"+ controlId+"'>$" + price + "</div><input type='button' class='removeItemButton' onclick='removeItem("+ controlId +")'/></div>";
+            jQuery("#ItemizedListBlock").append(itemizedMarkup);
+            h = jQuery('#right').height();
+            jQuery('#left').css('min-height', Math.max(h,jQuery('#left').height()));
+
+            jQuery('#EstimateOverlay').remove();
+        },
+        error: function (result, status, error) {
+            estimateError(controlId, commodityName);
+        }
+    });
+
+}
+function estimateError(controlId, commodityName) {
+    var itemizedMarkup = "<div id='rightPanelItem" + controlId + "' class='rightPanelItem'><div class='commodityNameBlock'>" + commodityName + "</div><div class='priceBlock error' id='priceBlock" + controlId + "'>" + "Error" + "</div></div>";
+    jQuery("#ItemizedListBlock").append(itemizedMarkup);
+    h = jQuery('#right').height();
+    jQuery('#left').css('min-height', Math.max(h, jQuery('#left').height()));
+
+    jQuery('#EstimateOverlay').remove();
+}
+
+function getUPSEstimate(destinationPostalCode, originPostalCode, variant, commodityName, controlId) {
+    jQuery("#InstructionsBlock").hide();
+    jQuery("#EstimateItemOutputBlock").show();
+    var originState;
+    var originCity;
+    var destinationState;
+    var destinationCity;
+    var distance;
+    //TODO use uShip services to geocode
+    jQuery.when(
+    jQuery.getJSON("https://maps.googleapis.com/maps/api/geocode/json?", { address: originPostalCode, sensor: false }, function (data) {
+        originState = jQuery.grep(data.results[0].address_components, function (n, i) { return jQuery.inArray("administrative_area_level_1", n.types) != -1; })[0].short_name;
+        originCity = jQuery.grep(data.results[0].address_components, function (n, i) { return jQuery.inArray("locality", n.types) != -1; })[0].long_name;
+    }),
+    jQuery.getJSON("https://maps.googleapis.com/maps/api/geocode/json?", { address: destinationPostalCode, sensor: false }, function (data) {
+        destinationState = jQuery.grep(data.results[0].address_components, function (n, i) { return jQuery.inArray("administrative_area_level_1", n.types) != -1; })[0].short_name;
+        destinationCity = jQuery.grep(data.results[0].address_components, function (n, i) { return jQuery.inArray("locality", n.types) != -1; })[0].long_name;
+    }),
+    jQuery.getJSON("https://maps.googleapis.com/maps/api/directions/json?", { origin: originPostalCode, destination: destinationPostalCode, sensor: false }, function (data) {
+        var res = "";
+        distance = data.routes[0].legs[0].distance.text;
+        distance = distance.replace("mi", "");
+    })
+    ).then(function () {
+        jQuery.ajax({
+            type: "POST",
+            url: "/shipping-calculator/calc.aspx/GetUPSEstimate",
+            data: "{'DestinationState': '" + destinationState + "', 'DestinationPostalCode':'" + destinationPostalCode + "', 'OriginState':'" + originState + "','OriginPostalCode':'" + originPostalCode + "','Variant':'" + variant + "'}",
+            async: false,
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (estimateResult) {
+                price = estimateResult.d;
+                price = price.replace("$", "");
+                price = parseFloat(price);
+                price = applyCoefficients(price, 0);
+                price = Math.round(price);
+                jQuery("#origin").html(originCity + ", " + originState);
+                jQuery("#destination").html(destinationCity + ", " + destinationState);
+                jQuery("#distance").html(distance);
+                total = total + price;
+                jQuery("#priceLabel").html(formatCurrency(total));
+                var itemizedMarkup = "<div id='rightPanelItem" + controlId + "' class='rightPanelItem'><div class='commodityNameBlock'>" + commodityName + "</div><div class='priceBlock' id='priceBlock" + controlId + "'>$" + price + "</div><input type='button' class='removeItemButton' onclick='removeItem(" + controlId + ")'/></div>";
+                jQuery("#ItemizedListBlock").append(itemizedMarkup);
+                h = jQuery('#right').height();
+                var leftMinHeight = jQuery('#LocalitiesBlock').height() + jQuery('#EstimateItemsInputBlock').height();
+                // jQuery('#left').css('min-height', Math.max(h, jQuery('#left').height()));
+                jQuery('#left').css('min-height', Math.max(h, leftMinHeight));
+            }
+        })
+    });
+
+}
+
+function getParentCommodityId(commodityId){
+    var result = commodityId;
+    jQuery.ajax({
+            type: "POST",
+            url: "/shipping-calculator/calc.aspx/GetParentCommodityId",
+            data: "{'CommodityID': '" + commodityId + "'}",
+            async: false,
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (parent) {
+                result = parent.d;
+            }
+        });
+    return result;
+}
+
+function applyCoefficients(price, commodityId) {
+    var result = price;
+    var parentId = getParentCommodityId(commodityId);
+    switch (commodityId) {
+        case '79': //CLT
+            result = price * 1.2;
+            break;
+        case '93': //Power Boats
+            result = price * 1.1;
+            break;
+        default:
+            switch(parentId){
+                case '146': //Motorcycles & Power Sports
+                    result = price * 1.3;
+                    break;
+                case '391': //Heavy Equipment
+                    result = price * .8;
+                    break;
+                case '3': //Household & Office Moves
+                    result = price * 1.4;
+                    break;
+                case '10': //Pets
+                    result = price * 1.1;
+                    break;
+                case '1': //Household Goods
+                    result = price * 1.1;
+                    break;
+                default:
+                    result = price * 1.2;
+            }
+    }
+    return result;
+}
+
+    function formatCurrency(num) {
+        num = isNaN(num) || num === '' || num === null ? 0.00 : num;
+        return parseFloat(num).toFixed(2);
+    }
+
+    function removeItem(id)
+    {
+        var estimatesBlock = jQuery("#ItemizedListBlock");
+        var numberEstimates = estimatesBlock.children().length;
+        if (numberEstimates <= 1) {
+            resetPageControls();
+        } else {
+            var temp = jQuery("#priceBlock" + id).html();
+            var subtract = parseFloat(temp.replace(/[^0-9.-]+/g, ''));
+
+            var newTotal = total - subtract;
+            jQuery("#rightPanelItem" + id).remove();
+            for (i = id + 1; i <= estimatesBlock.children().length + 1; i++) {
+                var rightPanelItem = jQuery('#rightPanelItem' + i);
+                rightPanelItem.attr('id', rightPanelItem.attr('id').replace(i, i - 1));
+                var priceBlock = jQuery('#priceBlock' + i);
+                priceBlock.attr('id', priceBlock.attr('id').replace(i, i - 1));
+                var removeItemButton = rightPanelItem.children('.removeItemButton');
+                removeItemButton.attr('onclick', removeItemButton.attr('onclick').replace(i, i - 1));
+            }
+            removeParentContainer(id);
+            jQuery("#priceLabel").html(formatCurrency(newTotal));
+            controlCount--;
+            h = jQuery('#left').height();
+            jQuery("#right").css('min-height', h);
+            // jQuery('#left').css('min-height', Math.max(h, jQuery('#left').height()));
+            jQuery('#left').css('min-height', '');
+        }
+    }
+
+
+    function createRequest() {
+        jQuery("#ItemizedListBlock").html("");
+        total = 0.00;
+        var UsPostalCodeRegex = new RegExp(/^([0-9]{5})(?:[-\s]*([0-9]{4}))?$/);
+        var CanadianPostalCodeRegex = new RegExp(/^[ABCEGHJKLMNPRSTVXY]\d[ABCEGHJKLMNPRSTVWXYZ]( )?\d[ABCEGHJKLMNPRSTVWXYZ]\d$/i);
+        var destinationCountryCode;
+        var destinationPostalCode = jQuery(destinationInputId).val();
+        var originCountryCode;
+        var originPostalCode = jQuery(originInputId).val();
+        if(UsPostalCodeRegex.test(destinationPostalCode)) {
+            destinationCountryCode = "US";
+        } else if (CanadianPostalCodeRegex.test(destinationPostalCode)) {
+            destinationCountryCode = "CA";
+        }
+         if(UsPostalCodeRegex.test(originPostalCode)) {
+            originCountryCode = "US";
+        } else if (CanadianPostalCodeRegex.test(originPostalCode)) {
+            originCountryCode = "CA";
+        }
+
+        for (var i = 1; i <= controlCount; i++) {
+            var commoditySelectId = '#child_commodity_ddl_' + i;
+            var parentCommoditySelectId = '#commodity_ddl_' + i;
+            var commodityId = jQuery(commoditySelectId).val();
+            var commodityName;
+            var controlId = i;
+            var variantTxtId = '#variantTxt' + i;
+            var variant = 0;
+            if (jQuery(variantTxtId).val() != null)
+            {
+                variant = jQuery(variantTxtId).val();
+            }
+            var parentCommodityId = '#commodity_ddl_' + i;
+            var parentCommoditySelectedValue = jQuery(commoditySelectId).val();
+            if (commodityId == 79) {
+                var yearSelectId = "#vehicleYear_ddl_" + i + " option:selected";
+                var makeSelectId = "#vehicleMake_ddl_" + i + " option:selected";
+                var modelSelectId = "#vehicleModel_ddl_" + i + " option:selected";
+                var year = jQuery(yearSelectId).text();
+                var make = jQuery(makeSelectId).text();
+                var model = jQuery(modelSelectId).text();
+                var qtySelectId = "#qtyddl" + i;
+                numberOfItems = jQuery(qtySelectId).val();
+                commodityName = numberOfItems + " x " + year + " " + make + " " + model;
+                variant = 3500;
+                getEstimate(commodityId, destinationCountryCode, destinationPostalCode, originCountryCode, originPostalCode, numberOfItems, variant, commodityName, controlId);
+            }
+            else if (jQuery(parentCommoditySelectId).val() == 415)
+            {
+                var parentCommodityText = '#commodity_ddl_' + i + " option:selected";
+                var commodityName = jQuery(parentCommodityText).text();
+                var variant = jQuery("#variantTxt" + i).val();
+                getUPSEstimate(destinationPostalCode, originPostalCode, variant, commodityName, controlId);
+            }
+            else
+            {
+                var childCommodityId = '#child_commodity_ddl_' + i + " option:selected";
+                commodityName = jQuery(childCommodityId).text();
+                numberOfItems = 1;
+                getEstimate(commodityId, destinationCountryCode, destinationPostalCode, originCountryCode, originPostalCode, numberOfItems, variant, commodityName, controlId);
+            }
+        }
+    }
+
+
+
+
+
+
+
